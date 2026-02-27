@@ -24,3 +24,33 @@ export interface SignupRequest {
   email: string;
   password: string;
 }
+
+export interface ApiSuccessResponse<T> {
+  status: "success";
+  data: T;
+}
+
+export interface AuthResponseData {
+  user: User;
+  token: string;
+}
+
+export type AuthResponse = ApiSuccessResponse<AuthResponseData>;
+
+export interface ApiErrorResponse {
+  message: string;
+  errors?: Record<string, string[]>;
+}
+
+export interface AuthState {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
+
+export interface AuthContextValue extends AuthState {
+  login: (email: string, password: string) => Promise<void>;
+  signup: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
