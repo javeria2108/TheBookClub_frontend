@@ -54,3 +54,19 @@ export interface AuthContextValue extends AuthState {
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
+
+export interface AppError extends Error {
+  statusCode?: number;
+  errors?: Record<string, string[]>;
+}
+
+export interface AsyncState<T = unknown> {
+  data: T | null;
+  isLoading: boolean;
+  error: AppError | null;
+}
+
+export interface FieldError {
+  field: string;
+  message: string;
+}
