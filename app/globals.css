@@ -12,56 +12,59 @@
 
 :root {
   /* Primary bookshelf browns */
-  --wood-dark: #2d1b12;        /* Dark walnut */
-  --wood-medium: #3d2817;      /* Medium wood */
-  --wood-light: #5c3d2e;       /* Light wood accent */
+  --wood-dark: #2d1b12; /* Dark walnut */
+  --wood-medium: #3d2817; /* Medium wood */
+  --wood-light: #5c3d2e; /* Light wood accent */
 
   /* Book spine colors (contrasting accents) */
-  --leather-burgundy: #6b2737;  /* Deep burgundy leather */
-  --leather-gold: #d4af37;      /* Gold leaf */
-  --leather-cream: #f5e6d3;     /* Aged paper cream */
-  --leather-sage: #8b9d83;      /* Sage green */
+  --leather-burgundy: #6b2737; /* Deep burgundy leather */
+  --leather-gold: #d4af37; /* Gold leaf */
+  --leather-cream: #f5e6d3; /* Aged paper cream */
+  --leather-sage: #8b9d83; /* Sage green */
 
   /* Text colors */
-  --text-primary: #f5e6d3;      /* Cream for main text */
-  --text-secondary: #c4b5a0;    /* Muted cream */
-  --text-accent: #d4af37;       /* Gold for highlights */
+  --text-primary: #f5e6d3; /* Cream for main text */
+  --text-secondary: #c4b5a0; /* Muted cream */
+  --text-accent: #d4af37; /* Gold for highlights */
 
   /* Functional colors */
   --error: #dc2626;
   --success: #10b981;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Shadcn theme colors - Customized for bookshelf aesthetic */
+  --background: #2d1b12; /* Dark walnut background */
+  --foreground: #f5e6d3; /* Cream text */
+  --card: #3d2817; /* Medium wood for cards */
+  --card-foreground: #f5e6d3; /* Cream text on cards */
+  --popover: #3d2817; /* Medium wood for popovers */
+  --popover-foreground: #f5e6d3; /* Cream text */
+  --primary: #6b2737; /* Burgundy leather - main actions */
+  --primary-foreground: #f5e6d3; /* Cream text on burgundy */
+  --secondary: #5c3d2e; /* Light wood - secondary actions */
+  --secondary-foreground: #f5e6d3; /* Cream text */
+  --muted: #3d2817; /* Medium wood - muted elements */
+  --muted-foreground: #c4b5a0; /* Muted cream text */
+  --accent: #d4af37; /* Gold accent */
+  --accent-foreground: #2d1b12; /* Dark text on gold */
+  --destructive: #dc2626; /* Red for errors/delete */
+  --destructive-foreground: #f5e6d3;
+  --border: #5c3d2e; /* Light wood borders */
+  --input: #3d2817; /* Medium wood input backgrounds */
+  --ring: #d4af37; /* Gold focus ring */
+  --chart-1: #6b2737;
+  --chart-2: #d4af37;
+  --chart-3: #8b9d83;
+  --chart-4: #5c3d2e;
+  --chart-5: #c4b5a0;
+  --radius: 0.5rem; /* Slightly rounded corners */
+  --sidebar: #2d1b12;
+  --sidebar-foreground: #f5e6d3;
+  --sidebar-primary: #6b2737;
+  --sidebar-primary-foreground: #f5e6d3;
+  --sidebar-accent: #5c3d2e;
+  --sidebar-accent-foreground: #f5e6d3;
+  --sidebar-border: #5c3d2e;
+  --sidebar-ring: #d4af37;
 }
 
 @theme inline {
@@ -130,7 +133,11 @@
 }
 
 body {
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  font-family:
+    var(--font-geist-sans),
+    system-ui,
+    -apple-system,
+    sans-serif;
   min-height: 100vh;
 }
 
@@ -165,19 +172,38 @@ body {
 
 /* Animations */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-shake {
@@ -195,38 +221,39 @@ body {
 /*---break---
  */
 
+/* Dark mode uses same bookshelf theme (our design is dark by default) */
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: #2d1b12;
+  --foreground: #f5e6d3;
+  --card: #3d2817;
+  --card-foreground: #f5e6d3;
+  --popover: #3d2817;
+  --popover-foreground: #f5e6d3;
+  --primary: #6b2737;
+  --primary-foreground: #f5e6d3;
+  --secondary: #5c3d2e;
+  --secondary-foreground: #f5e6d3;
+  --muted: #3d2817;
+  --muted-foreground: #c4b5a0;
+  --accent: #d4af37;
+  --accent-foreground: #2d1b12;
+  --destructive: #dc2626;
+  --border: #5c3d2e;
+  --input: #3d2817;
+  --ring: #d4af37;
+  --chart-1: #6b2737;
+  --chart-2: #d4af37;
+  --chart-3: #8b9d83;
+  --chart-4: #5c3d2e;
+  --chart-5: #c4b5a0;
+  --sidebar: #2d1b12;
+  --sidebar-foreground: #f5e6d3;
+  --sidebar-primary: #6b2737;
+  --sidebar-primary-foreground: #f5e6d3;
+  --sidebar-accent: #5c3d2e;
+  --sidebar-accent-foreground: #f5e6d3;
+  --sidebar-border: #5c3d2e;
+  --sidebar-ring: #d4af37;
 }
 
 /*---break---
