@@ -1,5 +1,5 @@
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5001/api";
 
 type ApiSuccess<T> = {
   status: "success";
@@ -35,7 +35,7 @@ function getErrorMessage(payload: ApiErrorShape, fallback: string): string {
 
 export async function postJson<TResponse, TBody>(
   path: string,
-  body: TBody
+  body: TBody,
 ): Promise<TResponse> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     method: "POST",
@@ -53,7 +53,9 @@ export async function postJson<TResponse, TBody>(
   }
 
   if (!response.ok) {
-    throw new Error(getErrorMessage(payload as ApiErrorShape, "Request failed"));
+    throw new Error(
+      getErrorMessage(payload as ApiErrorShape, "Request failed"),
+    );
   }
 
   return (payload as ApiSuccess<TResponse>).data;
