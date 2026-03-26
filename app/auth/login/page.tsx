@@ -10,11 +10,13 @@ import { BookOpen, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
+import { loginUser } from "@/lib/auth";
 
 export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
-
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -28,10 +30,17 @@ export default function LoginPage() {
     try {
       setServerError("");
       setIsSubmitting(true);
-      console.log("Login payload:", data);
-      await new Promise((resolve) => setTimeout(resolve, 600));
-    } catch {
-      setServerError("Something went wrong. Please try again.");
+
+      await loginUser(data.email, data.password);
+
+      //TO-DO: change target route as app grows (dashboard/home)
+      router.push("/");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again.";
+      setServerError(message);
     } finally {
       setIsSubmitting(false);
     }
