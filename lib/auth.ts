@@ -1,25 +1,18 @@
 import { postJson } from "@/lib/api";
+import {
+  AuthResponse,
+  LoginRequestPayload,
+  SignupRequestPayload,
+} from "@/lib/types";
 
 const AUTH_TOKEN_KEY = "bookclub_auth_token";
 const AUTH_USER_KEY = "bookclub_auth_user";
-
-export type AuthUser = {
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-};
-
-type AuthResponse = {
-  user: AuthUser;
-  token: string;
-};
 
 export async function loginUser(
   email: string,
   password: string
 ): Promise<AuthResponse> {
-  const data = await postJson<AuthResponse, { email: string; password: string }>(
+  const data = await postJson<AuthResponse, LoginRequestPayload>(
     "/auth/login",
     { email, password }
   );
@@ -35,7 +28,7 @@ export async function signupUser(
   email: string,
   password: string
 ): Promise<AuthResponse> {
-  const data = await postJson<AuthResponse, { name: string; email: string; password: string }>(
+  const data = await postJson<AuthResponse, SignupRequestPayload>(
     "/auth/register",
     { name, email, password }
   );

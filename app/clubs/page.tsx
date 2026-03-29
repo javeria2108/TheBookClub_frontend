@@ -2,7 +2,8 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Club, getClubs } from "@/lib/clubs";
+import { getClubs } from "@/lib/clubs";
+import { Club } from "@/lib/types";
 import { BookOpen, Search } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";

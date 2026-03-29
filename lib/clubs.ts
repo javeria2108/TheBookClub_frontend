@@ -1,32 +1,6 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
-
-export type Club = {
-  id: string;
-  name: string;
-  description: string | null;
-  isPublic: boolean;
-  createdAt: string;
-};
-
-type Pagination = {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-};
-
-type GetClubsResponse = {
-  clubs: Club[];
-  pagination: Pagination;
-};
-
-type GetClubsParams = {
-  page?: number;
-  limit?: number;
-  search?: string;
-  isPublic?: boolean;
-};
+import { GetClubsParams, GetClubsResponse } from "@/lib/types";
 
 export async function getClubs(params: GetClubsParams = {}) {
   const query = new URLSearchParams();
