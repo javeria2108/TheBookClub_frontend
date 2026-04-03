@@ -1,26 +1,12 @@
-export type Club = {
-  id: string;
-  name: string;
-  description: string | null;
-  isPublic: boolean;
-  createdAt: string;
-};
+import { z } from "zod";
+import {
+  ClubSchema,
+  GetClubsParamsSchema,
+  GetClubsResponseSchema,
+  PaginationSchema,
+} from "@/lib/contracts/club.contract";
 
-export type Pagination = {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-};
-
-export type GetClubsResponse = {
-  clubs: Club[];
-  pagination: Pagination;
-};
-
-export type GetClubsParams = {
-  page?: number;
-  limit?: number;
-  search?: string;
-  isPublic?: boolean;
-};
+export type Club = z.infer<typeof ClubSchema>;
+export type Pagination = z.infer<typeof PaginationSchema>;
+export type GetClubsResponse = z.infer<typeof GetClubsResponseSchema>;
+export type GetClubsParams = z.infer<typeof GetClubsParamsSchema>;

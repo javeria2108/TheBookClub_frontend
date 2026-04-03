@@ -1,14 +1,20 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+import {
+  GetClubsParamsSchema,
+  GetClubsResponseSchema,
+} from "@/lib/contracts/club.contract";
 import { GetClubsParams, GetClubsResponse } from "@/lib/types";
 
 export async function getClubs(params: GetClubsParams = {}) {
+  const validatedParams = GetClubsParamsSchema.parse(params);
+
   const query = new URLSearchParams();
-  if (params.page) query.set("page", String(params.page));
-  if (params.limit) query.set("limit", String(params.limit));
-  if (params.search?.trim()) query.set("search", params.search.trim());
-  if (typeof params.isPublic === "boolean") {
-    query.set("isPublic", String(params.isPublic));
+  if (validatedParams.page) query.set("page", String(validatedParams.page));
+  if (validatedParams.limit) query.set("limit", String(validatedParams.limit));
+  if (validatedParams.search?.trim()) query.set("search", validatedParams.search.trim());
+  if (typeof validatedParams.isPublic === "boolean") {
+    query.set("isPublic", String(validatedParams.isPublic));
   }
 
   const url = `${API_BASE_URL}/clubs${query.toString() ? `?${query.toString()}` : ""}`;
@@ -25,5 +31,5 @@ export async function getClubs(params: GetClubsParams = {}) {
     throw new Error(message);
   }
 
-  return payload.data as GetClubsResponse;
+  return GetClubsResponseSchema.parse(payload.data) as GetClubsResponse;
 }
