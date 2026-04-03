@@ -1,18 +1,31 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001/api";
+
 import {
   GetClubsParamsSchema,
   GetClubsResponseSchema,
+  CreateClubPayloadSchema,
+  CreateClubResponseSchema,
 } from "@/lib/contracts/club.contract";
-import { GetClubsParams, GetClubsResponse } from "@/lib/types";
+import {
+  GetClubsParams,
+  GetClubsResponse,
+  CreateClubPayload,
+  CreateClubResponse,
+} from "@/lib/types";
 
 export async function getClubs(params: GetClubsParams = {}) {
   const validatedParams = GetClubsParamsSchema.parse(params);
 
   const query = new URLSearchParams();
+
   if (validatedParams.page) query.set("page", String(validatedParams.page));
+
   if (validatedParams.limit) query.set("limit", String(validatedParams.limit));
-  if (validatedParams.search?.trim()) query.set("search", validatedParams.search.trim());
+
+  if (validatedParams.search?.trim())
+    query.set("search", validatedParams.search.trim());
+
   if (typeof validatedParams.isPublic === "boolean") {
     query.set("isPublic", String(validatedParams.isPublic));
   }
@@ -32,4 +45,27 @@ export async function getClubs(params: GetClubsParams = {}) {
   }
 
   return GetClubsResponseSchema.parse(payload.data) as GetClubsResponse;
+}
+
+export async function createClub(
+  input: CreateClubPayload,
+): Promise<CreateClubResponse> {
+  const payload = CreateClubPayloadSchema.parse(input);
+
+  const response = await fetch(`${API_BASE_URL}/clubs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+
+  const body = await response.json();
+
+  if (!response.ok) {
+    const message =
+      body?.error?.message || body?.message || "Failed to create club";
+    throw new Error(message);
+  }
+
+  return CreateClubResponseSchema.parse(body.data) as CreateClubResponse;
 }

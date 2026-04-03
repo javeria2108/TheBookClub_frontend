@@ -26,3 +26,13 @@ export const GetClubsParamsSchema = z.object({
   search: z.string().optional(),
   isPublic: z.boolean().optional(),
 });
+
+export const CreateClubPayloadSchema = z.object({
+  name: z.string().trim().min(1, "Club name is required").max(100),
+  description: z.string().trim().max(500).optional(),
+  isPublic: z.boolean().optional().default(true),
+});
+
+export const CreateClubResponseSchema = z.object({
+  club: ClubSchema,
+});
