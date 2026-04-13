@@ -67,7 +67,7 @@ export default function SignupPage() {
           <div className="absolute bottom-8 left-8 right-8">
             <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
               BookCircle
-               </p>
+            </p>
             <h2 className="mt-3 font-serif text-4xl leading-tight">
               Start your reading circle.
             </h2>
@@ -89,7 +89,11 @@ export default function SignupPage() {
             <h1 className="font-serif text-3xl">Create Account</h1>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-5"
+            noValidate
+          >
             <div className="space-y-2">
               <label htmlFor="name" className="text-sm text-[#F2E8D9]/80">
                 Full Name
@@ -143,12 +147,17 @@ export default function SignupPage() {
                 />
               </div>
               {errors.password && (
-                <p className="text-sm text-[#f87171]">{errors.password.message}</p>
+                <p className="text-sm text-[#f87171]">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm text-[#F2E8D9]/80">
+              <label
+                htmlFor="confirmPassword"
+                className="text-sm text-[#F2E8D9]/80"
+              >
                 Confirm Password
               </label>
               <div className="relative">
@@ -183,7 +192,7 @@ export default function SignupPage() {
               {!isSubmitting && <ChevronRight className="h-4 w-4" />}
             </button>
             <p className="text-center text-sm text-[#F2E8D9]/70">
-              Already have an account?{" "}
+              Already have an account{" "}
               <Link
                 href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`}
                 className="text-[#C9A96E] hover:underline"
