@@ -6,14 +6,17 @@ import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { BookOpen, Lock, Mail } from "lucide-react";
+import { BookOpen, ChevronRight, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginUser } from "@/lib/auth";
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("returnTo") || "/dashboard";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const router = useRouter();
@@ -47,31 +50,45 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
-      <section className="mx-auto grid min-h-screen max-w-6xl grid-cols-1 items-center gap-10 px-6 py-10 md:grid-cols-2">
-        <div className="relative hidden h-140 overflow-hidden rounded-2xl border border-border md:block">
+    <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
+      <section className="mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 px-5 py-8 md:grid-cols-2 md:gap-10 md:px-8">
+        <motion.div
+          initial={{ opacity: 0, x: -18 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.55 }}
+          className="relative hidden overflow-hidden rounded-2xl border border-[#C9A96E]/25 md:block"
+        >
           <Image
-            src="/images/auth-bookshelf-placeholder.jpg"
-            alt="Bookshelf themed background"
+            src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1400&q=80"
+            alt="Library shelves"
             fill
             priority
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-background/80 via-background/30 to-transparent" />
-          <div className="absolute bottom-6 left-6 right-6">
-            <p className="text-lg font-semibold text-cream">
-              Welcome back to your reading circle
+          <div className="absolute inset-0 bg-gradient-to-t from-[#1A0F07]/90 via-[#1A0F07]/40 to-transparent" />
+          <div className="absolute bottom-8 left-8 right-8">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+              BookCircle
             </p>
-            <p className="mt-1 text-sm text-text-secondary">
-              Discuss books, find common interests and grow your club
+            <h2 className="mt-3 font-serif text-4xl leading-tight">
+              Return to your reading circle.
+            </h2>
+            <p className="mt-3 max-w-md text-sm text-[#F2E8D9]/75">
+              Continue discussions, pick your next book, and join tonight’s
+              session.
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="animate-slideUp rounded-2xl border border-border bg-card p-6 shadow-xl md:p-8 ">
-          <div className="mb-6 flex items-center gap-3">
-            <BookOpen className="text-accent" size={24} />
-            <h1 className="text-2xl font-bold tracking-tight">Sign in</h1>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.08 }}
+          className="my-auto rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
+        >
+          <div className="mb-7 flex items-center gap-3">
+            <BookOpen className="h-6 w-6 text-[#C9A96E]" />
+            <h1 className="font-serif text-3xl">Log In</h1>
           </div>
 
           <form
@@ -80,70 +97,49 @@ export default function LoginPage() {
             noValidate
           >
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-cream">
+              <label htmlFor="email" className="text-sm text-[#F2E8D9]/80">
                 Email
-              </Label>
+              </label>
               <div className="relative">
-                <Mail
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  size={18}
-                />
-                <Input
+                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C9A96E]/70" />
+                <input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  className="pl-10"
+                  className="w-full rounded border border-[#C9A96E]/30 bg-[#1A0F07] py-3 pl-10 pr-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/40 focus:border-[#C9A96E] focus:outline-none"
                   {...register("email")}
                 />
               </div>
               {errors.email && (
-                <p className="animate-shake text-sm text-destructive">
-                  {errors.email.message}
-                </p>
+                <p className="text-sm text-[#f87171]">{errors.email.message}</p>
               )}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-cream">
-                Password
-              </Label>
-              <div className="relative">
-                <Lock
-                  className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  size={18}
-                />
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  className="pl-10"
-                  {...register("password")}
-                />
-              </div>
-              {errors.password && (
-                <p className="animate-shake text-sm text-destructive">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-            {serverError && (
-              <p className="text-sm text-destructive">{serverError}</p>
-            )}
+            {serverError ? (
+              <p className="rounded border border-[#8B4A3C]/60 bg-[#8B4A3C]/20 px-3 py-2 text-sm text-[#F2E8D9]">
+                {serverError}
+              </p>
+            ) : null}
 
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Signing in..." : "Sign in"}
-            </Button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex w-full items-center justify-center gap-2 rounded bg-[#C9A96E] px-4 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSubmitting ? "Signing in..." : "Sign In"}
+              {!isSubmitting && <ChevronRight className="h-4 w-4" />}
+            </button>
 
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-sm text-[#F2E8D9]/70">
               New here?{" "}
               <Link
-                href="/auth/signup"
-                className="font-medium text-accent hover:underline"
+                href={`/auth/signup?returnTo=${encodeURIComponent(returnTo)}`}
+                className="text-[#C9A96E] hover:underline"
               >
                 Create an account
               </Link>
             </p>
           </form>
-        </div>
+        </motion.div>
       </section>
     </main>
   );
