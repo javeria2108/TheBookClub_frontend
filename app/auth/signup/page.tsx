@@ -192,7 +192,7 @@ export default function SignupPage() {
               {!isSubmitting && <ChevronRight className="h-4 w-4" />}
             </button>
             <p className="text-center text-sm text-[#F2E8D9]/70">
-              Already have an account{" "}
+              Already have an account?{" "}
               <Link
                 href={`/auth/login?returnTo=${encodeURIComponent(returnTo)}`}
                 className="text-[#C9A96E] hover:underline"
