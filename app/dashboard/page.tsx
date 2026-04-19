@@ -1,14 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { BookOpen, Plus, Search } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { CreateClubModal } from "@/components/clubs/CreateClubModal";
 import { getClubs } from "@/lib/clubs";
 import type { Club } from "@/lib/types";
-import { CreateClubModal } from "@/components/clubs/CreateClubModal";
+import {
+  ArrowUpRight,
+  BookOpen,
+  CheckCircle2,
+  Plus,
+  Search,
+  Sparkles,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 
 export default function DashboardPage() {
   const [clubs, setClubs] = useState<Club[]>([]);
@@ -36,84 +41,168 @@ export default function DashboardPage() {
   }, []);
 
   const handleClubCreated = async () => {
-    setSuccessMessage("Club created successfully");
+    setSuccessMessage("Club created successfully.");
     await loadClubs();
     setTimeout(() => setSuccessMessage(""), 2500);
   };
 
+  const filteredClubs = useMemo(() => {
+    const term = searchInput.trim().toLowerCase();
+    if (!term) return clubs;
+    return clubs.filter((club) => club.name.toLowerCase().includes(term));
+  }, [clubs, searchInput]);
+
   return (
-    <main className="min-h-screen bg-background text-foreground px-6 py-8">
-      <section className="mx-auto max-w-6xl space-y-8">
-        <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Welcome back</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage your reading circles, discover clubs, and create new ones.
-            </p>
-          </div>
+    <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
+      <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8 md:py-12">
+        <motion.header
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55 }}
+          className="mb-8 rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
+        >
+          <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+            Your Reading Space
+          </p>
+          <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <h1 className="font-serif text-4xl leading-tight md:text-5xl">
+                Welcome back
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm text-[#F2E8D9]/75 md:text-base">
+                Manage your reading circles, discover communities, and create
+                your next club gathering in seconds.
+              </p>
+            </div>
 
-          <div className="flex gap-3">
-            <Button variant="secondary" asChild>
-              <Link href="/clubs">
-                <Search size={16} />
-                <span className="ml-2">Discover Clubs</span>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/clubs"
+                className="inline-flex items-center gap-2 rounded border border-[#C9A96E]/40 px-4 py-2 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E]"
+              >
+                <Search className="h-4 w-4" />
+                Discover Clubs
               </Link>
-            </Button>
 
-            <Button onClick={() => setIsCreateOpen(true)}>
-              <Plus size={16} />
-              <span className="ml-2">Create Club</span>
-            </Button>
+              <button
+                type="button"
+                onClick={() => setIsCreateOpen(true)}
+                className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+              >
+                <Plus className="h-4 w-4" />
+                Create Club
+              </button>
+            </div>
           </div>
-        </header>
+        </motion.header>
 
-        <div className="rounded-xl border border-border bg-card p-4">
-          <label className="text-sm text-muted-foreground">Quick search</label>
-          <Input
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search your clubs..."
-            className="mt-2"
-          />
-        </div>
+        <motion.section
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.06 }}
+          className="mb-6 rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810] p-5"
+        >
+          <label className="text-xs uppercase tracking-[0.18em] text-[#C9A96E]">
+            Quick Search
+          </label>
+          <div className="relative mt-3">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C9A96E]/70" />
+            <input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search your recent clubs..."
+              className="w-full rounded border border-[#C9A96E]/30 bg-[#1A0F07] py-3 pl-10 pr-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/40 focus:border-[#C9A96E] focus:outline-none"
+            />
+          </div>
+        </motion.section>
 
-        {successMessage && (
-          <p className="text-sm text-green-500">{successMessage}</p>
-        )}
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {successMessage ? (
+          <p className="mb-4 inline-flex items-center gap-2 rounded border border-[#3f8f5c]/50 bg-[#20432d]/35 px-3 py-2 text-sm text-[#daf5e4]">
+            <CheckCircle2 className="h-4 w-4" />
+            {successMessage}
+          </p>
+        ) : null}
 
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
-            <BookOpen size={20} className="text-accent" />
-            Recent Clubs
-          </h2>
+        {error ? (
+          <p className="mb-4 rounded border border-[#8B4A3C]/60 bg-[#8B4A3C]/20 px-3 py-2 text-sm text-[#F2E8D9]">
+            {error}
+          </p>
+        ) : null}
+
+        <section>
+          <div className="mb-4 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-[#C9A96E]" />
+            <h2 className="font-serif text-3xl">Recent Clubs</h2>
+          </div>
 
           {isLoading ? (
-            <p className="text-muted-foreground">Loading...</p>
-          ) : clubs.length === 0 ? (
-            <p className="text-muted-foreground">
-              No clubs yet. Create your first one.
-            </p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="h-40 animate-pulse rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810]"
+                />
+              ))}
+            </div>
+          ) : filteredClubs.length === 0 ? (
+            <div className="rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810] p-8 text-center">
+              <p className="font-serif text-2xl">
+                {searchInput.trim()
+                  ? "No matching clubs found"
+                  : "No clubs yet"}
+              </p>
+              <p className="mt-2 text-sm text-[#F2E8D9]/70">
+                {searchInput.trim()
+                  ? "Try a different search term."
+                  : "Create your first club to begin your reading journey."}
+              </p>
+              {!searchInput.trim() ? (
+                <button
+                  type="button"
+                  onClick={() => setIsCreateOpen(true)}
+                  className="mt-4 inline-flex items-center gap-2 rounded bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+                >
+                  <Plus className="h-4 w-4" />
+                  Create Club
+                </button>
+              ) : null}
+            </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {clubs.map((club) => (
-                <article
+              {filteredClubs.map((club, idx) => (
+                <motion.article
                   key={club.id}
-                  className="rounded-xl border border-border bg-card p-4"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45, delay: idx * 0.05 }}
+                  className="group rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810] p-5 transition hover:-translate-y-px hover:border-[#C9A96E]/45"
                 >
-                  <h3 className="font-semibold">{club.name}</h3>
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
+                  <h3 className="font-serif text-2xl leading-tight">
+                    {club.name}
+                  </h3>
+                  <p className="mt-2 line-clamp-3 text-sm text-[#F2E8D9]/75">
                     {club.description || "No description yet."}
                   </p>
-                  <div className="mt-3 text-xs text-accent">
-                    {club.isPublic ? "Public" : "Private"}
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1 text-xs text-[#F2E8D9]/65">
+                      <BookOpen className="h-3.5 w-3.5 text-[#C9A96E]" />
+                      {club.isPublic ? "Public" : "Private"}
+                    </span>
+                    <Link
+                      href={`/clubs/${club.id}`}
+                      className="inline-flex items-center gap-1 text-sm font-medium text-[#C9A96E] transition hover:text-[#d8b884]"
+                    >
+                      Open Club
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Link>
                   </div>
-                </article>
+                </motion.article>
               ))}
             </div>
           )}
         </section>
       </section>
+
       <CreateClubModal
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
