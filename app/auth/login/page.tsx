@@ -7,9 +7,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen, ChevronRight, Lock, Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loginUser } from "@/lib/auth";
 import { motion } from "framer-motion";
@@ -36,8 +33,7 @@ export default function LoginPage() {
 
       await loginUser(data.email, data.password);
 
-      //TO-DO: change target route as app grows (dashboard/home)
-      router.push("/");
+      router.push(returnTo);
     } catch (error) {
       const message =
         error instanceof Error
@@ -65,7 +61,7 @@ export default function LoginPage() {
             priority
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1A0F07]/90 via-[#1A0F07]/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#1A0F07]/90 via-[#1A0F07]/40 to-transparent" />
           <div className="absolute bottom-8 left-8 right-8">
             <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
               BookCircle
@@ -112,6 +108,27 @@ export default function LoginPage() {
               </div>
               {errors.email && (
                 <p className="text-sm text-[#f87171]">{errors.email.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm text-[#F2E8D9]/80">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C9A96E]/70" />
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="Your password"
+                  className="w-full rounded border border-[#C9A96E]/30 bg-[#1A0F07] py-3 pl-10 pr-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/40 focus:border-[#C9A96E] focus:outline-none"
+                  {...register("password")}
+                />
+              </div>
+              {errors.password && (
+                <p className="text-sm text-[#f87171]">
+                  {errors.password.message}
+                </p>
               )}
             </div>
             {serverError ? (

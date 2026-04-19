@@ -34,8 +34,7 @@ export default function SignupPage() {
 
       await signupUser(data.name, data.email, data.password);
 
-      // Redirect to home after successful signup
-      router.push("/");
+      router.push(returnTo);
     } catch (error) {
       const message =
         error instanceof Error
