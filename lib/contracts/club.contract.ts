@@ -36,3 +36,7 @@ export const CreateClubPayloadSchema = z.object({
 export const CreateClubResponseSchema = z.object({
   club: ClubSchema,
 });
+
+export const GetClubByIdResponseSchema = z.object({
+  club: ClubSchema,
+});

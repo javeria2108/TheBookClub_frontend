@@ -6,12 +6,14 @@ import {
   GetClubsResponseSchema,
   CreateClubPayloadSchema,
   CreateClubResponseSchema,
+  GetClubByIdResponseSchema,
 } from "@/lib/contracts/club.contract";
 import {
   GetClubsParams,
   GetClubsResponse,
   CreateClubPayload,
   CreateClubResponse,
+  GetClubByIdResponse,
 } from "@/lib/types";
 
 export async function getClubs(params: GetClubsParams = {}) {
@@ -68,4 +70,27 @@ export async function createClub(
   }
 
   return CreateClubResponseSchema.parse(body.data) as CreateClubResponse;
+}
+
+export async function getClubById(id: string) {
+  if (!id?.trim()) {
+    throw new Error("Club ID is required");
+  }
+
+  const url = `${API_BASE_URL}/clubs/${id}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message || payload?.message || "Failed to fetch club";
+    throw new Error(message);
+  }
+
+  return GetClubByIdResponseSchema.parse(payload.data) as GetClubByIdResponse;
 }
