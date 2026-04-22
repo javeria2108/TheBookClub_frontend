@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import { getClubs } from "@/lib/clubs";
 import {
   BookOpen,
   ChevronDown,
@@ -168,13 +169,46 @@ export default function HomePage() {
   const [showJoinPrompt, setShowJoinPrompt] = useState(false);
   const [joinTargetName, setJoinTargetName] = useState("");
   const [testimonialIndex, setTestimonialIndex] = useState(0);
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [isLoadingClubs, setIsLoadingClubs] = useState(true);
+  const [clubsError, setClubsError] = useState<string | null>(null);
 
-  const featuredClub = mockClubs[0];
+  const featuredClub = clubs[0] ?? mockClubs[0];
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 18);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const fetchLandingClubs = async () => {
+      try {
+        setIsLoadingClubs(true);
+        setClubsError(null);
+        const data = await getClubs({ limit: 5 });
+
+        const mapped: Club[] = data.clubs.map((apiClub, index) => ({
+          id: apiClub.id,
+          name: apiClub.name,
+          description: apiClub.description ?? "No description yet.",
+          isPrivate: !apiClub.isPublic,
+          memberCount: 0,
+          genre: "General",
+          coverImage: mockClubs[index % mockClubs.length].coverImage,
+        }));
+
+        setClubs(mapped);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to load clubs";
+        setClubsError(message);
+      } finally {
+        setIsLoadingClubs(false);
+      }
+    };
+
+    fetchLandingClubs();
   }, []);
 
   const initial = useMemo(
@@ -466,9 +500,7 @@ export default function HomePage() {
                   </span>
                 </div>
                 <div className="space-y-4 p-5">
-                  <h3 className="font-serif text-2xl">
-                    {club.name}
-                  </h3>
+                  <h3 className="font-serif text-2xl">{club.name}</h3>
                   <p className="line-clamp-2 text-sm text-[#F2E8D9]/70">
                     {club.description}
                   </p>
@@ -582,9 +614,7 @@ export default function HomePage() {
                   className="rounded-xl border border-[#C9A96E]/45 bg-[#fff7ec] p-7 transition hover:border-[#C9A96E]"
                 >
                   <Icon className="h-9 w-9 text-[#C9A96E]" />
-                  <h3 className="mt-5 font-serif text-2xl">
-                    {feature.title}
-                  </h3>
+                  <h3 className="mt-5 font-serif text-2xl">{feature.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-[#1A0F07]/75">
                     {feature.description}
                   </p>
@@ -597,9 +627,7 @@ export default function HomePage() {
 
       <section id="how" className="bg-[#1A0F07] px-5 py-24 md:px-8">
         <div className="mx-auto w-full max-w-7xl">
-          <h2 className="font-serif text-5xl md:text-6xl">
-            How it Works
-          </h2>
+          <h2 className="font-serif text-5xl md:text-6xl">How it Works</h2>
           <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
             {[
               {
@@ -647,9 +675,7 @@ export default function HomePage() {
                     className="object-cover"
                   />
                 </div>
-                <h3 className="mt-5 font-serif text-3xl">
-                  {step.title}
-                </h3>
+                <h3 className="mt-5 font-serif text-3xl">{step.title}</h3>
                 <p className="mt-3 text-sm text-[#F2E8D9]/75">
                   {step.description}
                 </p>
@@ -845,9 +871,7 @@ export default function HomePage() {
             <div>
               <div className="flex items-center gap-2">
                 <BookOpen className="h-5 w-5 text-[#C9A96E]" />
-                <span className="font-serif text-2xl">
-                  BookCircle
-                </span>
+                <span className="font-serif text-2xl">BookCircle</span>
               </div>
               <p className="mt-4 text-sm text-[#F2E8D9]/70">
                 A home for readers who want deeper books and better
