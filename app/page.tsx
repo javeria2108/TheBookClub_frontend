@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useAuthState } from "@/hooks/useAuthState";
 import { AnimatePresence, motion } from "framer-motion";
 import { getClubs } from "@/lib/clubs";
 import {
@@ -25,31 +26,6 @@ import {
   X,
 } from "lucide-react";
 
-const useAuth = (): AuthState => {
-  const [state, setState] = useState<AuthState>({ isAuthenticated: false });
-
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    const rawUser = localStorage.getItem("user");
-
-    if (!token || !rawUser) {
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(rawUser) as { name?: string };
-      setState({
-        isAuthenticated: true,
-        user: { name: parsed.name?.trim() || "Reader" },
-      });
-    } catch {
-      setState({ isAuthenticated: true, user: { name: "Reader" } });
-    }
-  }, []);
-
-  return state;
-};
-
 const cardReveal = {
   hidden: { opacity: 0, y: 18 },
   visible: (index: number) => ({
@@ -60,7 +36,7 @@ const cardReveal = {
 };
 
 export default function HomePage() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useAuthState();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showJoinPrompt, setShowJoinPrompt] = useState(false);
