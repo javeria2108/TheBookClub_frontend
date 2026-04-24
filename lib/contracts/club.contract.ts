@@ -5,6 +5,9 @@ export const ClubSchema = z.object({
   name: z.string().min(1),
   description: z.string().nullable(),
   isPublic: z.boolean(),
+  genre: z.string().nullable().optional(),
+  coverImage: z.string().url().nullable().optional(),
+  memberCount: z.number().int().nonnegative().optional(),
   createdAt: z.string(),
 });
 
@@ -31,6 +34,13 @@ export const CreateClubPayloadSchema = z.object({
   name: z.string().trim().min(1, "Club name is required").max(100),
   description: z.string().trim().max(500).optional(),
   isPublic: z.boolean().optional().default(true),
+  genre: z.string().trim().max(80).optional(),
+  coverImage: z.string().url().optional(),
+});
+
+export const JoinClubResponseSchema = z.object({
+  clubId: z.string().uuid(),
+  memberCount: z.number().int().nonnegative(),
 });
 
 export const CreateClubResponseSchema = z.object({

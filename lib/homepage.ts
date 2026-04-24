@@ -94,8 +94,9 @@ export function mapApiClubsToLandingClubs(
     name: apiClub.name,
     description: apiClub.description ?? "No description yet.",
     isPrivate: !apiClub.isPublic,
-    memberCount: 0,
-    genre: "General",
-    coverImage: mockClubs[index % mockClubs.length].coverImage,
+    memberCount: apiClub.memberCount ?? 0,
+    genre: apiClub.genre ?? "General",
+    coverImage:
+      apiClub.coverImage ?? mockClubs[index % mockClubs.length].coverImage,
   }));
 }

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useAuthState } from "@/hooks/useAuthState";
 import { AnimatePresence, motion } from "framer-motion";
-import { getClubs } from "@/lib/clubs";
+import { getClubs, joinClub } from "@/lib/clubs";
 import {
   mapApiClubsToLandingClubs,
   mockClubs,
@@ -46,6 +46,8 @@ export default function HomePage() {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [isLoadingClubs, setIsLoadingClubs] = useState(true);
   const [clubsError, setClubsError] = useState<string | null>(null);
+  const [joiningClubId, setJoiningClubId] = useState<string | null>(null);
+  const [joinFeedback, setJoinFeedback] = useState<string | null>(null);
 
   const featuredClub = clubs[0] ?? mockClubs[0];
 
@@ -61,13 +63,11 @@ export default function HomePage() {
         setIsLoadingClubs(true);
         setClubsError(null);
         const data = await getClubs({ limit: 5 });
-        console.log("Landing page API response:", data);
 
         setClubs(mapApiClubsToLandingClubs(data.clubs));
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Failed to load clubs";
-        console.error("Landing page API error:", message, error);
         setClubsError(message);
       } finally {
         setIsLoadingClubs(false);
@@ -82,8 +82,35 @@ export default function HomePage() {
     [user?.name],
   );
 
-  const handleJoinClick = (club: Club) => {
+  const handleJoinClick = async (club: Club) => {
     if (isAuthenticated) {
+      if (club.isPrivate) {
+        setJoinFeedback("Private club join requests are coming soon.");
+        return;
+      }
+
+      try {
+        setJoinFeedback(null);
+        setJoiningClubId(club.id);
+        const data = await joinClub(club.id);
+
+        setClubs((current) =>
+          current.map((currentClub) =>
+            currentClub.id === club.id
+              ? { ...currentClub, memberCount: data.memberCount }
+              : currentClub,
+          ),
+        );
+
+        setJoinFeedback(`You joined ${club.name}.`);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to join club";
+        setJoinFeedback(message);
+      } finally {
+        setJoiningClubId(null);
+      }
+
       return;
     }
 
@@ -318,10 +345,19 @@ export default function HomePage() {
       </section>
 
       <DiscoverSection
-        clubs={clubs.length > 0 ? clubs : mockClubs}
+        clubs={clubs}
         isAuthenticated={isAuthenticated}
         onJoinClick={handleJoinClick}
+        joiningClubId={joiningClubId}
       />
+
+      {joinFeedback ? (
+        <section className="px-5 pb-6 md:px-8">
+          <div className="mx-auto w-full max-w-7xl rounded border border-[#C9A96E]/30 bg-[#2A1810] px-4 py-3 text-sm text-[#F2E8D9]">
+            {joinFeedback}
+          </div>
+        </section>
+      ) : null}
 
       <section className="bg-[#F2E8D9] px-5 py-24 text-[#1A0F07] md:px-8">
         <div className="mx-auto w-full max-w-7xl">

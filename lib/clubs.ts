@@ -7,6 +7,7 @@ import {
   CreateClubPayloadSchema,
   CreateClubResponseSchema,
   GetClubByIdResponseSchema,
+  JoinClubResponseSchema,
 } from "@/lib/contracts/club.contract";
 import {
   GetClubsParams,
@@ -14,7 +15,9 @@ import {
   CreateClubPayload,
   CreateClubResponse,
   GetClubByIdResponse,
+  JoinClubResponse,
 } from "@/lib/types";
+import { getStoredToken } from "./auth";
 
 export async function getClubs(params: GetClubsParams = {}) {
   const validatedParams = GetClubsParamsSchema.parse(params);
@@ -93,4 +96,34 @@ export async function getClubById(id: string) {
   }
 
   return GetClubByIdResponseSchema.parse(payload.data) as GetClubByIdResponse;
+}
+
+export async function joinClub(clubId: string): Promise<JoinClubResponse> {
+  if (!clubId?.trim()) {
+    throw new Error("Club ID is required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to join a club");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/join`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message || payload?.message || "Failed to join club";
+    throw new Error(message);
+  }
+
+  return JoinClubResponseSchema.parse(payload.data) as JoinClubResponse;
 }

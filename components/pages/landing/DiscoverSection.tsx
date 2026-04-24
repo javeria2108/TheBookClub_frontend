@@ -10,6 +10,7 @@ interface DiscoverSectionProps {
   clubs: LandingClub[];
   isAuthenticated: boolean;
   onJoinClick: (club: LandingClub) => void;
+  joiningClubId?: string | null;
 }
 
 const cardReveal = {
@@ -25,6 +26,7 @@ export function DiscoverSection({
   clubs,
   isAuthenticated,
   onJoinClick,
+  joiningClubId,
 }: DiscoverSectionProps) {
   return (
     <section id="discover" className="px-5 pb-24 md:px-8">
@@ -93,22 +95,18 @@ export function DiscoverSection({
                   >
                     View Club
                   </Link>
-                  {isAuthenticated ? (
-                    <button
-                      type="button"
-                      className="rounded bg-[#C9A96E] px-3 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
-                    >
-                      {club.isPrivate ? "Request" : "Join"}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => onJoinClick(club)}
-                      className="rounded bg-[#C9A96E] px-3 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
-                    >
-                      {club.isPrivate ? "Request" : "Join"}
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => onJoinClick(club)}
+                    disabled={joiningClubId === club.id}
+                    className="rounded bg-[#C9A96E] px-3 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {joiningClubId === club.id
+                      ? "Joining..."
+                      : club.isPrivate
+                        ? "Request"
+                        : "Join"}
+                  </button>
                 </div>
               </div>
             </motion.article>
