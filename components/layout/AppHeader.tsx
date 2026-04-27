@@ -40,10 +40,16 @@ export function AppHeader({
   const router = useRouter();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
-  const navItems = useMemo(
-    () => (mode === "landing" ? LANDING_NAV_ITEMS : APP_NAV_ITEMS),
-    [mode],
-  );
+  const navItems = useMemo(() => {
+    if (mode === "landing") return LANDING_NAV_ITEMS;
+    
+    // In app mode, guests don't see Dashboard (middleware blocks it anyway)
+    if (!isAuthenticated) {
+      return APP_NAV_ITEMS.filter((item) => item.label !== "Dashboard");
+    }
+    
+    return APP_NAV_ITEMS;
+  }, [mode, isAuthenticated]);
 
   const handleLogout = async () => {
     setIsMobileNavOpen(false);
