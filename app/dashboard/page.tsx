@@ -1,7 +1,7 @@
 "use client";
 
 import { CreateClubModal } from "@/components/clubs/CreateClubModal";
-import { getClubs } from "@/lib/clubs";
+import { getClubs, getMyClubs } from "@/lib/clubs";
 import { AppHeader } from "@/components/layout/AppHeader";
 import type { Club } from "@/lib/types";
 import {
@@ -30,7 +30,10 @@ export default function DashboardPage() {
     try {
       setIsLoading(true);
       setError("");
-      const data = await getClubs({ page: 1, limit: 6 });
+      const data = isAuthenticated
+        ? await getMyClubs()
+        : await getClubs({ page: 1, limit: 6 });
+
       setClubs(data.clubs);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load clubs");
@@ -40,8 +43,9 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    // reload when auth state becomes available
     loadClubs();
-  }, []);
+  }, [isAuthenticated]);
 
   const handleClubCreated = async () => {
     setSuccessMessage("Club created successfully.");

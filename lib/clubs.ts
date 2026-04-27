@@ -98,6 +98,37 @@ export async function getClubById(id: string) {
   return GetClubByIdResponseSchema.parse(payload.data) as GetClubByIdResponse;
 }
 
+export async function getMyClubs() {
+  const url = `${API_BASE_URL}/users/me/clubs`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message = payload?.error?.message || payload?.message || "Failed to fetch your clubs";
+    throw new Error(message);
+  }
+
+  // Expect payload.data = { clubs: Club[] }
+  const clubs = payload?.data?.clubs ?? [];
+
+  const result = {
+    clubs,
+    pagination: {
+      page: 1,
+      limit: clubs.length,
+      total: clubs.length,
+      totalPages: 1,
+    },
+  };
+
+  return GetClubsResponseSchema.parse(result) as GetClubsResponse;
+}
+
 export async function joinClub(clubId: string): Promise<JoinClubResponse> {
   if (!clubId?.trim()) {
     throw new Error("Club ID is required");
