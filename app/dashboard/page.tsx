@@ -1,6 +1,7 @@
 "use client";
 
 import { CreateClubModal } from "@/components/clubs/CreateClubModal";
+import { logoutUser } from "@/lib/auth";
 import { getClubs } from "@/lib/clubs";
 import type { Club } from "@/lib/types";
 import {
@@ -12,10 +13,12 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -44,6 +47,11 @@ export default function DashboardPage() {
     setSuccessMessage("Club created successfully.");
     await loadClubs();
     setTimeout(() => setSuccessMessage(""), 2500);
+  };
+
+  const handleLogout = async () => {
+    await logoutUser();
+    router.push("/auth/login");
   };
 
   const filteredClubs = useMemo(() => {
@@ -91,6 +99,14 @@ export default function DashboardPage() {
               >
                 <Plus className="h-4 w-4" />
                 Create Club
+              </button>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex items-center gap-2 rounded border border-[#C9A96E]/40 px-4 py-2 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E]"
+              >
+                Logout
               </button>
             </div>
           </div>

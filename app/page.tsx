@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuthState } from "@/hooks/useAuthState";
 import { AnimatePresence, motion } from "framer-motion";
 import { getClubs, joinClub } from "@/lib/clubs";
@@ -26,6 +27,7 @@ import {
   X,
 } from "lucide-react";
 import { DiscoverSection } from "@/components/pages/landing/DiscoverSection";
+import { logoutUser } from "@/lib/auth";
 
 const cardReveal = {
   hidden: { opacity: 0, y: 18 },
@@ -37,6 +39,7 @@ const cardReveal = {
 };
 
 export default function HomePage() {
+  const router = useRouter();
   const { isAuthenticated, user } = useAuthState();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -83,39 +86,39 @@ export default function HomePage() {
   );
 
   const handleJoinClick = async (club: Club) => {
-    if (isAuthenticated) {
-      if (club.isPrivate) {
-        setJoinFeedback("Private club join requests are coming soon.");
-        return;
-      }
-
-      try {
-        setJoinFeedback(null);
-        setJoiningClubId(club.id);
-        const data = await joinClub(club.id);
-
-        setClubs((current) =>
-          current.map((currentClub) =>
-            currentClub.id === club.id
-              ? { ...currentClub, memberCount: data.memberCount }
-              : currentClub,
-          ),
-        );
-
-        setJoinFeedback(`You joined ${club.name}.`);
-      } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to join club";
-        setJoinFeedback(message);
-      } finally {
-        setJoiningClubId(null);
-      }
-
+    if (!isAuthenticated) {
+      setJoinTargetName(club.name);
+      setShowJoinPrompt(true);
       return;
     }
 
-    setJoinTargetName(club.name);
-    setShowJoinPrompt(true);
+    if (club.isPrivate) {
+      setJoinFeedback("Private club join requests are coming soon.");
+      return;
+    }
+
+    try {
+      setJoinFeedback(null);
+      setJoiningClubId(club.id);
+
+      const data = await joinClub(club.id);
+
+      setClubs((current) =>
+        current.map((currentClub) =>
+          currentClub.id === club.id
+            ? { ...currentClub, memberCount: data.memberCount }
+            : currentClub,
+        ),
+      );
+
+      setJoinFeedback(`You joined ${club.name}.`);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to join club";
+      setJoinFeedback(message);
+    } finally {
+      setJoiningClubId(null);
+    }
   };
 
   const prevTestimonial = () => {
@@ -126,6 +129,11 @@ export default function HomePage() {
 
   const nextTestimonial = () => {
     setTestimonialIndex((current) => (current + 1) % testimonials.length);
+  };
+
+  const handleLogout = async () => {
+    await logoutUser();
+    router.push("/auth/login");
   };
 
   return (
@@ -164,6 +172,13 @@ export default function HomePage() {
                 >
                   Dashboard
                 </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="rounded-full border border-[#C9A96E]/35 px-4 py-2 text-sm font-medium text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E]"
+                >
+                  Logout
+                </button>
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#C9A96E] text-sm font-semibold text-[#1A0F07]">
                   {initial}
                 </div>
@@ -231,13 +246,25 @@ export default function HomePage() {
                   About
                 </a>
                 {isAuthenticated ? (
-                  <Link
-                    href="/dashboard"
-                    className="block text-[#C9A96E]"
-                    onClick={() => setIsMobileNavOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
+                  <div className="space-y-2">
+                    <Link
+                      href="/dashboard"
+                      className="block text-[#C9A96E]"
+                      onClick={() => setIsMobileNavOpen(false)}
+                    >
+                      Dashboard
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        setIsMobileNavOpen(false);
+                        await handleLogout();
+                      }}
+                      className="block rounded border border-[#C9A96E]/35 px-3 py-2 text-left text-sm text-[#F2E8D9]"
+                    >
+                      Logout
+                    </button>
+                  </div>
                 ) : (
                   <div className="flex gap-3 pt-2">
                     <Link
@@ -349,15 +376,8 @@ export default function HomePage() {
         isAuthenticated={isAuthenticated}
         onJoinClick={handleJoinClick}
         joiningClubId={joiningClubId}
+        feedbackMessage={joinFeedback}
       />
-
-      {joinFeedback ? (
-        <section className="px-5 pb-6 md:px-8">
-          <div className="mx-auto w-full max-w-7xl rounded border border-[#C9A96E]/30 bg-[#2A1810] px-4 py-3 text-sm text-[#F2E8D9]">
-            {joinFeedback}
-          </div>
-        </section>
-      ) : null}
 
       <section className="bg-[#F2E8D9] px-5 py-24 text-[#1A0F07] md:px-8">
         <div className="mx-auto w-full max-w-7xl">

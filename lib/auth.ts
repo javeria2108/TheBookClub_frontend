@@ -10,8 +10,8 @@ import {
   SignupRequestPayload,
 } from "@/lib/types";
 
-const AUTH_TOKEN_KEY = "bookclub_auth_token";
-const AUTH_USER_KEY = "bookclub_auth_user";
+export const AUTH_TOKEN_KEY = "bookclub_auth_token";
+export const AUTH_USER_KEY = "bookclub_auth_user";
 
 export async function loginUser(
   email: string,
@@ -66,4 +66,12 @@ export function getStoredToken(): string | null {
 export function clearAuthStorage(): void {
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(AUTH_USER_KEY);
+}
+
+export async function logoutUser(): Promise<void> {
+  try {
+    await postJson<{ message: string }, Record<string, never>>("/auth/logout", {});
+  } finally {
+    clearAuthStorage();
+  }
 }

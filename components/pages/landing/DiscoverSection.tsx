@@ -11,6 +11,7 @@ interface DiscoverSectionProps {
   isAuthenticated: boolean;
   onJoinClick: (club: LandingClub) => void;
   joiningClubId?: string | null;
+  feedbackMessage?: string | null;
 }
 
 const cardReveal = {
@@ -27,6 +28,7 @@ export function DiscoverSection({
   isAuthenticated,
   onJoinClick,
   joiningClubId,
+  feedbackMessage,
 }: DiscoverSectionProps) {
   return (
     <section id="discover" className="px-5 pb-24 md:px-8">
@@ -48,6 +50,13 @@ export function DiscoverSection({
         >
           Public & private clubs — browse freely, join when ready.
         </motion.p>
+
+        {feedbackMessage ? (
+          <div className="mt-5 rounded border border-[#C9A96E]/25 bg-[#2A1810] px-4 py-3 text-sm text-[#F2E8D9]/80">
+            {feedbackMessage}
+          </div>
+        ) : null}
+
         <div className="mt-10 flex gap-5 overflow-x-auto pb-2">
           {clubs.map((club, index) => (
             <motion.article

@@ -6,15 +6,19 @@ import { motion } from "framer-motion";
 import { BookOpen, ChevronLeft, Globe, Lock, Users } from "lucide-react";
 import Link from "next/link";
 import type { Club } from "@/lib/types";
-import { getClubById } from "@/lib/clubs";
+import { getClubById, joinClub } from "@/lib/clubs";
+import { useAuthState } from "@/hooks/useAuthState";
 
 export default function ClubDetailPage() {
   const params = useParams();
   const clubId = params.id as string;
+  const { isAuthenticated } = useAuthState();
 
   const [club, setClub] = useState<Club | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [joinFeedback, setJoinFeedback] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
 
   useEffect(() => {
     const loadClub = async () => {
@@ -32,6 +36,39 @@ export default function ClubDetailPage() {
 
     loadClub();
   }, [clubId]);
+
+  const handleJoinClick = async () => {
+    if (!club) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setJoinFeedback("Please log in to join this club.");
+      return;
+    }
+
+    if (!club.isPublic) {
+      setJoinFeedback("Private club join requests are coming soon.");
+      return;
+    }
+
+    try {
+      setIsJoining(true);
+      setJoinFeedback("");
+
+      const data = await joinClub(club.id);
+
+      setClub((current) =>
+        current ? { ...current, memberCount: data.memberCount } : current,
+      );
+
+      setJoinFeedback("You joined this club.");
+    } catch (err) {
+      setJoinFeedback(err instanceof Error ? err.message : "Failed to join club");
+    } finally {
+      setIsJoining(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
@@ -83,13 +120,33 @@ export default function ClubDetailPage() {
             </p>
 
             <div className="mt-6 flex flex-wrap gap-4 items-center">
-              <button className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]">
-                Join Club
-              </button>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={handleJoinClick}
+                  disabled={isJoining}
+                  className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
+                >
+                  {isJoining ? "Joining..." : "Join Club"}
+                </button>
+              ) : (
+                <Link
+                  href={`/auth/login?returnTo=${encodeURIComponent(`/clubs/${club.id}`)}`}
+                  className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+                >
+                  Join Club
+                </Link>
+              )}
               <span className="text-sm text-[#F2E8D9]/70">
                 Created {new Date(club.createdAt).toLocaleDateString()}
               </span>
             </div>
+
+            {joinFeedback ? (
+              <p className="mt-4 rounded border border-[#C9A96E]/25 bg-[#1A0F07]/50 px-4 py-3 text-sm text-[#F2E8D9]/80">
+                {joinFeedback}
+              </p>
+            ) : null}
           </motion.div>
         ) : null}
       </section>
