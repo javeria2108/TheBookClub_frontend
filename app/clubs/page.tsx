@@ -1,6 +1,8 @@
 "use client";
 
+import { AppHeader } from "@/components/layout/AppHeader";
 import { getClubs } from "@/lib/clubs";
+import { useAuthState } from "@/hooks/useAuthState";
 import type { Club } from "@/lib/types";
 import {
   ArrowUpRight,
@@ -18,6 +20,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function ClubsPage() {
+  const { isAuthenticated, user } = useAuthState();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -56,8 +59,16 @@ export default function ClubsPage() {
     setSearch(searchInput.trim());
   };
 
+  const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
+
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
+      <AppHeader
+        mode="app"
+        isAuthenticated={isAuthenticated}
+        userInitial={userInitial}
+      />
+
       <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8 md:py-12">
         <motion.header
           initial={{ opacity: 0, y: 18 }}

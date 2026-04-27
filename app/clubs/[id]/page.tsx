@@ -6,19 +6,19 @@ import { motion } from "framer-motion";
 import { BookOpen, ChevronLeft, Globe, Lock, Users } from "lucide-react";
 import Link from "next/link";
 import type { Club } from "@/lib/types";
-import { getClubById, joinClub } from "@/lib/clubs";
+import { getClubById } from "@/lib/clubs";
 import { useAuthState } from "@/hooks/useAuthState";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { useJoinClubAction } from "@/hooks/useJoinClubAction";
 
 export default function ClubDetailPage() {
   const params = useParams();
   const clubId = params.id as string;
-  const { isAuthenticated } = useAuthState();
+  const { isAuthenticated, user } = useAuthState();
 
   const [club, setClub] = useState<Club | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [joinFeedback, setJoinFeedback] = useState("");
-  const [isJoining, setIsJoining] = useState(false);
 
   useEffect(() => {
     const loadClub = async () => {
@@ -37,41 +37,28 @@ export default function ClubDetailPage() {
     loadClub();
   }, [clubId]);
 
-  const handleJoinClick = async () => {
-    if (!club) {
-      return;
-    }
+  const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
 
-    if (!isAuthenticated) {
-      setJoinFeedback("Please log in to join this club.");
-      return;
-    }
-
-    if (!club.isPublic) {
-      setJoinFeedback("Private club join requests are coming soon.");
-      return;
-    }
-
-    try {
-      setIsJoining(true);
-      setJoinFeedback("");
-
-      const data = await joinClub(club.id);
-
-      setClub((current) =>
-        current ? { ...current, memberCount: data.memberCount } : current,
-      );
-
-      setJoinFeedback("You joined this club.");
-    } catch (err) {
-      setJoinFeedback(err instanceof Error ? err.message : "Failed to join club");
-    } finally {
-      setIsJoining(false);
-    }
-  };
+  const { joiningClubId, feedbackMessage, joinClub: handleJoinClick } =
+    useJoinClubAction<Club>({
+      isAuthenticated,
+      onSuccess: (joinedClub, memberCount) => {
+        setClub((current) =>
+          current && current.id === joinedClub.id
+            ? { ...current, memberCount }
+            : current,
+        );
+      },
+    });
 
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
+      <AppHeader
+        mode="app"
+        isAuthenticated={isAuthenticated}
+        userInitial={userInitial}
+      />
+
       <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8 md:py-12">
         <Link
           href="/clubs"
@@ -123,11 +110,11 @@ export default function ClubDetailPage() {
               {isAuthenticated ? (
                 <button
                   type="button"
-                  onClick={handleJoinClick}
-                  disabled={isJoining}
+                  onClick={() => void handleJoinClick(club)}
+                  disabled={joiningClubId === club.id}
                   className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {isJoining ? "Joining..." : "Join Club"}
+                  {joiningClubId === club.id ? "Joining..." : "Join Club"}
                 </button>
               ) : (
                 <Link
@@ -142,9 +129,9 @@ export default function ClubDetailPage() {
               </span>
             </div>
 
-            {joinFeedback ? (
+            {feedbackMessage ? (
               <p className="mt-4 rounded border border-[#C9A96E]/25 bg-[#1A0F07]/50 px-4 py-3 text-sm text-[#F2E8D9]/80">
-                {joinFeedback}
+                {feedbackMessage}
               </p>
             ) : null}
           </motion.div>

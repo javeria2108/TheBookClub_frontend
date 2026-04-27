@@ -1,8 +1,8 @@
 "use client";
 
 import { CreateClubModal } from "@/components/clubs/CreateClubModal";
-import { logoutUser } from "@/lib/auth";
 import { getClubs } from "@/lib/clubs";
+import { AppHeader } from "@/components/layout/AppHeader";
 import type { Club } from "@/lib/types";
 import {
   ArrowUpRight,
@@ -13,12 +13,12 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { useAuthState } from "@/hooks/useAuthState";
 
 export default function DashboardPage() {
-  const router = useRouter();
+  const { isAuthenticated, user } = useAuthState();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -49,10 +49,7 @@ export default function DashboardPage() {
     setTimeout(() => setSuccessMessage(""), 2500);
   };
 
-  const handleLogout = async () => {
-    await logoutUser();
-    router.push("/auth/login");
-  };
+  const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
 
   const filteredClubs = useMemo(() => {
     const term = searchInput.trim().toLowerCase();
@@ -62,6 +59,12 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
+      <AppHeader
+        mode="app"
+        isAuthenticated={isAuthenticated}
+        userInitial={userInitial}
+      />
+
       <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8 md:py-12">
         <motion.header
           initial={{ opacity: 0, y: 18 }}
@@ -99,14 +102,6 @@ export default function DashboardPage() {
               >
                 <Plus className="h-4 w-4" />
                 Create Club
-              </button>
-
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="inline-flex items-center gap-2 rounded border border-[#C9A96E]/40 px-4 py-2 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E]"
-              >
-                Logout
               </button>
             </div>
           </div>

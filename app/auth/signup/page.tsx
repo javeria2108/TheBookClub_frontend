@@ -62,7 +62,7 @@ export default function SignupPage() {
             priority
             className="object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#1A0F07]/90 via-[#1A0F07]/40 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#1A0F07]/90 via-[#1A0F07]/40 to-transparent" />
           <div className="absolute bottom-8 left-8 right-8">
             <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
               BookCircle

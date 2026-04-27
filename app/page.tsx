@@ -3,16 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useAuthState } from "@/hooks/useAuthState";
 import { AnimatePresence, motion } from "framer-motion";
-import { getClubs, joinClub } from "@/lib/clubs";
+import { getClubs } from "@/lib/clubs";
 import {
   mapApiClubsToLandingClubs,
   mockClubs,
   testimonials,
 } from "@/lib/homepage";
-import type { AuthState, LandingClub as Club, Testimonial } from "@/lib/types";
+import type { LandingClub as Club } from "@/lib/types";
 import {
   BookOpen,
   ChevronDown,
@@ -20,14 +19,14 @@ import {
   ChevronRight,
   Globe,
   Lock,
-  Menu,
   MessageSquare,
   Users,
   Vote,
   X,
 } from "lucide-react";
 import { DiscoverSection } from "@/components/pages/landing/DiscoverSection";
-import { logoutUser } from "@/lib/auth";
+import { AppHeader } from "@/components/layout/AppHeader";
+import { useJoinClubAction } from "@/hooks/useJoinClubAction";
 
 const cardReveal = {
   hidden: { opacity: 0, y: 18 },
@@ -39,26 +38,15 @@ const cardReveal = {
 };
 
 export default function HomePage() {
-  const router = useRouter();
   const { isAuthenticated, user } = useAuthState();
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const [showJoinPrompt, setShowJoinPrompt] = useState(false);
   const [joinTargetName, setJoinTargetName] = useState("");
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [isLoadingClubs, setIsLoadingClubs] = useState(true);
   const [clubsError, setClubsError] = useState<string | null>(null);
-  const [joiningClubId, setJoiningClubId] = useState<string | null>(null);
-  const [joinFeedback, setJoinFeedback] = useState<string | null>(null);
 
   const featuredClub = clubs[0] ?? mockClubs[0];
-
-  useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 18);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     const fetchLandingClubs = async () => {
@@ -85,41 +73,23 @@ export default function HomePage() {
     [user?.name],
   );
 
-  const handleJoinClick = async (club: Club) => {
-    if (!isAuthenticated) {
-      setJoinTargetName(club.name);
-      setShowJoinPrompt(true);
-      return;
-    }
-
-    if (club.isPrivate) {
-      setJoinFeedback("Private club join requests are coming soon.");
-      return;
-    }
-
-    try {
-      setJoinFeedback(null);
-      setJoiningClubId(club.id);
-
-      const data = await joinClub(club.id);
-
-      setClubs((current) =>
-        current.map((currentClub) =>
-          currentClub.id === club.id
-            ? { ...currentClub, memberCount: data.memberCount }
-            : currentClub,
-        ),
-      );
-
-      setJoinFeedback(`You joined ${club.name}.`);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to join club";
-      setJoinFeedback(message);
-    } finally {
-      setJoiningClubId(null);
-    }
-  };
+  const { joiningClubId, feedbackMessage, joinClub: handleJoinClick } =
+    useJoinClubAction<Club>({
+      isAuthenticated,
+      onUnauthenticatedJoin: (club) => {
+        setJoinTargetName(club.name);
+        setShowJoinPrompt(true);
+      },
+      onSuccess: (club, memberCount) => {
+        setClubs((current) =>
+          current.map((currentClub) =>
+            currentClub.id === club.id
+              ? { ...currentClub, memberCount }
+              : currentClub,
+          ),
+        );
+      },
+    });
 
   const prevTestimonial = () => {
     setTestimonialIndex(
@@ -131,161 +101,13 @@ export default function HomePage() {
     setTestimonialIndex((current) => (current + 1) % testimonials.length);
   };
 
-  const handleLogout = async () => {
-    await logoutUser();
-    router.push("/auth/login");
-  };
-
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9] font-sans">
-      <header
-        className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${
-          isScrolled ? "bg-[#1A0F07]/75 backdrop-blur-md" : "bg-transparent"
-        }`}
-      >
-        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-5 md:px-8">
-          <Link href="/" className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-[#C9A96E]" />
-            <span className="font-serif text-2xl leading-none text-[#F2E8D9]">
-              BookCircle
-            </span>
-          </Link>
-
-          <nav className="hidden items-center gap-8 text-[11px] uppercase tracking-[0.2em] md:flex">
-            <a href="#discover" className="transition hover:text-[#C9A96E]">
-              Discover
-            </a>
-            <a href="#how" className="transition hover:text-[#C9A96E]">
-              How it Works
-            </a>
-            <a href="#about" className="transition hover:text-[#C9A96E]">
-              About
-            </a>
-          </nav>
-
-          <div className="hidden items-center gap-3 md:flex">
-            {isAuthenticated ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="text-sm text-[#F2E8D9] transition hover:text-[#C9A96E]"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="rounded-full border border-[#C9A96E]/35 px-4 py-2 text-sm font-medium text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E]"
-                >
-                  Logout
-                </button>
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#C9A96E] text-sm font-semibold text-[#1A0F07]">
-                  {initial}
-                </div>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  className="text-sm text-[#F2E8D9] transition hover:text-[#C9A96E]"
-                >
-                  Log In
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="rounded-full bg-[#C9A96E] px-4 py-2 text-sm font-medium text-[#1A0F07] transition hover:bg-[#d8b884]"
-                >
-                  Join Free
-                </Link>
-              </>
-            )}
-          </div>
-
-          <button
-            aria-label="Open navigation"
-            onClick={() => setIsMobileNavOpen((value) => !value)}
-            className="md:hidden"
-            type="button"
-          >
-            {isMobileNavOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
-        </div>
-
-        <AnimatePresence>
-          {isMobileNavOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="border-t border-[#C9A96E]/20 bg-[#1A0F07]/95 px-5 py-4 md:hidden"
-            >
-              <div className="space-y-4 text-sm">
-                <a
-                  href="#discover"
-                  className="block"
-                  onClick={() => setIsMobileNavOpen(false)}
-                >
-                  Discover
-                </a>
-                <a
-                  href="#how"
-                  className="block"
-                  onClick={() => setIsMobileNavOpen(false)}
-                >
-                  How it Works
-                </a>
-                <a
-                  href="#about"
-                  className="block"
-                  onClick={() => setIsMobileNavOpen(false)}
-                >
-                  About
-                </a>
-                {isAuthenticated ? (
-                  <div className="space-y-2">
-                    <Link
-                      href="/dashboard"
-                      className="block text-[#C9A96E]"
-                      onClick={() => setIsMobileNavOpen(false)}
-                    >
-                      Dashboard
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        setIsMobileNavOpen(false);
-                        await handleLogout();
-                      }}
-                      className="block rounded border border-[#C9A96E]/35 px-3 py-2 text-left text-sm text-[#F2E8D9]"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-3 pt-2">
-                    <Link
-                      href="/auth/login"
-                      className="rounded border border-[#C9A96E]/40 px-3 py-2"
-                    >
-                      Log In
-                    </Link>
-                    <Link
-                      href="/auth/signup"
-                      className="rounded bg-[#C9A96E] px-3 py-2 text-[#1A0F07]"
-                    >
-                      Join Free
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+      <AppHeader
+        mode="landing"
+        isAuthenticated={isAuthenticated}
+        userInitial={initial}
+      />
 
       <section className="relative flex min-h-screen items-center overflow-hidden px-5 pb-14 pt-28 md:px-8">
         <div className="absolute right-[-8%] top-[14%] hidden h-[72%] w-[52%] overflow-hidden rounded-l-[44px] lg:block">
@@ -376,7 +198,7 @@ export default function HomePage() {
         isAuthenticated={isAuthenticated}
         onJoinClick={handleJoinClick}
         joiningClubId={joiningClubId}
-        feedbackMessage={joinFeedback}
+        feedbackMessage={feedbackMessage}
       />
 
       <section className="bg-[#F2E8D9] px-5 py-24 text-[#1A0F07] md:px-8">
