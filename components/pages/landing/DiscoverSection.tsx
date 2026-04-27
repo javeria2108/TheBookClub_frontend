@@ -2,16 +2,11 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import Link from "next/link";
-import { ChevronRight, Globe, Lock, Users } from "lucide-react";
+import { Globe, Lock, Users } from "lucide-react";
 import type { LandingClub } from "@/lib/types";
 
 interface DiscoverSectionProps {
   clubs: LandingClub[];
-  isAuthenticated: boolean;
-  onJoinClick: (club: LandingClub) => void;
-  joiningClubId?: string | null;
-  feedbackMessage?: string | null;
 }
 
 const cardReveal = {
@@ -25,10 +20,6 @@ const cardReveal = {
 
 export function DiscoverSection({
   clubs,
-  isAuthenticated,
-  onJoinClick,
-  joiningClubId,
-  feedbackMessage,
 }: DiscoverSectionProps) {
   return (
     <section id="discover" className="px-5 pb-24 md:px-8">
@@ -50,12 +41,6 @@ export function DiscoverSection({
         >
           Public & private clubs — browse freely, join when ready.
         </motion.p>
-
-        {feedbackMessage ? (
-          <div className="mt-5 rounded border border-[#C9A96E]/25 bg-[#2A1810] px-4 py-3 text-sm text-[#F2E8D9]/80">
-            {feedbackMessage}
-          </div>
-        ) : null}
 
         <div className="mt-10 flex gap-5 overflow-x-auto pb-2">
           {clubs.map((club, index) => (
@@ -97,38 +82,14 @@ export function DiscoverSection({
                 <span className="inline-block rounded-full bg-[#8B4A3C]/30 px-3 py-1 text-xs text-[#F2E8D9]">
                   {club.genre}
                 </span>
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <Link
-                    href={`/clubs/${club.id}`}
-                    className="rounded border border-[#C9A96E]/40 px-3 py-2 text-center text-sm transition hover:bg-[#C9A96E]/10"
-                  >
-                    View Club
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => onJoinClick(club)}
-                    disabled={joiningClubId === club.id}
-                    className="rounded bg-[#C9A96E] px-3 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    {joiningClubId === club.id
-                      ? "Joining..."
-                      : club.isPrivate
-                        ? "Request"
-                        : "Join"}
-                  </button>
+                <div className="pt-1">
+                  <p className="text-xs uppercase tracking-[0.16em] text-[#F2E8D9]/60">
+                    Club details are available inside the app.
+                  </p>
                 </div>
               </div>
             </motion.article>
           ))}
-        </div>
-
-        <div className="mt-7">
-          <Link
-            href="/clubs"
-            className="inline-flex items-center gap-1 text-sm text-[#C9A96E] transition hover:text-[#e4c591]"
-          >
-            View all clubs <ChevronRight className="h-4 w-4" />
-          </Link>
         </div>
       </div>
     </section>

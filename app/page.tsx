@@ -22,11 +22,9 @@ import {
   MessageSquare,
   Users,
   Vote,
-  X,
 } from "lucide-react";
 import { DiscoverSection } from "@/components/pages/landing/DiscoverSection";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { useJoinClubAction } from "@/hooks/useJoinClubAction";
 
 const cardReveal = {
   hidden: { opacity: 0, y: 18 },
@@ -39,8 +37,6 @@ const cardReveal = {
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuthState();
-  const [showJoinPrompt, setShowJoinPrompt] = useState(false);
-  const [joinTargetName, setJoinTargetName] = useState("");
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [isLoadingClubs, setIsLoadingClubs] = useState(true);
@@ -72,24 +68,6 @@ export default function HomePage() {
     () => user?.name?.charAt(0).toUpperCase() ?? "R",
     [user?.name],
   );
-
-  const { joiningClubId, feedbackMessage, joinClub: handleJoinClick } =
-    useJoinClubAction<Club>({
-      isAuthenticated,
-      onUnauthenticatedJoin: (club) => {
-        setJoinTargetName(club.name);
-        setShowJoinPrompt(true);
-      },
-      onSuccess: (club, memberCount) => {
-        setClubs((current) =>
-          current.map((currentClub) =>
-            currentClub.id === club.id
-              ? { ...currentClub, memberCount }
-              : currentClub,
-          ),
-        );
-      },
-    });
 
   const prevTestimonial = () => {
     setTestimonialIndex(
@@ -195,10 +173,6 @@ export default function HomePage() {
 
       <DiscoverSection
         clubs={clubs}
-        isAuthenticated={isAuthenticated}
-        onJoinClick={handleJoinClick}
-        joiningClubId={joiningClubId}
-        feedbackMessage={feedbackMessage}
       />
 
       <section className="bg-[#F2E8D9] px-5 py-24 text-[#1A0F07] md:px-8">
@@ -385,16 +359,6 @@ export default function HomePage() {
               {featuredClub.description}
             </p>
 
-            <Link
-              href={
-                isAuthenticated
-                  ? `/clubs/${featuredClub.id}`
-                  : `/auth/login?returnTo=${encodeURIComponent(`/clubs/${featuredClub.id}`)}`
-              }
-              className="mt-8 inline-flex items-center gap-2 rounded bg-[#C9A96E] px-6 py-3 text-sm font-semibold text-[#1A0F07] transition hover:-translate-y-px hover:shadow-[0_10px_24px_rgba(0,0,0,0.35)]"
-            >
-              {isAuthenticated ? "View Club →" : "Join This Club →"}
-            </Link>
           </motion.div>
         </div>
       </section>
@@ -613,63 +577,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      <AnimatePresence>
-        {showJoinPrompt && !isAuthenticated ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[#1A0F07]/70 px-4"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 14 }}
-              className="w-full max-w-md rounded-2xl border border-[#C9A96E]/30 bg-[#2A1810] p-6"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-                    Join required
-                  </p>
-                  <h3 className="mt-2 font-serif text-3xl">
-                    Create a free account to join
-                  </h3>
-                </div>
-                <button
-                  type="button"
-                  aria-label="Close"
-                  onClick={() => setShowJoinPrompt(false)}
-                  className="rounded p-1 text-[#F2E8D9]/70 hover:bg-[#1A0F07] hover:text-[#F2E8D9]"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              <p className="mt-4 text-sm text-[#F2E8D9]/75">
-                You tried to join{" "}
-                <span className="text-[#C9A96E]">{joinTargetName}</span>. Sign
-                up or log in and we will continue from there.
-              </p>
-
-              <div className="mt-6 flex gap-3">
-                <Link
-                  href={`/auth/signup?returnTo=${encodeURIComponent("/clubs")}`}
-                  className="rounded bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07]"
-                >
-                  Sign up
-                </Link>
-                <Link
-                  href={`/auth/login?returnTo=${encodeURIComponent("/clubs")}`}
-                  className="rounded border border-[#C9A96E]/35 px-4 py-2 text-sm"
-                >
-                  Log in
-                </Link>
-              </div>
-            </motion.div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
     </main>
   );
 }

@@ -17,6 +17,7 @@ export default function ClubDetailPage() {
   const { isAuthenticated, user } = useAuthState();
 
   const [club, setClub] = useState<Club | null>(null);
+  const [hasJoined, setHasJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -43,6 +44,7 @@ export default function ClubDetailPage() {
     useJoinClubAction<Club>({
       isAuthenticated,
       onSuccess: (joinedClub, memberCount) => {
+        setHasJoined(true);
         setClub((current) =>
           current && current.id === joinedClub.id
             ? { ...current, memberCount }
@@ -111,10 +113,14 @@ export default function ClubDetailPage() {
                 <button
                   type="button"
                   onClick={() => void handleJoinClick(club)}
-                  disabled={joiningClubId === club.id}
+                  disabled={joiningClubId === club.id || hasJoined}
                   className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {joiningClubId === club.id ? "Joining..." : "Join Club"}
+                  {joiningClubId === club.id
+                    ? "Joining..."
+                    : hasJoined
+                      ? "Joined"
+                      : "Join Club"}
                 </button>
               ) : (
                 <Link

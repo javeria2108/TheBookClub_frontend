@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { joinClub as requestJoinClub } from "@/lib/clubs";
+import { leaveClub as requestLeaveClub } from "@/lib/clubs";
 
 type JoinableClub = {
   id: string;
@@ -11,12 +12,14 @@ type JoinableClub = {
 interface UseJoinClubActionOptions<TClub extends JoinableClub> {
   isAuthenticated: boolean;
   onUnauthenticatedJoin?: (club: TClub) => void;
+  onUnauthenticatedLeave?: (club: TClub) => void;
   onSuccess?: (club: TClub, memberCount: number) => void;
 }
 
 export function useJoinClubAction<TClub extends JoinableClub>({
   isAuthenticated,
   onUnauthenticatedJoin,
+  onUnauthenticatedLeave,
   onSuccess,
 }: UseJoinClubActionOptions<TClub>) {
   const [joiningClubId, setJoiningClubId] = useState<string | null>(null);
@@ -52,10 +55,34 @@ export function useJoinClubAction<TClub extends JoinableClub>({
     }
   };
 
+  const leave = async (club: TClub) => {
+    if (!isAuthenticated) {
+      onUnauthenticatedLeave?.(club);
+      return;
+    }
+
+    try {
+      setFeedbackMessage(null);
+      setJoiningClubId(club.id);
+
+      const data = await requestLeaveClub(club.id);
+
+      onSuccess?.(club, data.memberCount);
+      setFeedbackMessage(`You left ${club.name}.`);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to leave club";
+      setFeedbackMessage(message);
+    } finally {
+      setJoiningClubId(null);
+    }
+  };
+
   return {
     joiningClubId,
     feedbackMessage,
     clearFeedback,
     joinClub: join,
+    leaveClub: leave,
   };
 }

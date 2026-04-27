@@ -101,15 +101,27 @@ export async function getClubById(id: string) {
 export async function getMyClubs() {
   const url = `${API_BASE_URL}/users/me/clubs`;
 
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to view your clubs");
+  }
+
   const response = await fetch(url, {
     method: "GET",
     credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   const payload = await response.json();
 
   if (!response.ok) {
-    const message = payload?.error?.message || payload?.message || "Failed to fetch your clubs";
+    const message =
+      payload?.error?.message ||
+      payload?.message ||
+      "Failed to fetch your clubs";
     throw new Error(message);
   }
 
@@ -153,6 +165,36 @@ export async function joinClub(clubId: string): Promise<JoinClubResponse> {
   if (!response.ok) {
     const message =
       payload?.error?.message || payload?.message || "Failed to join club";
+    throw new Error(message);
+  }
+
+  return JoinClubResponseSchema.parse(payload.data) as JoinClubResponse;
+}
+
+export async function leaveClub(clubId: string): Promise<JoinClubResponse> {
+  if (!clubId?.trim()) {
+    throw new Error("Club ID is required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to leave a club");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/member`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message || payload?.message || "Failed to leave club";
     throw new Error(message);
   }
 

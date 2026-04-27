@@ -1,8 +1,9 @@
 "use client";
 
 import { CreateClubModal } from "@/components/clubs/CreateClubModal";
-import { getClubs, getMyClubs } from "@/lib/clubs";
+import { getMyClubs } from "@/lib/clubs";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { useJoinClubAction } from "@/hooks/useJoinClubAction";
 import type { Club } from "@/lib/types";
 import {
   ArrowUpRight,
@@ -30,10 +31,8 @@ export default function DashboardPage() {
     try {
       setIsLoading(true);
       setError("");
-      const data = isAuthenticated
-        ? await getMyClubs()
-        : await getClubs({ page: 1, limit: 6 });
-
+      // Dashboard is protected by middleware, always authenticated
+      const data = await getMyClubs();
       setClubs(data.clubs);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load clubs");
@@ -43,9 +42,8 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    // reload when auth state becomes available
     loadClubs();
-  }, [isAuthenticated]);
+  }, []);
 
   const handleClubCreated = async () => {
     setSuccessMessage("Club created successfully.");
@@ -60,6 +58,14 @@ export default function DashboardPage() {
     if (!term) return clubs;
     return clubs.filter((club) => club.name.toLowerCase().includes(term));
   }, [clubs, searchInput]);
+
+  const { joiningClubId, feedbackMessage, clearFeedback, leaveClub } =
+    useJoinClubAction<Club>({
+      isAuthenticated,
+      onSuccess: (club) => {
+        setClubs((previous) => previous.filter((item) => item.id !== club.id));
+      },
+    });
 
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
@@ -144,6 +150,12 @@ export default function DashboardPage() {
           </p>
         ) : null}
 
+        {feedbackMessage ? (
+          <p className="mb-4 rounded border border-[#C9A96E]/40 bg-[#C9A96E]/10 px-3 py-2 text-sm text-[#F2E8D9]">
+            {feedbackMessage}
+          </p>
+        ) : null}
+
         <section>
           <div className="mb-4 flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-[#C9A96E]" />
@@ -203,13 +215,26 @@ export default function DashboardPage() {
                       <BookOpen className="h-3.5 w-3.5 text-[#C9A96E]" />
                       {club.isPublic ? "Public" : "Private"}
                     </span>
-                    <Link
-                      href={`/clubs/${club.id}`}
-                      className="inline-flex items-center gap-1 text-sm font-medium text-[#C9A96E] transition hover:text-[#d8b884]"
-                    >
-                      Open Club
-                      <ArrowUpRight className="h-4 w-4" />
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          clearFeedback();
+                          void leaveClub(club);
+                        }}
+                        disabled={joiningClubId === club.id}
+                        className="text-sm font-medium text-[#F2E8D9]/80 transition hover:text-[#C9A96E] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {joiningClubId === club.id ? "Leaving..." : "Leave"}
+                      </button>
+                      <Link
+                        href={`/clubs/${club.id}`}
+                        className="inline-flex items-center gap-1 text-sm font-medium text-[#C9A96E] transition hover:text-[#d8b884]"
+                      >
+                        Open Club
+                        <ArrowUpRight className="h-4 w-4" />
+                      </Link>
+                    </div>
                   </div>
                 </motion.article>
               ))}
