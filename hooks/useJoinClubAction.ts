@@ -13,7 +13,11 @@ interface UseJoinClubActionOptions<TClub extends JoinableClub> {
   isAuthenticated: boolean;
   onUnauthenticatedJoin?: (club: TClub) => void;
   onUnauthenticatedLeave?: (club: TClub) => void;
-  onSuccess?: (club: TClub, memberCount: number) => void;
+  onSuccess?: (
+    club: TClub,
+    memberCount: number,
+    action: "join" | "leave",
+  ) => void;
 }
 
 export function useJoinClubAction<TClub extends JoinableClub>({
@@ -44,7 +48,7 @@ export function useJoinClubAction<TClub extends JoinableClub>({
 
       const data = await requestJoinClub(club.id);
 
-      onSuccess?.(club, data.memberCount);
+      onSuccess?.(club, data.memberCount, "join");
       setFeedbackMessage(`You joined ${club.name}.`);
     } catch (error) {
       const message =
@@ -67,7 +71,7 @@ export function useJoinClubAction<TClub extends JoinableClub>({
 
       const data = await requestLeaveClub(club.id);
 
-      onSuccess?.(club, data.memberCount);
+      onSuccess?.(club, data.memberCount, "leave");
       setFeedbackMessage(`You left ${club.name}.`);
     } catch (error) {
       const message =

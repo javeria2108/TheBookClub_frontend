@@ -17,7 +17,6 @@ export default function ClubDetailPage() {
   const { isAuthenticated, user } = useAuthState();
 
   const [club, setClub] = useState<Club | null>(null);
-  const [hasJoined, setHasJoined] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -40,18 +39,25 @@ export default function ClubDetailPage() {
 
   const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
 
-  const { joiningClubId, feedbackMessage, joinClub: handleJoinClick } =
-    useJoinClubAction<Club>({
-      isAuthenticated,
-      onSuccess: (joinedClub, memberCount) => {
-        setHasJoined(true);
-        setClub((current) =>
-          current && current.id === joinedClub.id
-            ? { ...current, memberCount }
-            : current,
-        );
-      },
-    });
+  const {
+    joiningClubId,
+    feedbackMessage,
+    joinClub: handleJoinClick,
+    leaveClub: handleLeaveClick,
+  } = useJoinClubAction<Club>({
+    isAuthenticated,
+    onSuccess: (joinedClub, memberCount, action) => {
+      setClub((current) =>
+        current && current.id === joinedClub.id
+          ? {
+              ...current,
+              memberCount,
+              isMember: action === "join",
+            }
+          : current,
+      );
+    },
+  });
 
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
@@ -112,14 +118,20 @@ export default function ClubDetailPage() {
               {isAuthenticated ? (
                 <button
                   type="button"
-                  onClick={() => void handleJoinClick(club)}
-                  disabled={joiningClubId === club.id || hasJoined}
+                  onClick={() =>
+                    club.isMember
+                      ? void handleLeaveClick(club)
+                      : void handleJoinClick(club)
+                  }
+                  disabled={joiningClubId === club.id}
                   className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {joiningClubId === club.id
-                    ? "Joining..."
-                    : hasJoined
-                      ? "Joined"
+                    ? club.isMember
+                      ? "Leaving..."
+                      : "Joining..."
+                    : club.isMember
+                      ? "Leave Club"
                       : "Join Club"}
                 </button>
               ) : (

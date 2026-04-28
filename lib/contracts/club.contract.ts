@@ -8,6 +8,7 @@ export const ClubSchema = z.object({
   genre: z.string().nullable().optional(),
   coverImage: z.string().url().nullable().optional(),
   memberCount: z.number().int().nonnegative().optional(),
+  isMember: z.boolean().optional(),
   createdAt: z.string(),
 });
 

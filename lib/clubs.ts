@@ -81,10 +81,16 @@ export async function getClubById(id: string) {
   }
 
   const url = `${API_BASE_URL}/clubs/${id}`;
+  const token = getStoredToken();
 
   const response = await fetch(url, {
     method: "GET",
     credentials: "include",
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
+        }
+      : undefined,
   });
 
   const payload = await response.json();
