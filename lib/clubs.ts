@@ -206,3 +206,152 @@ export async function leaveClub(clubId: string): Promise<JoinClubResponse> {
 
   return JoinClubResponseSchema.parse(payload.data) as JoinClubResponse;
 }
+
+export async function getJoinRequests(clubId: string) {
+  if (!clubId?.trim()) {
+    throw new Error("Club ID is required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to view join requests");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/join-requests`, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message ||
+      payload?.message ||
+      "Failed to fetch join requests";
+    throw new Error(message);
+  }
+
+  return payload.data.requests;
+}
+
+export async function approveJoinRequest(
+  clubId: string,
+  requestId: string,
+): Promise<{ message: string }> {
+  if (!clubId?.trim() || !requestId?.trim()) {
+    throw new Error("Club ID and request ID are required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to approve requests");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/clubs/${clubId}/join-requests/${requestId}`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ action: "APPROVE" }),
+    },
+  );
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message || payload?.message || "Failed to approve request";
+    throw new Error(message);
+  }
+
+  return payload.data;
+}
+
+export async function rejectJoinRequest(
+  clubId: string,
+  requestId: string,
+): Promise<{ message: string }> {
+  if (!clubId?.trim() || !requestId?.trim()) {
+    throw new Error("Club ID and request ID are required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to reject requests");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/clubs/${clubId}/join-requests/${requestId}`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ action: "REJECT" }),
+    },
+  );
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message || payload?.message || "Failed to reject request";
+    throw new Error(message);
+  }
+
+  return payload.data;
+}
+
+export async function updateMemberRole(
+  clubId: string,
+  userId: string,
+  role: "MEMBER" | "MODERATOR",
+): Promise<{ memberId: string; userId: string; role: string }> {
+  if (!clubId?.trim() || !userId?.trim()) {
+    throw new Error("Club ID and user ID are required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to manage member roles");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/clubs/${clubId}/members/${userId}/role`,
+    {
+      method: "PATCH",
+      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ role }),
+    },
+  );
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message ||
+      payload?.message ||
+      "Failed to update member role";
+    throw new Error(message);
+  }
+
+  return payload.data;
+}

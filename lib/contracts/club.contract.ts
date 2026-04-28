@@ -9,6 +9,7 @@ export const ClubSchema = z.object({
   coverImage: z.string().url().nullable().optional(),
   memberCount: z.number().int().nonnegative().optional(),
   isMember: z.boolean().optional(),
+  memberRole: z.enum(["MEMBER", "MODERATOR", "OWNER"]).nullable().optional(),
   createdAt: z.string(),
 });
 
