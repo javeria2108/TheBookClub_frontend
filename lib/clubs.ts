@@ -215,6 +215,40 @@ export async function leaveClub(clubId: string): Promise<JoinClubResponse> {
   return JoinClubResponseSchema.parse(payload.data) as JoinClubResponse;
 }
 
+export async function cancelJoinRequest(
+  clubId: string,
+): Promise<{ message: string }> {
+  if (!clubId?.trim()) {
+    throw new Error("Club ID is required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to cancel a join request");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/join-request`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message ||
+      payload?.message ||
+      "Failed to cancel join request";
+    throw new Error(message);
+  }
+
+  return payload.data as { message: string };
+}
+
 export async function getJoinRequests(clubId: string) {
   if (!clubId?.trim()) {
     throw new Error("Club ID is required");

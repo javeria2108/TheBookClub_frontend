@@ -152,7 +152,7 @@ export default function DashboardPage() {
         <section>
           <div className="mb-4 flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-[#C9A96E]" />
-            <h2 className="font-serif text-3xl">Recent Clubs</h2>
+            <h2 className="font-serif text-3xl">My Clubs</h2>
           </div>
 
           {isLoading ? (

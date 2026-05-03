@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { joinClub as requestJoinClub } from "@/lib/clubs";
 import { leaveClub as requestLeaveClub } from "@/lib/clubs";
+import { cancelJoinRequest as requestCancelJoinRequest } from "@/lib/clubs";
 
 type JoinableClub = {
   id: string;
@@ -17,7 +18,7 @@ interface UseJoinClubActionOptions<TClub extends JoinableClub> {
   onSuccess?: (
     club: TClub,
     memberCount: number,
-    action: "join" | "leave",
+    action: "join" | "leave" | "cancel",
   ) => void;
 }
 
@@ -83,11 +84,35 @@ export function useJoinClubAction<TClub extends JoinableClub>({
     }
   };
 
+  const cancelRequest = async (club: TClub) => {
+    if (!isAuthenticated) {
+      onUnauthenticatedLeave?.(club);
+      return;
+    }
+
+    try {
+      setFeedbackMessage(null);
+      setJoiningClubId(club.id);
+
+      const data = await requestCancelJoinRequest(club.id);
+
+      onSuccess?.(club, club.memberCount ?? 0, "cancel");
+      setFeedbackMessage(data.message || `Join request cancelled for ${club.name}.`);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to cancel join request";
+      setFeedbackMessage(message);
+    } finally {
+      setJoiningClubId(null);
+    }
+  };
+
   return {
     joiningClubId,
     feedbackMessage,
     clearFeedback,
     joinClub: join,
     leaveClub: leave,
+    cancelJoinRequest: cancelRequest,
   };
 }

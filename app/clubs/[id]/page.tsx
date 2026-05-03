@@ -30,6 +30,7 @@ export default function ClubDetailPage() {
         setError("");
         const response = await getClubById(clubId);
         setClub(response.club);
+        setPendingRequest(Boolean(response.club.hasPendingJoinRequest));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch club");
       } finally {
@@ -47,11 +48,14 @@ export default function ClubDetailPage() {
     feedbackMessage,
     joinClub: handleJoinClick,
     leaveClub: handleLeaveClick,
+    cancelJoinRequest: handleCancelJoinRequestClick,
   } = useJoinClubAction<Club>({
     isAuthenticated,
     onSuccess: (joinedClub, memberCount, action) => {
       if (action === "join" && !joinedClub.isPublic) {
         setPendingRequest(true);
+      } else if (action === "cancel") {
+        setPendingRequest(false);
       }
       setClub((current) =>
         current && current.id === joinedClub.id
@@ -143,11 +147,13 @@ export default function ClubDetailPage() {
                       onClick={() =>
                         club.isMember
                           ? void handleLeaveClick(club)
+                          : pendingRequest
+                            ? void handleCancelJoinRequestClick(club)
                           : club.isPublic || !pendingRequest
                             ? void handleJoinClick(club)
                             : undefined
                       }
-                      disabled={joiningClubId === club.id || pendingRequest}
+                      disabled={joiningClubId === club.id}
                       className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
                     >
                       {club.isMember
@@ -155,7 +161,9 @@ export default function ClubDetailPage() {
                           ? "Leaving..."
                           : "Leave Club"
                         : pendingRequest
-                          ? "Request Sent"
+                          ? joiningClubId === club.id
+                            ? "Cancelling..."
+                            : "Cancel Request"
                           : joiningClubId === club.id
                             ? club.isPublic
                               ? "Joining..."

@@ -10,6 +10,8 @@ export const ClubSchema = z.object({
   memberCount: z.number().int().nonnegative().optional(),
   isMember: z.boolean().optional(),
   memberRole: z.enum(["MEMBER", "MODERATOR", "OWNER"]).nullable().optional(),
+  hasPendingJoinRequest: z.boolean().optional(),
+  pendingJoinRequestId: z.string().uuid().nullable().optional(),
   createdAt: z.string(),
 });
 
