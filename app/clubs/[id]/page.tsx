@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, ChevronLeft, Globe, Lock, Users, AlertCircle } from "lucide-react";
+import { ChevronLeft, Globe, Lock, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import type { Club } from "@/lib/types";
 import { getClubById } from "@/lib/clubs";
@@ -50,8 +50,7 @@ export default function ClubDetailPage() {
   } = useJoinClubAction<Club>({
     isAuthenticated,
     onSuccess: (joinedClub, memberCount, action) => {
-      if (action === "join" && !club?.isPublic) {
-        // For private clubs, set pending state
+      if (action === "join" && !joinedClub.isPublic) {
         setPendingRequest(true);
       }
       setClub((current) =>
@@ -59,7 +58,7 @@ export default function ClubDetailPage() {
           ? {
               ...current,
               memberCount,
-              isMember: action === "join" && club?.isPublic,
+              isMember: action === "join" && joinedClub.isPublic,
             }
           : current,
       );
@@ -69,7 +68,11 @@ export default function ClubDetailPage() {
   const moderation = useClubModeration(clubId);
 
   useEffect(() => {
-    if (club && club.memberRole && (club.memberRole === "OWNER" || club.memberRole === "MODERATOR")) {
+    if (
+      club &&
+      club.memberRole &&
+      (club.memberRole === "OWNER" || club.memberRole === "MODERATOR")
+    ) {
       moderation.loadRequests().catch(() => {
         console.error("Failed to load join requests");
       });
@@ -138,27 +141,35 @@ export default function ClubDetailPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        club.isMember || pendingRequest
+                        club.isMember
                           ? void handleLeaveClick(club)
-                          : void handleJoinClick(club)
+                          : club.isPublic || !pendingRequest
+                            ? void handleJoinClick(club)
+                            : undefined
                       }
-                      disabled={joiningClubId === club.id}
+                      disabled={joiningClubId === club.id || pendingRequest}
                       className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                      {joiningClubId === club.id ? (
-                        club.isMember || pendingRequest ? "Leaving..." : "Joining..."
-                      ) : club.isMember ? (
-                        "Leave Club"
-                      ) : pendingRequest ? (
-                        "Cancel Request"
-                      ) : (
-                        "Join Club"
-                      )}
+                      {club.isMember
+                        ? joiningClubId === club.id
+                          ? "Leaving..."
+                          : "Leave Club"
+                        : pendingRequest
+                          ? "Request Sent"
+                          : joiningClubId === club.id
+                            ? club.isPublic
+                              ? "Joining..."
+                              : "Requesting..."
+                            : club.isPublic
+                              ? "Join Club"
+                              : "Request to Join"}
                     </button>
                     {pendingRequest && (
                       <div className="inline-flex items-center gap-2 rounded-full border border-[#E8A87C]/50 bg-[#E8A87C]/10 px-3 py-1.5">
                         <AlertCircle className="h-4 w-4 text-[#E8A87C]" />
-                        <span className="text-xs text-[#E8A87C]">Pending Approval</span>
+                        <span className="text-xs text-[#E8A87C]">
+                          Pending Approval
+                        </span>
                       </div>
                     )}
                   </>
@@ -182,78 +193,21 @@ export default function ClubDetailPage() {
               ) : null}
             </motion.div>
 
-            {club.memberRole && (club.memberRole === "OWNER" || club.memberRole === "MODERATOR") && !club.isPublic && (
-              <JoinRequestsPanel
-                clubId={clubId}
-                requests={moderation.requests}
-                loading={moderation.loading}
-                actionInProgress={moderation.actionInProgress}
-                onApprove={moderation.approveRequest}
-                onReject={moderation.rejectRequest}
-                onRefresh={moderation.loadRequests}
-              />
-            )}
-          </div>
-        ) : null}
-      </section>
-    </main>
-  );
-}
-                </h1>
-              </div>
-              <span className="inline-flex items-center gap-1 rounded-full border border-[#C9A96E]/35 px-3 py-1.5 text-[11px] uppercase tracking-wide text-[#C9A96E] whitespace-nowrap">
-                {club.isPublic ? (
-                  <Globe className="h-3.5 w-3.5" />
-                ) : (
-                  <Lock className="h-3.5 w-3.5" />
-                )}
-                {club.isPublic ? "Public" : "Private"}
-              </span>
-            </div>
-
-            <p className="mt-4 text-base text-[#F2E8D9]/80 leading-relaxed max-w-2xl">
-              {club.description || "No description available."}
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-4 items-center">
-              {isAuthenticated ? (
-                <button
-                  type="button"
-                  onClick={() =>
-                    club.isMember
-                      ? void handleLeaveClick(club)
-                      : void handleJoinClick(club)
-                  }
-                  disabled={joiningClubId === club.id}
-                  className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {joiningClubId === club.id
-                    ? club.isMember
-                      ? "Leaving..."
-                      : "Joining..."
-                    : club.isMember
-                      ? "Leave Club"
-                      : "Join Club"}
-                </button>
-              ) : (
-                <Link
-                  href={`/auth/login?returnTo=${encodeURIComponent(`/clubs/${club.id}`)}`}
-                  className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
-                >
-                  Join Club
-                </Link>
+            {club.memberRole &&
+              (club.memberRole === "OWNER" ||
+                club.memberRole === "MODERATOR") &&
+              !club.isPublic && (
+                <JoinRequestsPanel
+                  clubId={clubId}
+                  requests={moderation.requests}
+                  loading={moderation.loading}
+                  actionInProgress={moderation.actionInProgress}
+                  onApprove={moderation.approveRequest}
+                  onReject={moderation.rejectRequest}
+                  onRefresh={moderation.loadRequests}
+                />
               )}
-              <span className="text-sm text-[#F2E8D9]/70">
-                Created {new Date(club.createdAt).toLocaleDateString()}
-              </span>
-            </div>
-
-            {feedbackMessage ? (
-              <p className="mt-4 rounded border border-[#C9A96E]/25 bg-[#1A0F07]/50 px-4 py-3 text-sm text-[#F2E8D9]/80">
-                {feedbackMessage}
-              </p>
-            ) : null}
-          </motion.div>
+          </div>
         ) : null}
       </section>
     </main>

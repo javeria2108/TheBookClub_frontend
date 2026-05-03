@@ -13,6 +13,33 @@ import {
 export const AUTH_TOKEN_KEY = "bookclub_auth_token";
 export const AUTH_USER_KEY = "bookclub_auth_user";
 
+function getJwtPayload(token: string): { exp?: number } | null {
+  const parts = token.split(".");
+
+  if (parts.length !== 3) {
+    return null;
+  }
+
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+    const decoded = atob(padded);
+    return JSON.parse(decoded) as { exp?: number };
+  } catch {
+    return null;
+  }
+}
+
+function isJwtExpired(token: string): boolean {
+  const payload = getJwtPayload(token);
+
+  if (!payload?.exp) {
+    return false;
+  }
+
+  return payload.exp * 1000 <= Date.now();
+}
+
 export async function loginUser(
   email: string,
   password: string
@@ -60,7 +87,18 @@ export async function signupUser(
 }
 
 export function getStoredToken(): string | null {
-  return localStorage.getItem(AUTH_TOKEN_KEY);
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+
+  if (!token) {
+    return null;
+  }
+
+  if (isJwtExpired(token)) {
+    clearAuthStorage();
+    return null;
+  }
+
+  return token;
 }
 
 export function clearAuthStorage(): void {

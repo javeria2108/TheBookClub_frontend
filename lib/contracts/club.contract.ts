@@ -41,9 +41,15 @@ export const CreateClubPayloadSchema = z.object({
 });
 
 export const JoinClubResponseSchema = z.object({
-  clubId: z.string().uuid(),
-  memberCount: z.number().int().nonnegative(),
-});
+  clubId: z.string().uuid().optional(),
+  memberCount: z.number().int().nonnegative().optional(),
+  message: z.string().optional(),
+}).refine(
+  (value) => value.memberCount !== undefined || value.message !== undefined,
+  {
+    message: "Join club response must include either memberCount or message",
+  },
+);
 
 export const CreateClubResponseSchema = z.object({
   club: ClubSchema,

@@ -56,10 +56,18 @@ export async function createClub(
   input: CreateClubPayload,
 ): Promise<CreateClubResponse> {
   const payload = CreateClubPayloadSchema.parse(input);
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to create a club");
+  }
 
   const response = await fetch(`${API_BASE_URL}/clubs`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
     credentials: "include",
     body: JSON.stringify(payload),
   });

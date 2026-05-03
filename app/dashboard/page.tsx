@@ -18,7 +18,7 @@ import { motion } from "framer-motion";
 import { useAuthState } from "@/hooks/useAuthState";
 
 export default function DashboardPage() {
-  const { isAuthenticated, user } = useAuthState();
+  const { isAuthenticated, isReady, user } = useAuthState();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -30,7 +30,6 @@ export default function DashboardPage() {
     try {
       setIsLoading(true);
       setError("");
-      // Dashboard is protected by middleware, always authenticated
       const data = await getMyClubs();
       setClubs(data.clubs);
     } catch (err) {
@@ -41,8 +40,17 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      return;
+    }
+
     loadClubs();
-  }, []);
+  }, [isAuthenticated, isReady]);
 
   const handleClubCreated = async () => {
     setSuccessMessage("Club created successfully.");

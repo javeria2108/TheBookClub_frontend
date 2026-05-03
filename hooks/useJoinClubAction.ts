@@ -7,6 +7,7 @@ type JoinableClub = {
   name: string;
   isPublic?: boolean;
   isPrivate?: boolean;
+  memberCount?: number;
 };
 
 interface UseJoinClubActionOptions<TClub extends JoinableClub> {
@@ -37,19 +38,19 @@ export function useJoinClubAction<TClub extends JoinableClub>({
       return;
     }
 
-    if (club.isPrivate || club.isPublic === false) {
-      setFeedbackMessage("Private club join requests are coming soon.");
-      return;
-    }
-
     try {
       setFeedbackMessage(null);
       setJoiningClubId(club.id);
 
       const data = await requestJoinClub(club.id);
 
-      onSuccess?.(club, data.memberCount, "join");
-      setFeedbackMessage(`You joined ${club.name}.`);
+      if (club.isPrivate || club.isPublic === false) {
+        onSuccess?.(club, club.memberCount ?? data.memberCount ?? 0, "join");
+        setFeedbackMessage(data.message ?? `Join request sent for ${club.name}.`);
+      } else {
+        onSuccess?.(club, data.memberCount ?? club.memberCount ?? 0, "join");
+        setFeedbackMessage(`You joined ${club.name}.`);
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to join club";
@@ -71,7 +72,7 @@ export function useJoinClubAction<TClub extends JoinableClub>({
 
       const data = await requestLeaveClub(club.id);
 
-      onSuccess?.(club, data.memberCount, "leave");
+      onSuccess?.(club, data.memberCount ?? club.memberCount ?? 0, "leave");
       setFeedbackMessage(`You left ${club.name}.`);
     } catch (error) {
       const message =
