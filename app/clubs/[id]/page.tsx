@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, Globe, Lock, AlertCircle } from "lucide-react";
@@ -12,9 +12,11 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { useJoinClubAction } from "@/hooks/useJoinClubAction";
 import { useClubModeration } from "@/hooks/useClubModeration";
 import JoinRequestsPanel from "@/components/pages/clubs/JoinRequestsPanel";
+import OwnerLeaveDialog from "@/components/pages/clubs/OwnerLeaveDialog";
 
 export default function ClubDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const clubId = params.id as string;
   const { isAuthenticated, user } = useAuthState();
 
@@ -22,6 +24,7 @@ export default function ClubDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [pendingRequest, setPendingRequest] = useState(false);
+  const [ownerLeaveModalOpen, setOwnerLeaveModalOpen] = useState(false);
 
   useEffect(() => {
     const loadClub = async () => {
@@ -70,19 +73,27 @@ export default function ClubDetailPage() {
   });
 
   const moderation = useClubModeration(clubId);
+  const { loadRequests } = moderation;
 
   useEffect(() => {
-    if (
-      club &&
-      club.memberRole &&
-      (club.memberRole === "OWNER" || club.memberRole === "MODERATOR")
-    ) {
-      moderation.loadRequests().catch(() => {
+    const role = club?.memberRole;
+    if (role === "OWNER" || role === "MODERATOR") {
+      loadRequests().catch(() => {
         console.error("Failed to load join requests");
       });
     }
-    // Only re-run when the memberRole or clubId changes to avoid loops
-  }, [club?.memberRole, clubId]);
+  }, [club?.memberRole, clubId, loadRequests]);
+
+  const onLeavePressed = () => {
+    if (!club) return;
+
+    if (club.memberRole === "OWNER") {
+      setOwnerLeaveModalOpen(true);
+      return;
+    }
+
+    void handleLeaveClick(club);
+  };
 
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
@@ -95,7 +106,7 @@ export default function ClubDetailPage() {
       <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8 md:py-12">
         <Link
           href="/clubs"
-          className="inline-flex items-center gap-2 mb-8 text-[#C9A96E] hover:text-[#d8b884] transition"
+          className="mb-8 inline-flex items-center gap-2 text-[#C9A96E] transition hover:text-[#d8b884]"
         >
           <ChevronLeft className="h-4 w-4" />
           Back to Clubs
@@ -117,7 +128,7 @@ export default function ClubDetailPage() {
               transition={{ duration: 0.55 }}
               className="rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
             >
-              <div className="flex items-start justify-between gap-4 mb-6">
+              <div className="mb-6 flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
                     BookCircle Club
@@ -126,7 +137,7 @@ export default function ClubDetailPage() {
                     {club.name}
                   </h1>
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full border border-[#C9A96E]/35 px-3 py-1.5 text-[11px] uppercase tracking-wide text-[#C9A96E] whitespace-nowrap">
+                <span className="inline-flex whitespace-nowrap items-center gap-1 rounded-full border border-[#C9A96E]/35 px-3 py-1.5 text-[11px] uppercase tracking-wide text-[#C9A96E]">
                   {club.isPublic ? (
                     <Globe className="h-3.5 w-3.5" />
                   ) : (
@@ -136,23 +147,23 @@ export default function ClubDetailPage() {
                 </span>
               </div>
 
-              <p className="mt-4 text-base text-[#F2E8D9]/80 leading-relaxed max-w-2xl">
+              <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#F2E8D9]/80">
                 {club.description || "No description available."}
               </p>
 
-              <div className="mt-6 flex flex-wrap gap-4 items-center">
+              <div className="mt-6 flex flex-wrap items-center gap-4">
                 {isAuthenticated ? (
                   <>
                     <button
                       type="button"
                       onClick={() =>
                         club.isMember
-                          ? void handleLeaveClick(club)
+                          ? onLeavePressed()
                           : pendingRequest
                             ? void handleCancelJoinRequestClick(club)
-                          : club.isPublic || !pendingRequest
-                            ? void handleJoinClick(club)
-                            : undefined
+                            : club.isPublic || !pendingRequest
+                              ? void handleJoinClick(club)
+                              : undefined
                       }
                       disabled={joiningClubId === club.id}
                       className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
@@ -219,6 +230,16 @@ export default function ClubDetailPage() {
           </div>
         ) : null}
       </section>
+
+      <OwnerLeaveDialog
+        isOpen={ownerLeaveModalOpen}
+        clubId={clubId}
+        onClose={() => setOwnerLeaveModalOpen(false)}
+        onCompleted={() => {
+          setOwnerLeaveModalOpen(false);
+          router.push("/clubs");
+        }}
+      />
     </main>
   );
 }

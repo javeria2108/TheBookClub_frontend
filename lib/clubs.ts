@@ -146,7 +146,7 @@ export async function getMyClubs() {
     clubs,
     pagination: {
       page: 1,
-      limit: clubs.length,
+      limit: Math.max(clubs.length, 10),
       total: clubs.length,
       totalPages: 1,
     },
@@ -396,4 +396,111 @@ export async function updateMemberRole(
   }
 
   return payload.data;
+}
+
+export type ClubMemberSummary = {
+  userId: string;
+  username: string;
+  email: string;
+  role: "MEMBER" | "MODERATOR" | "OWNER";
+  joinedAt: string;
+};
+
+export async function getClubMembers(
+  clubId: string,
+): Promise<ClubMemberSummary[]> {
+  if (!clubId?.trim()) {
+    throw new Error("Club ID is required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to view club members");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/members`, {
+    method: "GET",
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message || payload?.message || "Failed to fetch members";
+    throw new Error(message);
+  }
+
+  return (payload?.data?.members ?? []) as ClubMemberSummary[];
+}
+
+export async function transferClubOwnership(
+  clubId: string,
+  targetUserId: string,
+): Promise<{ message: string }> {
+  if (!clubId?.trim() || !targetUserId?.trim()) {
+    throw new Error("Club ID and target user ID are required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to transfer ownership");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/ownership`, {
+    method: "PATCH",
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ targetUserId }),
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message ||
+      payload?.message ||
+      "Failed to transfer ownership";
+    throw new Error(message);
+  }
+
+  return payload.data as { message: string };
+}
+
+export async function deleteClub(clubId: string): Promise<{ message: string }> {
+  if (!clubId?.trim()) {
+    throw new Error("Club ID is required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to delete a club");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/clubs/${clubId}`, {
+    method: "DELETE",
+    credentials: "include",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message || payload?.message || "Failed to delete club";
+    throw new Error(message);
+  }
+
+  return payload.data as { message: string };
 }
