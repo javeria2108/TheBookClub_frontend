@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   getJoinRequests,
   approveJoinRequest,
@@ -22,7 +22,7 @@ export function useClubModeration(clubId: string) {
   const [error, setError] = useState<string | null>(null);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
 
-  const loadRequests = async () => {
+  const loadRequests = useCallback(async () => {
     if (!clubId) return;
     setLoading(true);
     setError(null);
@@ -34,7 +34,7 @@ export function useClubModeration(clubId: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [clubId]);
 
   const approveRequest = async (requestId: string) => {
     setActionInProgress(requestId);

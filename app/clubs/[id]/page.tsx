@@ -81,7 +81,8 @@ export default function ClubDetailPage() {
         console.error("Failed to load join requests");
       });
     }
-  }, [club, moderation]);
+    // Only re-run when the memberRole or clubId changes to avoid loops
+  }, [club?.memberRole, clubId]);
 
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
