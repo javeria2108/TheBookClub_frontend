@@ -6,12 +6,14 @@ import { motion } from "framer-motion";
 import { ChevronLeft, Globe, Lock, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import type { Club } from "@/lib/types";
-import { getClubById } from "@/lib/clubs";
+import { getClubById, getClubMembers } from "@/lib/clubs";
 import { useAuthState } from "@/hooks/useAuthState";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { useJoinClubAction } from "@/hooks/useJoinClubAction";
 import { useClubModeration } from "@/hooks/useClubModeration";
+import { useMemberManagement } from "@/hooks/useMemberManagement";
 import JoinRequestsPanel from "@/components/pages/clubs/JoinRequestsPanel";
+import MembersPanel from "@/components/pages/clubs/MembersPanel";
 import OwnerLeaveDialog from "@/components/pages/clubs/OwnerLeaveDialog";
 
 export default function ClubDetailPage() {
@@ -25,6 +27,20 @@ export default function ClubDetailPage() {
   const [error, setError] = useState("");
   const [pendingRequest, setPendingRequest] = useState(false);
   const [ownerLeaveModalOpen, setOwnerLeaveModalOpen] = useState(false);
+
+  const memberManagement = useMemberManagement(clubId);
+
+  const loadMembers = async () => {
+    try {
+      memberManagement.setLoading(true);
+      const members = await getClubMembers(clubId);
+      memberManagement.setMembers(members);
+    } catch (err) {
+      console.error("Failed to load members:", err);
+    } finally {
+      memberManagement.setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const loadClub = async () => {
@@ -83,6 +99,15 @@ export default function ClubDetailPage() {
       });
     }
   }, [club?.memberRole, clubId, loadRequests]);
+
+  useEffect(() => {
+    const role = club?.memberRole;
+    if (role === "OWNER") {
+      loadMembers().catch(() => {
+        console.error("Failed to load members");
+      });
+    }
+  }, [club?.memberRole, clubId]);
 
   const onLeavePressed = () => {
     if (!club) return;
@@ -227,6 +252,18 @@ export default function ClubDetailPage() {
                   onRefresh={moderation.loadRequests}
                 />
               )}
+
+            {club.memberRole === "OWNER" && (
+              <MembersPanel
+                members={memberManagement.members}
+                loading={memberManagement.loading}
+                actionInProgress={memberManagement.actionInProgress}
+                currentUserRole={club.memberRole}
+                onPromote={memberManagement.promoteToModerator}
+                onDemote={memberManagement.demoteToMember}
+                onRefresh={loadMembers}
+              />
+            )}
           </div>
         ) : null}
       </section>
