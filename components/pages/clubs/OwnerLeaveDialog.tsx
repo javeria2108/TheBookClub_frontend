@@ -5,8 +5,8 @@ import {
   getClubMembers,
   leaveClub as requestLeaveClub,
   transferClubOwnership,
-  type ClubMemberSummary,
 } from "@/lib/clubs";
+import type { ClubMemberSummary } from "@/lib/types";
 
 type OwnerLeaveStep = "choice" | "transfer";
 

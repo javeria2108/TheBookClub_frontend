@@ -8,6 +8,8 @@ import {
   CreateClubResponseSchema,
   GetClubByIdResponseSchema,
   JoinClubResponseSchema,
+  GetClubMembersResponseSchema,
+  OperationMessageSchema,
 } from "@/lib/contracts/club.contract";
 import {
   GetClubsParams,
@@ -16,6 +18,8 @@ import {
   CreateClubResponse,
   GetClubByIdResponse,
   JoinClubResponse,
+  ClubMemberSummary,
+  OperationMessage,
 } from "@/lib/types";
 import { getStoredToken } from "./auth";
 
@@ -217,7 +221,7 @@ export async function leaveClub(clubId: string): Promise<JoinClubResponse> {
 
 export async function cancelJoinRequest(
   clubId: string,
-): Promise<{ message: string }> {
+): Promise<OperationMessage> {
   if (!clubId?.trim()) {
     throw new Error("Club ID is required");
   }
@@ -246,7 +250,7 @@ export async function cancelJoinRequest(
     throw new Error(message);
   }
 
-  return payload.data as { message: string };
+  return OperationMessageSchema.parse(payload.data) as OperationMessage;
 }
 
 export async function getJoinRequests(clubId: string) {
@@ -284,7 +288,7 @@ export async function getJoinRequests(clubId: string) {
 export async function approveJoinRequest(
   clubId: string,
   requestId: string,
-): Promise<{ message: string }> {
+): Promise<OperationMessage> {
   if (!clubId?.trim() || !requestId?.trim()) {
     throw new Error("Club ID and request ID are required");
   }
@@ -316,13 +320,13 @@ export async function approveJoinRequest(
     throw new Error(message);
   }
 
-  return payload.data;
+  return OperationMessageSchema.parse(payload.data) as OperationMessage;
 }
 
 export async function rejectJoinRequest(
   clubId: string,
   requestId: string,
-): Promise<{ message: string }> {
+): Promise<OperationMessage> {
   if (!clubId?.trim() || !requestId?.trim()) {
     throw new Error("Club ID and request ID are required");
   }
@@ -354,7 +358,7 @@ export async function rejectJoinRequest(
     throw new Error(message);
   }
 
-  return payload.data;
+  return OperationMessageSchema.parse(payload.data) as OperationMessage;
 }
 
 export async function updateMemberRole(
@@ -398,14 +402,6 @@ export async function updateMemberRole(
   return payload.data;
 }
 
-export type ClubMemberSummary = {
-  userId: string;
-  username: string;
-  email: string;
-  role: "MEMBER" | "MODERATOR" | "OWNER";
-  joinedAt: string;
-};
-
 export async function getClubMembers(
   clubId: string,
 ): Promise<ClubMemberSummary[]> {
@@ -435,13 +431,14 @@ export async function getClubMembers(
     throw new Error(message);
   }
 
-  return (payload?.data?.members ?? []) as ClubMemberSummary[];
+  const data = GetClubMembersResponseSchema.parse(payload.data);
+  return data.members;
 }
 
 export async function transferClubOwnership(
   clubId: string,
   targetUserId: string,
-): Promise<{ message: string }> {
+): Promise<OperationMessage> {
   if (!clubId?.trim() || !targetUserId?.trim()) {
     throw new Error("Club ID and target user ID are required");
   }
@@ -472,10 +469,10 @@ export async function transferClubOwnership(
     throw new Error(message);
   }
 
-  return payload.data as { message: string };
+  return OperationMessageSchema.parse(payload.data) as OperationMessage;
 }
 
-export async function deleteClub(clubId: string): Promise<{ message: string }> {
+export async function deleteClub(clubId: string): Promise<OperationMessage> {
   if (!clubId?.trim()) {
     throw new Error("Club ID is required");
   }
@@ -502,5 +499,5 @@ export async function deleteClub(clubId: string): Promise<{ message: string }> {
     throw new Error(message);
   }
 
-  return payload.data as { message: string };
+  return OperationMessageSchema.parse(payload.data) as OperationMessage;
 }
