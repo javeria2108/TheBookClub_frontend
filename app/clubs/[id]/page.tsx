@@ -15,12 +15,15 @@ import { useMemberManagement } from "@/hooks/useMemberManagement";
 import JoinRequestsPanel from "@/components/pages/clubs/JoinRequestsPanel";
 import MembersPanel from "@/components/pages/clubs/MembersPanel";
 import OwnerLeaveDialog from "@/components/pages/clubs/OwnerLeaveDialog";
+import { useToast } from "@/components/ui/use-toast";
+import { useCallback } from "react";
 
 export default function ClubDetailPage() {
   const params = useParams();
   const router = useRouter();
   const clubId = params.id as string;
   const { isAuthenticated, user } = useAuthState();
+  const { toast } = useToast();
 
   const [club, setClub] = useState<Club | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -42,29 +45,34 @@ export default function ClubDetailPage() {
     }
   };
 
-  useEffect(() => {
-    const loadClub = async () => {
-      try {
-        setIsLoading(true);
-        setError("");
-        const response = await getClubById(clubId);
-        setClub(response.club);
-        setPendingRequest(Boolean(response.club.hasPendingJoinRequest));
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch club");
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadClub = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      const response = await getClubById(clubId);
+      setClub(response.club);
+      setPendingRequest(Boolean(response.club.hasPendingJoinRequest));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to fetch club";
+      setError(message);
+      toast({
+        variant: "destructive",
+        title: "Failed to fetch club",
+        description: message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [clubId, toast]);
 
-    loadClub();
-  }, [clubId]);
+  useEffect(() => {
+    void loadClub();
+  }, [loadClub]);
 
   const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
 
   const {
     joiningClubId,
-    feedbackMessage,
     joinClub: handleJoinClick,
     leaveClub: handleLeaveClick,
     cancelJoinRequest: handleCancelJoinRequestClick,
@@ -142,8 +150,20 @@ export default function ClubDetailPage() {
             <p className="text-lg">Loading club...</p>
           </div>
         ) : error ? (
-          <div className="rounded-2xl border border-[#8B4A3C]/60 bg-[#8B4A3C]/20 p-6">
-            <p className="text-[#F2E8D9]">{error}</p>
+          <div className="rounded-2xl border border-[#8B4A3C]/60 bg-[#8B4A3C]/15 p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold text-[#F2E8D9]">Unable to load club</p>
+                <p className="text-sm text-[#F2E8D9]/75">Try again in a moment.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void loadClub()}
+                className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+              >
+                Retry
+              </button>
+            </div>
           </div>
         ) : club ? (
           <div className="space-y-8">
@@ -231,11 +251,6 @@ export default function ClubDetailPage() {
                 </span>
               </div>
 
-              {feedbackMessage ? (
-                <p className="mt-4 rounded border border-[#C9A96E]/25 bg-[#1A0F07]/50 px-4 py-3 text-sm text-[#F2E8D9]/80">
-                  {feedbackMessage}
-                </p>
-              ) : null}
             </motion.div>
 
             {club.memberRole &&

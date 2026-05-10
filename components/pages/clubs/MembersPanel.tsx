@@ -30,20 +30,15 @@ export default function MembersPanel({
   onRefresh,
 }: MembersPanelProps) {
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState("");
 
   const canManageRoles = currentUserRole === "OWNER";
 
   const handlePromote = async (userId: string, username: string) => {
-    const result = await onPromote(userId, username);
-    setFeedback(result.message);
-    setTimeout(() => setFeedback(""), 3000);
+    await onPromote(userId, username);
   };
 
   const handleDemote = async (userId: string, username: string) => {
-    const result = await onDemote(userId, username);
-    setFeedback(result.message);
-    setTimeout(() => setFeedback(""), 3000);
+    await onDemote(userId, username);
   };
 
   return (
@@ -63,12 +58,6 @@ export default function MembersPanel({
           {loading ? "Loading..." : "Refresh"}
         </button>
       </div>
-
-      {feedback && (
-        <div className="mb-4 rounded border border-[#C9A96E]/25 bg-[#1A0F07]/50 px-4 py-2 text-sm text-[#C9A96E]">
-          {feedback}
-        </div>
-      )}
 
       {loading ? (
         <div className="space-y-3">

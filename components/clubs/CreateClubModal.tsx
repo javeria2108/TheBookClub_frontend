@@ -11,6 +11,7 @@ import { createClub } from "@/lib/clubs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { toast } from "@/components/ui/use-toast";
 
 type Props = {
   open: boolean;
@@ -21,7 +22,6 @@ type Props = {
 type CreateClubFormValues = z.input<typeof CreateClubPayloadSchema>;
 
 export function CreateClubModal({ open, onOpenChange, onCreated }: Props) {
-  const [serverError, setServerError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -41,7 +41,6 @@ export function CreateClubModal({ open, onOpenChange, onCreated }: Props) {
 
   const onSubmit = async (data: CreateClubFormValues) => {
     try {
-      setServerError("");
       setIsSubmitting(true);
 
       const payload = CreateClubPayloadSchema.parse(data);
@@ -49,10 +48,17 @@ export function CreateClubModal({ open, onOpenChange, onCreated }: Props) {
       await onCreated();
       reset();
       onOpenChange(false);
+      toast({
+        title: "Club created",
+        description: `${payload.name} is ready for members.`,
+      });
     } catch (err) {
-      setServerError(
-        err instanceof Error ? err.message : "Failed to create club",
-      );
+      toast({
+        variant: "destructive",
+        title: "Failed to create club",
+        description:
+          err instanceof Error ? err.message : "Failed to create club",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -103,10 +109,6 @@ export function CreateClubModal({ open, onOpenChange, onCreated }: Props) {
             <input type="checkbox" {...register("isPublic")} />
             Make this club public
           </label>
-
-          {serverError && (
-            <p className="text-sm text-destructive">{serverError}</p>
-          )}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair",
@@ -30,6 +31,7 @@ export default function RootLayout({
         className={`${playfairDisplay.variable} ${dmSans.variable} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

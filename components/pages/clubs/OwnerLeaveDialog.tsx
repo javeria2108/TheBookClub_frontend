@@ -7,6 +7,7 @@ import {
   transferClubOwnership,
 } from "@/lib/clubs";
 import type { ClubMemberSummary } from "@/lib/types";
+import { toast } from "@/components/ui/use-toast";
 
 type OwnerLeaveStep = "choice" | "transfer";
 
@@ -27,14 +28,12 @@ export default function OwnerLeaveDialog({
   const [members, setMembers] = useState<ClubMemberSummary[]>([]);
   const [selectedNextOwnerId, setSelectedNextOwnerId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!isOpen) {
       setStep("choice");
       setMembers([]);
       setSelectedNextOwnerId("");
-      setError("");
       setIsLoading(false);
     }
   }, [isOpen]);
@@ -46,13 +45,16 @@ export default function OwnerLeaveDialog({
 
   const loadTransferCandidates = async () => {
     try {
-      setError("");
       setIsLoading(true);
       const result = await getClubMembers(clubId);
       setMembers(result);
       setStep("transfer");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load members");
+      toast({
+        variant: "destructive",
+        title: "Failed to load members",
+        description: err instanceof Error ? err.message : "Failed to load members",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -60,12 +62,19 @@ export default function OwnerLeaveDialog({
 
   const handleDeleteClub = async () => {
     try {
-      setError("");
       setIsLoading(true);
       await requestDeleteClub(clubId);
+      toast({
+        title: "Club deleted",
+        description: "The club has been removed.",
+      });
       onCompleted();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete club");
+      toast({
+        variant: "destructive",
+        title: "Failed to delete club",
+        description: err instanceof Error ? err.message : "Failed to delete club",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -73,20 +82,30 @@ export default function OwnerLeaveDialog({
 
   const handleTransferAndLeave = async () => {
     if (!selectedNextOwnerId) {
-      setError("Please select a member or moderator to become owner");
+      toast({
+        variant: "destructive",
+        title: "Select a new owner",
+        description: "Please select a member or moderator to become owner.",
+      });
       return;
     }
 
     try {
-      setError("");
       setIsLoading(true);
       await transferClubOwnership(clubId, selectedNextOwnerId);
       await requestLeaveClub(clubId);
+      toast({
+        title: "Ownership transferred",
+        description: "You left the club after handing off ownership.",
+      });
       onCompleted();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to transfer ownership",
-      );
+      toast({
+        variant: "destructive",
+        title: "Failed to transfer ownership",
+        description:
+          err instanceof Error ? err.message : "Failed to transfer ownership",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -117,12 +136,6 @@ export default function OwnerLeaveDialog({
             <X className="h-5 w-5" />
           </button>
         </div>
-
-        {error ? (
-          <p className="mb-4 rounded border border-[#8B4A3C]/60 bg-[#8B4A3C]/20 px-3 py-2 text-sm text-[#F2E8D9]">
-            {error}
-          </p>
-        ) : null}
 
         {step === "choice" ? (
           <div className="space-y-3">

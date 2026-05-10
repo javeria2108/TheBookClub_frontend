@@ -16,8 +16,9 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ClubsPage() {
   const { isAuthenticated, user } = useAuthState();
@@ -28,30 +29,37 @@ export default function ClubsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const { toast } = useToast();
+
+  const loadClubs = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      const data = await getClubs({
+        page,
+        limit: 9,
+        search: search || undefined,
+      });
+
+      setClubs(data.clubs);
+      setTotalPages(data.pagination.totalPages || 1);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to load clubs";
+      setError(message);
+      toast({
+        variant: "destructive",
+        title: "Failed to load clubs",
+        description: message,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [page, search, toast]);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        setIsLoading(true);
-        setError("");
-
-        const data = await getClubs({
-          page,
-          limit: 9,
-          search: search || undefined,
-        });
-
-        setClubs(data.clubs);
-        setTotalPages(data.pagination.totalPages || 1);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load clubs");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    load();
-  }, [page, search]);
+    void loadClubs();
+  }, [loadClubs]);
 
   const handleSearchSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -123,9 +131,21 @@ export default function ClubsPage() {
         </motion.header>
 
         {error ? (
-          <p className="mb-6 rounded border border-[#8B4A3C]/60 bg-[#8B4A3C]/20 px-3 py-2 text-sm text-[#F2E8D9]">
-            {error}
-          </p>
+          <div className="mb-6 rounded-2xl border border-[#8B4A3C]/60 bg-[#8B4A3C]/15 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold text-[#F2E8D9]">Unable to load clubs</p>
+                <p className="text-sm text-[#F2E8D9]/75">Try again in a moment.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void loadClubs()}
+                className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
         ) : null}
 
         {isLoading ? (

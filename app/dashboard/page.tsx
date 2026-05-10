@@ -7,15 +7,15 @@ import type { Club } from "@/lib/types";
 import {
   ArrowUpRight,
   BookOpen,
-  CheckCircle2,
   Plus,
   Search,
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuthState } from "@/hooks/useAuthState";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function DashboardPage() {
   const { isAuthenticated, isReady, user } = useAuthState();
@@ -24,20 +24,26 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const { toast } = useToast();
 
-  const loadClubs = async () => {
+  const loadClubs = useCallback(async () => {
     try {
       setIsLoading(true);
       setError("");
       const data = await getMyClubs();
       setClubs(data.clubs);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load clubs");
+      const message = err instanceof Error ? err.message : "Failed to load clubs";
+      setError(message);
+      toast({
+        variant: "destructive",
+        title: "Failed to load clubs",
+        description: message,
+      });
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     if (!isReady) {
@@ -50,12 +56,10 @@ export default function DashboardPage() {
     }
 
     loadClubs();
-  }, [isAuthenticated, isReady]);
+  }, [isAuthenticated, isReady, loadClubs]);
 
   const handleClubCreated = async () => {
-    setSuccessMessage("Club created successfully.");
     await loadClubs();
-    setTimeout(() => setSuccessMessage(""), 2500);
   };
 
   const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
@@ -136,17 +140,22 @@ export default function DashboardPage() {
           </div>
         </motion.section>
 
-        {successMessage ? (
-          <p className="mb-4 inline-flex items-center gap-2 rounded border border-[#3f8f5c]/50 bg-[#20432d]/35 px-3 py-2 text-sm text-[#daf5e4]">
-            <CheckCircle2 className="h-4 w-4" />
-            {successMessage}
-          </p>
-        ) : null}
-
         {error ? (
-          <p className="mb-4 rounded border border-[#8B4A3C]/60 bg-[#8B4A3C]/20 px-3 py-2 text-sm text-[#F2E8D9]">
-            {error}
-          </p>
+          <div className="mb-4 rounded-2xl border border-[#8B4A3C]/60 bg-[#8B4A3C]/15 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold text-[#F2E8D9]">Unable to load clubs</p>
+                <p className="text-sm text-[#F2E8D9]/75">Try again in a moment.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void loadClubs()}
+                className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
         ) : null}
 
         <section>

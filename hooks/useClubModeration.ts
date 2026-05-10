@@ -5,6 +5,7 @@ import {
   rejectJoinRequest,
   updateMemberRole,
 } from "@/lib/clubs";
+import { toast } from "@/components/ui/use-toast";
 
 export interface JoinRequest {
   id: string;
@@ -19,18 +20,20 @@ export interface JoinRequest {
 export function useClubModeration(clubId: string) {
   const [requests, setRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
 
   const loadRequests = useCallback(async () => {
     if (!clubId) return;
     setLoading(true);
-    setError(null);
     try {
       const data = await getJoinRequests(clubId);
       setRequests(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load requests");
+      toast({
+        variant: "destructive",
+        title: "Failed to load requests",
+        description: err instanceof Error ? err.message : "Failed to load requests",
+      });
     } finally {
       setLoading(false);
     }
@@ -46,8 +49,16 @@ export function useClubModeration(clubId: string) {
           req.id === requestId ? { ...req, status: "APPROVED" } : req,
         ),
       );
+      toast({
+        title: "Request approved",
+        description: "The member has been added to the club.",
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to approve request");
+      toast({
+        variant: "destructive",
+        title: "Failed to approve request",
+        description: err instanceof Error ? err.message : "Failed to approve request",
+      });
     } finally {
       setActionInProgress(null);
     }
@@ -63,8 +74,16 @@ export function useClubModeration(clubId: string) {
           req.id === requestId ? { ...req, status: "REJECTED" } : req,
         ),
       );
+      toast({
+        title: "Request rejected",
+        description: "The join request was removed.",
+      });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reject request");
+      toast({
+        variant: "destructive",
+        title: "Failed to reject request",
+        description: err instanceof Error ? err.message : "Failed to reject request",
+      });
     } finally {
       setActionInProgress(null);
     }
@@ -74,10 +93,19 @@ export function useClubModeration(clubId: string) {
     setActionInProgress(userId);
     try {
       await updateMemberRole(clubId, userId, role);
+      toast({
+        title: "Member role updated",
+        description:
+          role === "MODERATOR"
+            ? "The member is now a moderator."
+            : "The member is now a regular member.",
+      });
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to update member role",
-      );
+      toast({
+        variant: "destructive",
+        title: "Failed to update member role",
+        description: err instanceof Error ? err.message : "Failed to update member role",
+      });
     } finally {
       setActionInProgress(null);
     }
@@ -86,7 +114,6 @@ export function useClubModeration(clubId: string) {
   return {
     requests,
     loading,
-    error,
     actionInProgress,
     loadRequests,
     approveRequest,
