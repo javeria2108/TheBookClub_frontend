@@ -25,6 +25,7 @@ export default function ChatWindow({
   } = useChat(roomId, clubId);
   const [text, setText] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const listRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
@@ -64,11 +65,13 @@ export default function ChatWindow({
 
   const startEditing = (id: string, currentContent: string) => {
     setEditingMessageId(id);
+    setActiveMessageId(id);
     setEditText(currentContent);
   };
 
   const cancelEditing = () => {
     setEditingMessageId(null);
+    setActiveMessageId(null);
     setEditText("");
   };
 
@@ -79,7 +82,7 @@ export default function ChatWindow({
           <div key={m.id} className="mb-2">
             <div className="mb-1 flex items-center justify-between">
               <div className="text-xs text-gray-400">{m.username}</div>
-              {m.userId === currentUserId && (
+              {m.userId === currentUserId && activeMessageId === m.id && editingMessageId !== m.id && (
                 <div className="flex items-center gap-2 text-[11px]">
                   <button
                     type="button"
@@ -94,6 +97,7 @@ export default function ChatWindow({
                     onClick={async () => {
                       const ok = await deleteMessage(m.id);
                       if (!ok) return;
+                      setActiveMessageId(null);
                     }}
                     className="text-red-300 hover:text-red-200"
                     disabled={actionLoadingMessageId === m.id}
@@ -138,7 +142,20 @@ export default function ChatWindow({
                 </div>
               </form>
             ) : (
-              <div className="rounded bg-[#2A1810] p-2">{m.content}</div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (m.userId !== currentUserId) return;
+                  setActiveMessageId((current) =>
+                    current === m.id ? null : m.id,
+                  );
+                }}
+                className={`w-full rounded bg-[#2A1810] p-2 text-left ${
+                  m.userId === currentUserId ? "cursor-pointer border border-transparent hover:border-[#C9A96E]/30" : "cursor-default"
+                } ${activeMessageId === m.id ? "border-[#C9A96E]/40" : ""}`}
+              >
+                {m.content}
+              </button>
             )}
           </div>
         ))}
