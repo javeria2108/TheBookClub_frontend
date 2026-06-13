@@ -15,6 +15,7 @@ import { useMemberManagement } from "@/hooks/useMemberManagement";
 import JoinRequestsPanel from "@/components/pages/clubs/JoinRequestsPanel";
 import MembersPanel from "@/components/pages/clubs/MembersPanel";
 import OwnerLeaveDialog from "@/components/pages/clubs/OwnerLeaveDialog";
+import ChatWindow from "@/components/clubs/ChatWindow";
 import { useToast } from "@/components/ui/use-toast";
 import { useCallback } from "react";
 
@@ -278,6 +279,16 @@ export default function ClubDetailPage() {
                 onDemote={memberManagement.demoteToMember}
                 onRefresh={loadMembers}
               />
+            )}
+
+            {club.isMember && (
+              <section className="space-y-3">
+                <h2 className="font-serif text-2xl">Club Chat</h2>
+                <p className="text-sm text-[#F2E8D9]/70">
+                  Realtime conversation for current club members.
+                </p>
+                <ChatWindow clubId={clubId} roomId={`${clubId}-general`} />
+              </section>
             )}
           </div>
         ) : null}

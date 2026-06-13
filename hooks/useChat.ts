@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { getStoredToken } from "@/lib/auth";
 import type { ChatMessage } from "@/lib/types";
 
 export function useChat(roomId: string, clubId: string) {
@@ -15,7 +14,7 @@ export function useChat(roomId: string, clubId: string) {
       socket.emit("joinRoom", { roomId });
     });
 
-    socket.on("message", (msg) => {
+    socket.on("message", (msg: ChatMessage) => {
       setMessages((s) => [...s, msg]);
     });
 

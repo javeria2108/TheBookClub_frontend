@@ -69,6 +69,20 @@ export const OperationMessageSchema = z.object({
   message: z.string(),
 });
 
+export const ChatMessageSchema = z.object({
+  id: z.string(),
+  roomId: z.string(),
+  clubId: z.string().uuid(),
+  userId: z.string().uuid(),
+  username: z.string().min(1),
+  content: z.string(),
+  createdAt: z.string(),
+});
+
+export const GetChatMessagesResponseSchema = z.object({
+  messages: z.array(ChatMessageSchema),
+});
+
 export const CreateClubResponseSchema = z.object({
   club: ClubSchema,
 });

@@ -11,6 +11,8 @@ import {
   ClubMemberSummarySchema,
   GetClubMembersResponseSchema,
   OperationMessageSchema,
+  ChatMessageSchema,
+  GetChatMessagesResponseSchema,
 } from "@/lib/contracts/club.contract";
 
 export type Club = z.infer<typeof ClubSchema>;
@@ -24,3 +26,5 @@ export type JoinClubResponse = z.infer<typeof JoinClubResponseSchema>;
 export type ClubMemberSummary = z.infer<typeof ClubMemberSummarySchema>;
 export type GetClubMembersResponse = z.infer<typeof GetClubMembersResponseSchema>;
 export type OperationMessage = z.infer<typeof OperationMessageSchema>;
+export type ChatMessage = z.infer<typeof ChatMessageSchema>;
+export type GetChatMessagesResponse = z.infer<typeof GetChatMessagesResponseSchema>;

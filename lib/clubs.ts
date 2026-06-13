@@ -10,6 +10,7 @@ import {
   JoinClubResponseSchema,
   GetClubMembersResponseSchema,
   OperationMessageSchema,
+  GetChatMessagesResponseSchema,
 } from "@/lib/contracts/club.contract";
 import {
   GetClubsParams,
@@ -20,6 +21,7 @@ import {
   JoinClubResponse,
   ClubMemberSummary,
   OperationMessage,
+  ChatMessage,
 } from "@/lib/types";
 import { getStoredToken } from "./auth";
 
@@ -500,4 +502,51 @@ export async function deleteClub(clubId: string): Promise<OperationMessage> {
   }
 
   return OperationMessageSchema.parse(payload.data) as OperationMessage;
+}
+
+export async function getChatMessages(
+  clubId: string,
+  roomId: string,
+  limit = 50,
+): Promise<ChatMessage[]> {
+  if (!clubId?.trim()) {
+    throw new Error("Club ID is required");
+  }
+
+  if (!roomId?.trim()) {
+    throw new Error("Room ID is required");
+  }
+
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to view chat");
+  }
+
+  const params = new URLSearchParams({
+    roomId,
+    limit: String(limit),
+  });
+
+  const response = await fetch(
+    `${API_BASE_URL}/clubs/${clubId}/chat/messages?${params.toString()}`,
+    {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  const payload = await response.json();
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message || payload?.message || "Failed to fetch chat messages";
+    throw new Error(message);
+  }
+
+  const data = GetChatMessagesResponseSchema.parse(payload.data);
+  return data.messages;
 }
