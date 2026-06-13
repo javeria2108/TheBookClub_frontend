@@ -3,7 +3,15 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronLeft, Globe, Lock, AlertCircle } from "lucide-react";
+import {
+  ChevronLeft,
+  Globe,
+  Lock,
+  AlertCircle,
+  CalendarDays,
+  MessageCircle,
+  Users2,
+} from "lucide-react";
 import Link from "next/link";
 import type { Club } from "@/lib/types";
 import { getClubById, getClubMembers } from "@/lib/clubs";
@@ -172,9 +180,12 @@ export default function ClubDetailPage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55 }}
-              className="rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
+              className="relative overflow-hidden rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
             >
-              <div className="mb-6 flex items-start justify-between gap-4">
+              <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#C9A96E]/10 blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-[#8B4A3C]/20 blur-3xl" />
+
+              <div className="relative z-10 mb-6 flex items-start justify-between gap-4">
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
                     BookCircle Club
@@ -193,11 +204,43 @@ export default function ClubDetailPage() {
                 </span>
               </div>
 
-              <p className="mt-4 max-w-2xl text-base leading-relaxed text-[#F2E8D9]/80">
+              <p className="relative z-10 mt-4 max-w-3xl text-base leading-relaxed text-[#F2E8D9]/80">
                 {club.description || "No description available."}
               </p>
 
-              <div className="mt-6 flex flex-wrap items-center gap-4">
+              <div className="relative z-10 mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/45 p-4">
+                  <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
+                    <Users2 className="h-4 w-4" />
+                  </div>
+                  <p className="text-2xl font-semibold">{club.memberCount ?? 0}</p>
+                  <p className="text-xs uppercase tracking-wide text-[#F2E8D9]/60">
+                    Members
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/45 p-4">
+                  <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
+                    <MessageCircle className="h-4 w-4" />
+                  </div>
+                  <p className="text-2xl font-semibold">Live</p>
+                  <p className="text-xs uppercase tracking-wide text-[#F2E8D9]/60">
+                    Club Chat
+                  </p>
+                </div>
+                <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/45 p-4">
+                  <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
+                    <CalendarDays className="h-4 w-4" />
+                  </div>
+                  <p className="text-base font-semibold">
+                    {new Date(club.createdAt).toLocaleDateString()}
+                  </p>
+                  <p className="text-xs uppercase tracking-wide text-[#F2E8D9]/60">
+                    Created
+                  </p>
+                </div>
+              </div>
+
+              <div className="relative z-10 mt-6 flex flex-wrap items-center gap-4">
                 {isAuthenticated ? (
                   <>
                     <button
@@ -247,49 +290,56 @@ export default function ClubDetailPage() {
                     Join Club
                   </Link>
                 )}
-                <span className="text-sm text-[#F2E8D9]/70">
-                  Created {new Date(club.createdAt).toLocaleDateString()}
-                </span>
               </div>
-
             </motion.div>
 
-            {club.memberRole &&
-              (club.memberRole === "OWNER" ||
-                club.memberRole === "MODERATOR") &&
-              !club.isPublic && (
-                <JoinRequestsPanel
-                  clubId={clubId}
-                  requests={moderation.requests}
-                  loading={moderation.loading}
-                  actionInProgress={moderation.actionInProgress}
-                  onApprove={moderation.approveRequest}
-                  onReject={moderation.rejectRequest}
-                  onRefresh={moderation.loadRequests}
-                />
-              )}
+            <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
+              <div className="space-y-8">
+                {club.memberRole &&
+                  (club.memberRole === "OWNER" ||
+                    club.memberRole === "MODERATOR") &&
+                  !club.isPublic && (
+                    <JoinRequestsPanel
+                      clubId={clubId}
+                      requests={moderation.requests}
+                      loading={moderation.loading}
+                      actionInProgress={moderation.actionInProgress}
+                      onApprove={moderation.approveRequest}
+                      onReject={moderation.rejectRequest}
+                      onRefresh={moderation.loadRequests}
+                    />
+                  )}
 
-            {club.memberRole === "OWNER" && (
-              <MembersPanel
-                members={memberManagement.members}
-                loading={memberManagement.loading}
-                actionInProgress={memberManagement.actionInProgress}
-                currentUserRole={club.memberRole}
-                onPromote={memberManagement.promoteToModerator}
-                onDemote={memberManagement.demoteToMember}
-                onRefresh={loadMembers}
-              />
-            )}
+                {club.memberRole === "OWNER" && (
+                  <MembersPanel
+                    members={memberManagement.members}
+                    loading={memberManagement.loading}
+                    actionInProgress={memberManagement.actionInProgress}
+                    currentUserRole={club.memberRole}
+                    onPromote={memberManagement.promoteToModerator}
+                    onDemote={memberManagement.demoteToMember}
+                    onRefresh={loadMembers}
+                  />
+                )}
+              </div>
 
-            {club.isMember && (
-              <section className="space-y-3">
-                <h2 className="font-serif text-2xl">Club Chat</h2>
-                <p className="text-sm text-[#F2E8D9]/70">
-                  Realtime conversation for current club members.
-                </p>
-                <ChatWindow clubId={clubId} roomId={`${clubId}-general`} />
-              </section>
-            )}
+              <aside className="space-y-4 xl:sticky xl:top-24 xl:h-fit">
+                <div className="rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-5 shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
+                  <h2 className="font-serif text-2xl">Club Chat</h2>
+                  <p className="mt-2 text-sm text-[#F2E8D9]/70">
+                    Realtime conversation for current club members.
+                  </p>
+                </div>
+
+                {club.isMember ? (
+                  <ChatWindow clubId={clubId} roomId={`${clubId}-general`} />
+                ) : (
+                  <div className="rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-5 text-sm text-[#F2E8D9]/75">
+                    Join this club to access live chat.
+                  </div>
+                )}
+              </aside>
+            </div>
           </div>
         ) : null}
       </section>
