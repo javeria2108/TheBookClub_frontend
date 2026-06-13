@@ -26,20 +26,12 @@ export function useChat(roomId: string, clubId: string) {
 
   const sendMessage = (content: string) => {
     if (!socketRef.current) return;
-    socketRef.current.emit("message", { roomId, clubId, content });
-    // optimistic add (optional)
-    setMessages((s) => [
-      ...s,
-      {
-        id: `temp-${Date.now()}`,
-        roomId,
-        clubId,
-        userId: "me",
-        username: "You",
-        content,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
+    const trimmed = content.trim();
+    if (!trimmed) return;
+
+    // Let the server broadcast be the single source of truth.
+    // This avoids sender-side duplicates from optimistic + echoed message.
+    socketRef.current.emit("message", { roomId, clubId, content: trimmed });
   };
 
   return { messages, sendMessage, setMessages };
