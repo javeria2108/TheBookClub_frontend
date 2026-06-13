@@ -24,6 +24,7 @@ import JoinRequestsPanel from "@/components/pages/clubs/JoinRequestsPanel";
 import MembersPanel from "@/components/pages/clubs/MembersPanel";
 import OwnerLeaveDialog from "@/components/pages/clubs/OwnerLeaveDialog";
 import ChatWindow from "@/components/clubs/ChatWindow";
+import LiveRoomPreview from "@/components/clubs/LiveRoomPreview";
 import { useToast } from "@/components/ui/use-toast";
 import { useCallback } from "react";
 
@@ -295,6 +296,8 @@ export default function ClubDetailPage() {
 
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="space-y-8">
+                <LiveRoomPreview clubId={clubId} isMember={Boolean(club.isMember)} />
+
                 {club.memberRole &&
                   (club.memberRole === "OWNER" ||
                     club.memberRole === "MODERATOR") &&
