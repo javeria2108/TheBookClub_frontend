@@ -39,7 +39,34 @@ export const CreateClubPayloadSchema = z.object({
   description: z.string().trim().max(500).optional(),
   isPublic: z.boolean().optional().default(true),
   genre: z.string().trim().max(80).optional(),
-  coverImage: z.string().url().optional(),
+  coverImage: z.string().url("Cover image is required"),
+});
+
+export const CreateClubFormSchema = CreateClubPayloadSchema.omit({
+  coverImage: true,
+});
+
+export const UpdateClubPayloadSchema = z
+  .object({
+    name: z.string().trim().min(1, "Club name is required").max(100).optional(),
+    description: z.string().trim().max(500).optional().nullable(),
+    isPublic: z.boolean().optional(),
+    genre: z.string().trim().max(80).optional().nullable(),
+    coverImage: z.string().url("Cover image must be a valid URL").optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "At least one field must be provided to update",
+  });
+
+export const ClubSettingsFormSchema = z.object({
+  name: z.string().trim().min(1, "Club name is required").max(100),
+  description: z.string().trim().max(500).optional(),
+  isPublic: z.boolean(),
+  genre: z.string().trim().max(80).optional(),
+});
+
+export const UploadClubCoverResponseSchema = z.object({
+  url: z.string().url(),
 });
 
 export const JoinClubResponseSchema = z.object({

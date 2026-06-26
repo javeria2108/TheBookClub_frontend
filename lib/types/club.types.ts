@@ -5,6 +5,8 @@ import {
   GetClubsResponseSchema,
   PaginationSchema,
   CreateClubPayloadSchema,
+  UpdateClubPayloadSchema,
+  UploadClubCoverResponseSchema,
   CreateClubResponseSchema,
   GetClubByIdResponseSchema,
   JoinClubResponseSchema,
@@ -20,6 +22,8 @@ export type Pagination = z.infer<typeof PaginationSchema>;
 export type GetClubsResponse = z.infer<typeof GetClubsResponseSchema>;
 export type GetClubsParams = z.infer<typeof GetClubsParamsSchema>;
 export type CreateClubPayload = z.infer<typeof CreateClubPayloadSchema>;
+export type UpdateClubPayload = z.infer<typeof UpdateClubPayloadSchema>;
+export type UploadClubCoverResponse = z.infer<typeof UploadClubCoverResponseSchema>;
 export type CreateClubResponse = z.infer<typeof CreateClubResponseSchema>;
 export type GetClubByIdResponse = z.infer<typeof GetClubByIdResponseSchema>;
 export type JoinClubResponse = z.infer<typeof JoinClubResponseSchema>;

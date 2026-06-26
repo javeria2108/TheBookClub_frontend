@@ -5,6 +5,7 @@ import {
   GetClubsParamsSchema,
   GetClubsResponseSchema,
   CreateClubPayloadSchema,
+  UpdateClubPayloadSchema,
   CreateClubResponseSchema,
   GetClubByIdResponseSchema,
   JoinClubResponseSchema,
@@ -17,6 +18,7 @@ import {
   GetClubsResponse,
   CreateClubPayload,
   CreateClubResponse,
+  UpdateClubPayload,
   GetClubByIdResponse,
   JoinClubResponse,
   ClubMemberSummary,
@@ -87,6 +89,42 @@ export async function createClub(
   }
 
   return CreateClubResponseSchema.parse(body.data) as CreateClubResponse;
+}
+
+export async function updateClub(
+  clubId: string,
+  input: UpdateClubPayload,
+): Promise<GetClubByIdResponse> {
+  if (!clubId?.trim()) {
+    throw new Error("Club ID is required");
+  }
+
+  const payload = UpdateClubPayloadSchema.parse(input);
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You must be logged in to update a club");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/clubs/${clubId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+
+  const body = await response.json();
+
+  if (!response.ok) {
+    const message =
+      body?.error?.message || body?.message || "Failed to update club";
+    throw new Error(message);
+  }
+
+  return GetClubByIdResponseSchema.parse(body.data) as GetClubByIdResponse;
 }
 
 export async function getClubById(id: string) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ChevronLeft,
@@ -11,6 +11,7 @@ import {
   CalendarDays,
   MessageCircle,
   Users2,
+  Settings2,
 } from "lucide-react";
 import Link from "next/link";
 import type { Club } from "@/lib/types";
@@ -24,9 +25,7 @@ import JoinRequestsPanel from "@/components/pages/clubs/JoinRequestsPanel";
 import MembersPanel from "@/components/pages/clubs/MembersPanel";
 import OwnerLeaveDialog from "@/components/pages/clubs/OwnerLeaveDialog";
 import ChatWindow from "@/components/clubs/ChatWindow";
-import LiveRoomPreview from "@/components/clubs/LiveRoomPreview";
 import { useToast } from "@/components/ui/use-toast";
-import { useCallback } from "react";
 
 export default function ClubDetailPage() {
   const params = useParams();
@@ -42,18 +41,19 @@ export default function ClubDetailPage() {
   const [ownerLeaveModalOpen, setOwnerLeaveModalOpen] = useState(false);
 
   const memberManagement = useMemberManagement(clubId);
+  const { setLoading: setMembersLoading, setMembers } = memberManagement;
 
-  const loadMembers = async () => {
+  const loadMembers = useCallback(async () => {
     try {
-      memberManagement.setLoading(true);
+      setMembersLoading(true);
       const members = await getClubMembers(clubId);
-      memberManagement.setMembers(members);
+      setMembers(members);
     } catch (err) {
       console.error("Failed to load members:", err);
     } finally {
-      memberManagement.setLoading(false);
+      setMembersLoading(false);
     }
-  };
+  }, [clubId, setMembers, setMembersLoading]);
 
   const loadClub = useCallback(async () => {
     try {
@@ -63,7 +63,8 @@ export default function ClubDetailPage() {
       setClub(response.club);
       setPendingRequest(Boolean(response.club.hasPendingJoinRequest));
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to fetch club";
+      const message =
+        err instanceof Error ? err.message : "Failed to fetch club";
       setError(message);
       toast({
         variant: "destructive",
@@ -125,7 +126,7 @@ export default function ClubDetailPage() {
         console.error("Failed to load members");
       });
     }
-  }, [club?.memberRole, clubId]);
+  }, [club?.memberRole, clubId, loadMembers]);
 
   const onLeavePressed = () => {
     if (!club) return;
@@ -146,7 +147,7 @@ export default function ClubDetailPage() {
         userInitial={userInitial}
       />
 
-      <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8 md:py-12">
+      <section className="mx-auto w-full max-w-7xl px-5 pb-12 pt-28 md:px-8">
         <Link
           href="/clubs"
           className="mb-8 inline-flex items-center gap-2 text-[#C9A96E] transition hover:text-[#d8b884]"
@@ -163,8 +164,12 @@ export default function ClubDetailPage() {
           <div className="rounded-2xl border border-[#8B4A3C]/60 bg-[#8B4A3C]/15 p-6">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="font-semibold text-[#F2E8D9]">Unable to load club</p>
-                <p className="text-sm text-[#F2E8D9]/75">Try again in a moment.</p>
+                <p className="font-semibold text-[#F2E8D9]">
+                  Unable to load club
+                </p>
+                <p className="text-sm text-[#F2E8D9]/75">
+                  Try again in a moment.
+                </p>
               </div>
               <button
                 type="button"
@@ -181,123 +186,149 @@ export default function ClubDetailPage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55 }}
-              className="relative overflow-hidden rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
+              className="relative overflow-hidden rounded-2xl border border-[#C9A96E]/25 bg-[#100904] shadow-[0_24px_70px_rgba(0,0,0,0.45)]"
             >
-              <div className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full bg-[#C9A96E]/10 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-[#8B4A3C]/20 blur-3xl" />
-
-              <div className="relative z-10 mb-6 flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-                    BookCircle Club
-                  </p>
-                  <h1 className="mt-3 font-serif text-4xl leading-tight md:text-5xl">
-                    {club.name}
-                  </h1>
-                </div>
-                <span className="inline-flex whitespace-nowrap items-center gap-1 rounded-full border border-[#C9A96E]/35 px-3 py-1.5 text-[11px] uppercase tracking-wide text-[#C9A96E]">
-                  {club.isPublic ? (
-                    <Globe className="h-3.5 w-3.5" />
-                  ) : (
-                    <Lock className="h-3.5 w-3.5" />
-                  )}
-                  {club.isPublic ? "Public" : "Private"}
-                </span>
-              </div>
-
-              <p className="relative z-10 mt-4 max-w-3xl text-base leading-relaxed text-[#F2E8D9]/80">
-                {club.description || "No description available."}
-              </p>
-
-              <div className="relative z-10 mt-6 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/45 p-4">
-                  <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
-                    <Users2 className="h-4 w-4" />
+              <div className="grid lg:grid-cols-[minmax(0,1fr)_420px]">
+                <div className="p-6 md:p-8">
+                  <div className="mb-6 flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+                        BookCircle Club
+                      </p>
+                      <h1 className="mt-3 font-serif text-5xl leading-none md:text-6xl">
+                        {club.name}
+                      </h1>
+                    </div>
+                    <div className="flex flex-col items-end gap-3">
+                      <span className="inline-flex whitespace-nowrap items-center gap-1 rounded-full border border-[#C9A96E]/35 px-3 py-1.5 text-[11px] uppercase tracking-wide text-[#C9A96E]">
+                        {club.isPublic ? (
+                          <Globe className="h-3.5 w-3.5" />
+                        ) : (
+                          <Lock className="h-3.5 w-3.5" />
+                        )}
+                        {club.isPublic ? "Public" : "Private"}
+                      </span>
+                      {club.memberRole === "OWNER" && (
+                        <Link
+                          href={`/clubs/${clubId}/settings`}
+                          className="inline-flex items-center gap-2 rounded-lg border border-[#C9A96E]/35 px-3 py-2 text-xs font-medium text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E]"
+                        >
+                          <Settings2 className="h-3.5 w-3.5" />
+                          Club Settings
+                        </Link>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-2xl font-semibold">{club.memberCount ?? 0}</p>
-                  <p className="text-xs uppercase tracking-wide text-[#F2E8D9]/60">
-                    Members
-                  </p>
-                </div>
-                <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/45 p-4">
-                  <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
-                    <MessageCircle className="h-4 w-4" />
-                  </div>
-                  <p className="text-2xl font-semibold">Live</p>
-                  <p className="text-xs uppercase tracking-wide text-[#F2E8D9]/60">
-                    Club Chat
-                  </p>
-                </div>
-                <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/45 p-4">
-                  <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
-                    <CalendarDays className="h-4 w-4" />
-                  </div>
-                  <p className="text-base font-semibold">
-                    {new Date(club.createdAt).toLocaleDateString()}
-                  </p>
-                  <p className="text-xs uppercase tracking-wide text-[#F2E8D9]/60">
-                    Created
-                  </p>
-                </div>
-              </div>
 
-              <div className="relative z-10 mt-6 flex flex-wrap items-center gap-4">
-                {isAuthenticated ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        club.isMember
-                          ? onLeavePressed()
-                          : pendingRequest
-                            ? void handleCancelJoinRequestClick(club)
-                            : club.isPublic || !pendingRequest
-                              ? void handleJoinClick(club)
-                              : undefined
-                      }
-                      disabled={joiningClubId === club.id}
-                      className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      {club.isMember
-                        ? joiningClubId === club.id
-                          ? "Leaving..."
-                          : "Leave Club"
-                        : pendingRequest
-                          ? joiningClubId === club.id
-                            ? "Cancelling..."
-                            : "Cancel Request"
-                          : joiningClubId === club.id
-                            ? club.isPublic
-                              ? "Joining..."
-                              : "Requesting..."
-                            : club.isPublic
-                              ? "Join Club"
-                              : "Request to Join"}
-                    </button>
-                    {pendingRequest && (
-                      <div className="inline-flex items-center gap-2 rounded-full border border-[#E8A87C]/50 bg-[#E8A87C]/10 px-3 py-1.5">
-                        <AlertCircle className="h-4 w-4 text-[#E8A87C]" />
-                        <span className="text-xs text-[#E8A87C]">
-                          Pending Approval
-                        </span>
+                  <p className="max-w-3xl text-base leading-relaxed text-[#F2E8D9]/80">
+                    {club.description || "No description available."}
+                  </p>
+
+                  <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/65 p-4">
+                      <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
+                        <Users2 className="h-4 w-4" />
                       </div>
+                      <p className="text-2xl font-semibold">
+                        {club.memberCount ?? 0}
+                      </p>
+                      <p className="text-xs uppercase tracking-wide text-[#F2E8D9]/60">
+                        Members
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/65 p-4">
+                      <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
+                        <MessageCircle className="h-4 w-4" />
+                      </div>
+                      <p className="text-2xl font-semibold">Chat</p>
+                      <p className="text-xs uppercase tracking-wide text-[#F2E8D9]/60">
+                        Club Room
+                      </p>
+                    </div>
+                    <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/65 p-4">
+                      <div className="mb-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
+                        <CalendarDays className="h-4 w-4" />
+                      </div>
+                      <p className="text-base font-semibold">
+                        {new Date(club.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-xs uppercase tracking-wide text-[#F2E8D9]/60">
+                        Created
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap items-center gap-4">
+                    {isAuthenticated ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            club.isMember
+                              ? onLeavePressed()
+                              : pendingRequest
+                                ? void handleCancelJoinRequestClick(club)
+                                : club.isPublic || !pendingRequest
+                                  ? void handleJoinClick(club)
+                                  : undefined
+                          }
+                          disabled={joiningClubId === club.id}
+                          className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
+                        >
+                          {club.isMember
+                            ? joiningClubId === club.id
+                              ? "Leaving..."
+                              : "Leave Club"
+                            : pendingRequest
+                              ? joiningClubId === club.id
+                                ? "Cancelling..."
+                                : "Cancel Request"
+                              : joiningClubId === club.id
+                                ? club.isPublic
+                                  ? "Joining..."
+                                  : "Requesting..."
+                                : club.isPublic
+                                  ? "Join Club"
+                                  : "Request to Join"}
+                        </button>
+                        {pendingRequest && (
+                          <div className="inline-flex items-center gap-2 rounded-full border border-[#E8A87C]/50 bg-[#E8A87C]/10 px-3 py-1.5">
+                            <AlertCircle className="h-4 w-4 text-[#E8A87C]" />
+                            <span className="text-xs text-[#E8A87C]">
+                              Pending Approval
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <Link
+                        href={`/auth/login?returnTo=${encodeURIComponent(`/clubs/${club.id}`)}`}
+                        className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+                      >
+                        Join Club
+                      </Link>
                     )}
-                  </>
-                ) : (
-                  <Link
-                    href={`/auth/login?returnTo=${encodeURIComponent(`/clubs/${club.id}`)}`}
-                    className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
-                  >
-                    Join Club
-                  </Link>
-                )}
+                  </div>
+                </div>
+
+                <div className="relative min-h-72 border-t border-[#C9A96E]/15 bg-[#1A0F07] lg:border-l lg:border-t-0">
+                  {club.coverImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={club.coverImage}
+                      alt=""
+                      className="h-full min-h-72 w-full object-cover opacity-80"
+                    />
+                  ) : (
+                    <div className="h-full min-h-72 w-full bg-[radial-gradient(circle_at_top_left,rgba(201,169,110,0.22),transparent_36%),linear-gradient(135deg,#3A2114,#100904)]" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#100904] via-transparent to-transparent" />
+                </div>
               </div>
             </motion.div>
 
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="space-y-8">
-                <LiveRoomPreview clubId={clubId} isMember={Boolean(club.isMember)} />
-
                 {club.memberRole &&
                   (club.memberRole === "OWNER" ||
                     club.memberRole === "MODERATOR") &&
