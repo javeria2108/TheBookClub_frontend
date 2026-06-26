@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useChat } from "@/hooks/useChat";
 import { getChatMessages } from "@/lib/clubs";
 import { useToast } from "@/components/ui/use-toast";
+import { MessageCircle, PenLine, Send, Trash2 } from "lucide-react";
 
 export default function ChatWindow({
   clubId,
@@ -76,12 +77,25 @@ export default function ChatWindow({
   };
 
   return (
-    <div className="flex h-105 flex-col overflow-hidden rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
-      <div className="border-b border-[#C9A96E]/20 bg-[#1A0F07]/70 px-4 py-3">
-        <p className="text-xs uppercase tracking-[0.18em] text-[#C9A96E]">General Room</p>
+    <div className="flex h-[620px] flex-col overflow-hidden rounded-xl border border-[#C9A96E]/25 bg-[#100904] shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
+      <div className="border-b border-[#C9A96E]/20 bg-[#2A1810]/90 px-4 py-4">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
+            <MessageCircle className="h-4 w-4" />
+          </span>
+          <div>
+            <p className="font-serif text-xl leading-none">Club Chat</p>
+            <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#C9A96E]">
+              General Room
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div ref={listRef} className="flex-1 space-y-4 overflow-auto bg-[radial-gradient(circle_at_top,rgba(201,169,110,0.08),transparent_55%)] p-4">
+      <div
+        ref={listRef}
+        className="flex-1 space-y-4 overflow-auto bg-[radial-gradient(circle_at_top,rgba(201,169,110,0.08),transparent_55%)] p-4"
+      >
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[#C9A96E]/25 bg-[#1A0F07]/35 px-4 text-center text-sm text-[#F2E8D9]/65">
             No messages yet. Start the first conversation.
@@ -110,9 +124,10 @@ export default function ChatWindow({
                       <button
                         type="button"
                         onClick={() => startEditing(m.id, m.content)}
-                        className="rounded-full border border-[#C9A96E]/40 px-2 py-0.5 text-[#C9A96E] hover:bg-[#C9A96E]/15"
+                        className="inline-flex items-center gap-1 rounded-full border border-[#C9A96E]/40 px-2 py-0.5 text-[#C9A96E] hover:bg-[#C9A96E]/15"
                         disabled={actionLoadingMessageId === m.id}
                       >
+                        <PenLine className="h-3 w-3" />
                         Edit
                       </button>
                       <button
@@ -122,9 +137,10 @@ export default function ChatWindow({
                           if (!ok) return;
                           setActiveMessageId(null);
                         }}
-                        className="rounded-full border border-red-300/35 px-2 py-0.5 text-red-300 hover:bg-red-400/10"
+                        className="inline-flex items-center gap-1 rounded-full border border-red-300/35 px-2 py-0.5 text-red-300 hover:bg-red-400/10"
                         disabled={actionLoadingMessageId === m.id}
                       >
+                        <Trash2 className="h-3 w-3" />
                         {actionLoadingMessageId === m.id ? "Deleting..." : "Delete"}
                       </button>
                     </div>
@@ -207,9 +223,10 @@ export default function ChatWindow({
           />
           <button
             type="submit"
-            className="rounded-lg bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] shadow-[0_8px_20px_rgba(201,169,110,0.35)] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex items-center gap-2 rounded-lg bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] shadow-[0_8px_20px_rgba(201,169,110,0.35)] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isSending || !text.trim()}
           >
+            {!isSending ? <Send className="h-4 w-4" /> : null}
             {isSending ? "Sending..." : "Send"}
           </button>
         </div>

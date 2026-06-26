@@ -7,9 +7,12 @@ import type { Club } from "@/lib/types";
 import {
   ArrowUpRight,
   BookOpen,
+  Globe,
+  Lock,
   Plus,
   Search,
   Sparkles,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -70,6 +73,11 @@ export default function DashboardPage() {
     return clubs.filter((club) => club.name.toLowerCase().includes(term));
   }, [clubs, searchInput]);
 
+  const totalMembers = useMemo(
+    () => clubs.reduce((total, club) => total + (club.memberCount ?? 0), 0),
+    [clubs],
+  );
+
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
       <AppHeader
@@ -78,24 +86,30 @@ export default function DashboardPage() {
         userInitial={userInitial}
       />
 
-      <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8 md:py-12">
+      <section className="relative mx-auto w-full max-w-7xl px-5 pb-12 pt-28 md:px-8">
+        <div className="pointer-events-none absolute inset-x-5 top-24 h-72 overflow-hidden rounded-[28px] opacity-70 md:inset-x-8">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(201,169,110,0.22),transparent_32%),linear-gradient(135deg,#2A1810,#1A0F07_58%,#8B4A3C)]" />
+          <div className="absolute inset-0 bg-[#1A0F07]/35" />
+        </div>
+
         <motion.header
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55 }}
-          className="mb-8 rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
+          className="relative mb-6 overflow-hidden rounded-2xl border border-[#C9A96E]/25 bg-[#100904]/80 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.45)] backdrop-blur md:p-8"
         >
-          <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-            Your Reading Space
-          </p>
-          <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="absolute right-0 top-0 h-full w-1/2 bg-[linear-gradient(120deg,transparent,rgba(201,169,110,0.08))]" />
+          <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="font-serif text-4xl leading-tight md:text-5xl">
-                Welcome back
+              <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+                Your Reading Space
+              </p>
+              <h1 className="mt-3 font-serif text-5xl leading-none md:text-6xl">
+                Welcome back{user?.name ? `, ${user.name}` : ""}
               </h1>
               <p className="mt-3 max-w-2xl text-sm text-[#F2E8D9]/75 md:text-base">
-                Manage your reading circles, discover communities, and create
-                your next club gathering in seconds.
+                Pick up the clubs you care about, keep conversations moving,
+                and shape the next reading circle without wading through noise.
               </p>
             </div>
 
@@ -120,16 +134,39 @@ export default function DashboardPage() {
           </div>
         </motion.header>
 
+        <div className="relative mb-6 grid gap-3 md:grid-cols-3">
+          {[
+            { label: "Joined Clubs", value: clubs.length, icon: BookOpen },
+            { label: "Readers Nearby", value: totalMembers, icon: Users },
+            {
+              label: "Private Circles",
+              value: clubs.filter((club) => !club.isPublic).length,
+              icon: Lock,
+            },
+          ].map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <div
+                key={stat.label}
+                className="rounded-xl border border-[#C9A96E]/20 bg-[#2A1810]/85 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.28)]"
+              >
+                <Icon className="mb-3 h-5 w-5 text-[#C9A96E]" />
+                <p className="font-serif text-4xl leading-none">{stat.value}</p>
+                <p className="mt-2 text-[11px] uppercase tracking-[0.18em] text-[#F2E8D9]/55">
+                  {stat.label}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
         <motion.section
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, delay: 0.06 }}
-          className="mb-6 rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810] p-5"
+          className="relative mb-8 rounded-xl border border-[#C9A96E]/20 bg-[#100904]/80 p-4"
         >
-          <label className="text-xs uppercase tracking-[0.18em] text-[#C9A96E]">
-            Quick Search
-          </label>
-          <div className="relative mt-3">
+          <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C9A96E]/70" />
             <input
               value={searchInput}
@@ -159,9 +196,14 @@ export default function DashboardPage() {
         ) : null}
 
         <section>
-          <div className="mb-4 flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-[#C9A96E]" />
-            <h2 className="font-serif text-3xl">My Clubs</h2>
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-[#C9A96E]" />
+              <h2 className="font-serif text-3xl">My Clubs</h2>
+            </div>
+            <p className="hidden text-sm text-[#F2E8D9]/55 sm:block">
+              {filteredClubs.length} shown
+            </p>
           </div>
 
           {isLoading ? (
@@ -174,7 +216,8 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : filteredClubs.length === 0 ? (
-            <div className="rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810] p-8 text-center">
+            <div className="overflow-hidden rounded-2xl border border-dashed border-[#C9A96E]/30 bg-[#2A1810]/75 p-8 text-center">
+              <BookOpen className="mx-auto mb-4 h-9 w-9 text-[#C9A96E]" />
               <p className="font-serif text-2xl">
                 {searchInput.trim()
                   ? "No matching clubs found"
@@ -197,33 +240,56 @@ export default function DashboardPage() {
               ) : null}
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {filteredClubs.map((club, idx) => (
                 <motion.article
                   key={club.id}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, delay: idx * 0.05 }}
-                  className="group rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810] p-5 transition hover:-translate-y-px hover:border-[#C9A96E]/45"
+                  className="group overflow-hidden rounded-xl border border-[#C9A96E]/20 bg-[#2A1810] shadow-[0_18px_45px_rgba(0,0,0,0.3)] transition hover:-translate-y-1 hover:border-[#C9A96E]/55"
                 >
-                  <h3 className="font-serif text-2xl leading-tight">
-                    {club.name}
-                  </h3>
-                  <p className="mt-2 line-clamp-3 text-sm text-[#F2E8D9]/75">
-                    {club.description || "No description yet."}
-                  </p>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="inline-flex items-center gap-1 text-xs text-[#F2E8D9]/65">
-                      <BookOpen className="h-3.5 w-3.5 text-[#C9A96E]" />
+                  <div className="relative h-36 bg-[#100904]">
+                    {club.coverImage ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={club.coverImage}
+                        alt=""
+                        className="h-full w-full object-cover opacity-85 transition duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,rgba(201,169,110,0.24),transparent_38%),linear-gradient(135deg,#3A2114,#100904)]" />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1A0F07]/90 to-transparent" />
+                    <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#100904]/80 px-3 py-1 text-xs text-[#F2E8D9]">
+                      {club.isPublic ? (
+                        <Globe className="h-3.5 w-3.5 text-[#C9A96E]" />
+                      ) : (
+                        <Lock className="h-3.5 w-3.5 text-[#C9A96E]" />
+                      )}
                       {club.isPublic ? "Public" : "Private"}
                     </span>
-                    <Link
-                      href={`/clubs/${club.id}`}
-                      className="inline-flex items-center gap-1 text-sm font-medium text-[#C9A96E] transition hover:text-[#d8b884]"
-                    >
-                      Open Club
-                      <ArrowUpRight className="h-4 w-4" />
-                    </Link>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-serif text-2xl leading-tight">
+                      {club.name}
+                    </h3>
+                    <p className="mt-2 line-clamp-3 min-h-14 text-sm text-[#F2E8D9]/75">
+                      {club.description || "No description yet."}
+                    </p>
+                    <div className="mt-5 flex items-center justify-between">
+                      <span className="inline-flex items-center gap-1 text-xs text-[#F2E8D9]/65">
+                        <Users className="h-3.5 w-3.5 text-[#C9A96E]" />
+                        {club.memberCount ?? 0} readers
+                      </span>
+                      <Link
+                        href={`/clubs/${club.id}`}
+                        className="inline-flex items-center gap-1 text-sm font-medium text-[#C9A96E] transition hover:text-[#d8b884]"
+                      >
+                        Open Club
+                        <ArrowUpRight className="h-4 w-4" />
+                      </Link>
+                    </div>
                   </div>
                 </motion.article>
               ))}

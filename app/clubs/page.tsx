@@ -77,25 +77,26 @@ export default function ClubsPage() {
         userInitial={userInitial}
       />
 
-      <section className="mx-auto w-full max-w-7xl px-5 py-10 md:px-8 md:py-12">
+      <section className="mx-auto w-full max-w-7xl px-5 pb-12 pt-28 md:px-8">
         <motion.header
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55 }}
-          className="mb-8 rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
+          className="relative mb-8 overflow-hidden rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.42)] md:p-8"
         >
-          <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-            BookCircle
-          </p>
+          <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_70%_20%,rgba(201,169,110,0.2),transparent_34%),linear-gradient(135deg,transparent,#8B4A3C)] opacity-70 md:block" />
 
-          <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
-              <h1 className="font-serif text-4xl leading-tight md:text-5xl">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+                BookCircle Library
+              </p>
+              <h1 className="mt-3 font-serif text-5xl leading-none md:text-6xl">
                 Discover Book Clubs
               </h1>
               <p className="mt-3 max-w-2xl text-sm text-[#F2E8D9]/75 md:text-base">
-                Explore reading circles, find your next discussion, and join a
-                community built around great books.
+                Browse public and private reading circles with enough context
+                to choose the kind of conversation you actually want to join.
               </p>
             </div>
 
@@ -110,7 +111,7 @@ export default function ClubsPage() {
 
           <form
             onSubmit={handleSearchSubmit}
-            className="mt-6 flex flex-col gap-3 sm:flex-row"
+            className="relative z-10 mt-7 flex flex-col gap-3 rounded-xl border border-[#C9A96E]/20 bg-[#100904]/60 p-3 sm:flex-row"
           >
             <div className="relative flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C9A96E]/70" />
@@ -118,13 +119,14 @@ export default function ClubsPage() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search clubs by name..."
-                className="w-full rounded border border-[#C9A96E]/30 bg-[#1A0F07] py-3 pl-10 pr-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/40 focus:border-[#C9A96E] focus:outline-none"
+                className="w-full rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] py-3 pl-10 pr-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/40 focus:border-[#C9A96E] focus:outline-none"
               />
             </div>
             <button
               type="submit"
-              className="inline-flex items-center justify-center rounded bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#C9A96E] px-5 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
             >
+              <Sparkles className="h-4 w-4" />
               Search
             </button>
           </form>
@@ -153,12 +155,13 @@ export default function ClubsPage() {
             {Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
-                className="h-44 animate-pulse rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810]"
+                className="h-80 animate-pulse rounded-xl border border-[#C9A96E]/20 bg-[#2A1810]"
               />
             ))}
           </div>
         ) : clubs.length === 0 ? (
-          <div className="rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810] p-8 text-center">
+          <div className="rounded-2xl border border-dashed border-[#C9A96E]/30 bg-[#2A1810]/80 p-10 text-center">
+            <BookOpen className="mx-auto mb-4 h-10 w-10 text-[#C9A96E]" />
             <p className="font-serif text-2xl">No clubs found</p>
             <p className="mt-2 text-sm text-[#F2E8D9]/70">
               Try a different search term or clear your filter.
@@ -172,39 +175,52 @@ export default function ClubsPage() {
                 initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, delay: index * 0.05 }}
-                className="group rounded-2xl border border-[#C9A96E]/20 bg-[#2A1810] p-5 transition hover:-translate-y-px hover:border-[#C9A96E]/45"
+                className="group overflow-hidden rounded-xl border border-[#C9A96E]/20 bg-[#2A1810] shadow-[0_18px_45px_rgba(0,0,0,0.32)] transition hover:-translate-y-1 hover:border-[#C9A96E]/55"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <h2 className="font-serif text-2xl leading-tight">
-                    {club.name}
-                  </h2>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-[#C9A96E]/35 px-2.5 py-1 text-[11px] uppercase tracking-wide text-[#C9A96E]">
+                <div className="relative h-44 bg-[#100904]">
+                  {club.coverImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={club.coverImage}
+                      alt=""
+                      className="h-full w-full object-cover opacity-85 transition duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,rgba(201,169,110,0.24),transparent_36%),linear-gradient(135deg,#3A2114,#100904)]" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1A0F07]/95 via-[#1A0F07]/15 to-transparent" />
+                  <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#100904]/80 px-3 py-1 text-xs text-[#F2E8D9]">
                     {club.isPublic ? (
-                      <Globe className="h-3.5 w-3.5" />
+                      <Globe className="h-3.5 w-3.5 text-[#C9A96E]" />
                     ) : (
-                      <Lock className="h-3.5 w-3.5" />
+                      <Lock className="h-3.5 w-3.5 text-[#C9A96E]" />
                     )}
                     {club.isPublic ? "Public" : "Private"}
                   </span>
+                  <h2 className="absolute bottom-4 left-4 right-4 font-serif text-3xl leading-tight">
+                    {club.name}
+                  </h2>
                 </div>
 
-                <p className="mt-3 line-clamp-3 text-sm text-[#F2E8D9]/75">
-                  {club.description || "No description yet."}
-                </p>
+                <div className="p-5">
+                  <p className="line-clamp-3 min-h-16 text-sm leading-relaxed text-[#F2E8D9]/75">
+                    {club.description || "No description yet."}
+                  </p>
 
-                <div className="mt-4 flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 text-xs text-[#F2E8D9]/65">
-                    <Users className="h-3.5 w-3.5 text-[#C9A96E]" />
-                    Reading circle
-                  </span>
+                  <div className="mt-5 flex items-center justify-between border-t border-[#C9A96E]/15 pt-4">
+                    <span className="inline-flex items-center gap-1 text-xs text-[#F2E8D9]/65">
+                      <Users className="h-3.5 w-3.5 text-[#C9A96E]" />
+                      {club.memberCount ?? 0} readers
+                    </span>
 
-                  <Link
-                    href={`/clubs/${club.id}`}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-[#C9A96E] transition hover:text-[#d8b884]"
-                  >
-                    View Club
-                    <ArrowUpRight className="h-4 w-4" />
-                  </Link>
+                    <Link
+                      href={`/clubs/${club.id}`}
+                      className="inline-flex items-center gap-1 text-sm font-medium text-[#C9A96E] transition hover:text-[#d8b884]"
+                    >
+                      View Club
+                      <ArrowUpRight className="h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
               </motion.article>
             ))}

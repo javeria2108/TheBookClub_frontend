@@ -189,9 +189,9 @@ export default function HomePage() {
           <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {[
               {
-                title: "Live Reading Rooms",
+                title: "Focused Club Chat",
                 description:
-                  "Meet in real-time for focused sessions and guided chapter discussions.",
+                  "Discuss chapters in a dedicated room that keeps every club conversation in one place.",
                 icon: MessageSquare,
               },
               {
@@ -266,7 +266,7 @@ export default function HomePage() {
                 step: "02",
                 title: "Join the conversation",
                 description:
-                  "Use live rooms and async chat to discuss ideas beyond the page.",
+                  "Use club chat to discuss ideas, share reactions, and keep momentum between reads.",
                 image:
                   "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=900&q=80",
               },
