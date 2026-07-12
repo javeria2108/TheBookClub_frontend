@@ -98,16 +98,24 @@ export const OperationMessageSchema = z.object({
 
 export const ChatMessageSchema = z.object({
   id: z.string(),
+  clientMessageId: z.string().optional(),
   roomId: z.string(),
   clubId: z.string().uuid(),
   userId: z.string().uuid(),
   username: z.string().min(1),
   content: z.string(),
   createdAt: z.string(),
+  isDeleted: z.boolean().optional().default(false),
+  deletedAt: z.string().nullable().optional(),
+  deliveryStatus: z.enum(["sending", "sent", "failed"]).optional(),
 });
 
 export const GetChatMessagesResponseSchema = z.object({
   messages: z.array(ChatMessageSchema),
+  pagination: z.object({
+    nextCursor: z.string().nullable(),
+    hasMore: z.boolean(),
+  }),
 });
 
 export const CreateClubResponseSchema = z.object({

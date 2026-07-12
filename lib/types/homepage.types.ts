@@ -1,9 +1,9 @@
-export type AuthUser = { name: string };
+export type AuthStateUser = { name: string };
 
 export type AuthState = {
   isAuthenticated: boolean;
   isReady: boolean;
-  user?: AuthUser;
+  user?: AuthStateUser;
 };
 
 export type LandingClub = {

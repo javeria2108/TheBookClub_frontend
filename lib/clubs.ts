@@ -23,7 +23,7 @@ import {
   JoinClubResponse,
   ClubMemberSummary,
   OperationMessage,
-  ChatMessage,
+  GetChatMessagesResponse,
 } from "@/lib/types";
 import { getStoredToken } from "./auth";
 
@@ -546,7 +546,8 @@ export async function getChatMessages(
   clubId: string,
   roomId: string,
   limit = 50,
-): Promise<ChatMessage[]> {
+  cursor?: string | null,
+): Promise<GetChatMessagesResponse> {
   if (!clubId?.trim()) {
     throw new Error("Club ID is required");
   }
@@ -565,6 +566,10 @@ export async function getChatMessages(
     roomId,
     limit: String(limit),
   });
+
+  if (cursor) {
+    params.set("cursor", cursor);
+  }
 
   const response = await fetch(
     `${API_BASE_URL}/clubs/${clubId}/chat/messages?${params.toString()}`,
@@ -586,5 +591,5 @@ export async function getChatMessages(
   }
 
   const data = GetChatMessagesResponseSchema.parse(payload.data);
-  return data.messages;
+  return data;
 }
