@@ -33,17 +33,9 @@ function getErrorMessage(payload: ApiErrorShape, fallback: string): string {
   return fallback;
 }
 
-export async function postJson<TResponse, TBody>(
-  path: string,
-  body: TBody,
+async function readJsonResponse<TResponse>(
+  response: Response,
 ): Promise<TResponse> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify(body),
-  });
-
   let payload: ApiSuccess<TResponse> | ApiErrorShape;
 
   try {
@@ -59,4 +51,27 @@ export async function postJson<TResponse, TBody>(
   }
 
   return (payload as ApiSuccess<TResponse>).data;
+}
+
+export async function getJson<TResponse>(path: string): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return readJsonResponse<TResponse>(response);
+}
+
+export async function postJson<TResponse, TBody>(
+  path: string,
+  body: TBody,
+): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+
+  return readJsonResponse<TResponse>(response);
 }

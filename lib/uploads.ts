@@ -3,13 +3,8 @@ const API_BASE_URL =
 
 import { UploadClubCoverResponseSchema } from "@/lib/contracts/club.contract";
 import type { UploadClubCoverResponse } from "@/lib/types";
-import { getStoredToken } from "./auth";
 
-const ALLOWED_IMAGE_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -34,20 +29,11 @@ export async function uploadClubCoverImage(
     throw new Error(validationError);
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to upload a cover image");
-  }
-
   const formData = new FormData();
   formData.append("coverImage", file);
 
   const response = await fetch(`${API_BASE_URL}/uploads/club-cover`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     credentials: "include",
     body: formData,
   });

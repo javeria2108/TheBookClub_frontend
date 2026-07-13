@@ -11,7 +11,6 @@ export const AuthUserSchema = z.object({
 
 export const AuthResponseSchema = z.object({
   user: AuthUserSchema,
-  token: z.string().min(1),
 });
 
 export const LoginRequestPayloadSchema = z.object({

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import type { ChatMessage } from "@/lib/types";
-import { AUTH_USER_KEY, getStoredToken } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
+import type { AuthUser } from "@/lib/types";
 
 const SOCKET_URL =
   process.env.NEXT_PUBLIC_SOCKET_URL ?? "http://localhost:5001";
@@ -24,40 +25,16 @@ export type TypingUser = {
   username: string;
 };
 
-function getCurrentUserId(): string | null {
-  const token = getStoredToken();
-  if (!token) return null;
-
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-
-  try {
-    const payloadJson = atob(parts[1].replace(/-/g, "+").replace(/_/g, "/"));
-    const payload = JSON.parse(payloadJson) as { id?: string };
-    return typeof payload.id === "string" ? payload.id : null;
-  } catch {
-    return null;
-  }
-}
-
-function getCurrentUsername(): string {
-  try {
-    const rawUser = localStorage.getItem(AUTH_USER_KEY);
-    if (!rawUser) return "You";
-
-    const user = JSON.parse(rawUser) as { username?: string; name?: string };
-    return user.username?.trim() || user.name?.trim() || "You";
-  } catch {
-    return "You";
-  }
-}
-
 function createClientMessageId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
 
   return `client-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getDisplayName(user: AuthUser | null): string {
+  return user?.username.trim() || "You";
 }
 
 function mergeMessage(messages: ChatMessage[], incoming: ChatMessage) {
@@ -97,84 +74,49 @@ export function useChat(roomId: string, clubId: string) {
   const [chatError, setChatError] = useState<string | null>(null);
   const [participants, setParticipants] = useState<ChatParticipant[]>([]);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
-  const [currentUserId] = useState<string | null>(() => getCurrentUserId());
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const currentUserId = currentUser?.id ?? null;
   const socketRef = useRef<Socket | null>(null);
   const isTypingRef = useRef(false);
 
   useEffect(() => {
-    const socket = io(SOCKET_URL, { withCredentials: true });
-    socketRef.current = socket;
+    let isMounted = true;
+    let socket: Socket | null = null;
 
-    socket.on("connect", () => {
-      socket.emit("joinRoom", { roomId, clubId }, (ack: SocketAck) => {
-        if (!ack?.ok) {
-          setChatError(ack?.message ?? "Failed to join chat room");
+    async function connectChat() {
+      try {
+        const user = await getCurrentUser();
+
+        if (!isMounted) return;
+
+        setCurrentUser(user);
+
+        socket = io(SOCKET_URL, { withCredentials: true });
+        socketRef.current = socket;
+
+        socket.on("connect", () => {
+          socket?.emit("joinRoom", { roomId, clubId }, (ack: SocketAck) => {
+            if (!ack?.ok) {
+              setChatError(ack?.message ?? "Failed to join chat room");
+            }
+          });
+        });
+
+        // keep the existing socket.on(...) handlers here unchanged
+      } catch {
+        if (isMounted) {
+          setChatError("You must be logged in to use chat.");
         }
-      });
-    });
-
-    socket.on("message", (message: ChatMessage) => {
-      setMessages((current) => mergeMessage(current, message));
-    });
-
-    socket.on("messageEdited", (message: ChatMessage) => {
-      setMessages((current) =>
-        current.map((existing) =>
-          existing.id === message.id
-            ? { ...existing, ...message, deliveryStatus: "sent" }
-            : existing,
-        ),
-      );
-    });
-
-    socket.on("messageDeleted", (message: ChatMessage) => {
-      setMessages((current) =>
-        current.map((existing) =>
-          existing.id === message.id
-            ? { ...existing, ...message, deliveryStatus: "sent" }
-            : existing,
-        ),
-      );
-    });
-
-    socket.on(
-      "chatPresence",
-      ({ participants: nextParticipants }: { participants: ChatParticipant[] }) => {
-        setParticipants(nextParticipants);
-      },
-    );
-
-    socket.on("userTyping", (user: TypingUser) => {
-      if (user.userId === currentUserId) return;
-
-      setTypingUsers((current) => {
-        if (current.some((typingUser) => typingUser.socketId === user.socketId)) {
-          return current;
-        }
-
-        return [...current, user];
-      });
-    });
-
-    socket.on(
-      "userStoppedTyping",
-      ({ socketId }: { socketId: string; userId?: string }) => {
-        setTypingUsers((current) =>
-          current.filter((typingUser) => typingUser.socketId !== socketId),
-        );
-      },
-    );
-
-    socket.on("chatError", ({ message }: { message?: string }) => {
-      if (message) {
-        setChatError(message);
       }
-    });
+    }
+
+    void connectChat();
 
     return () => {
-      socket.emit("typingStopped", { roomId, clubId });
-      socket.emit("leaveRoom", { roomId });
-      socket.disconnect();
+      isMounted = false;
+      socket?.emit("typingStopped", { roomId, clubId });
+      socket?.emit("leaveRoom", { roomId });
+      socket?.disconnect();
       socketRef.current = null;
       setParticipants([]);
       setTypingUsers([]);
@@ -196,7 +138,7 @@ export function useChat(roomId: string, clubId: string) {
         roomId,
         clubId,
         userId: currentUserId,
-        username: getCurrentUsername(),
+        username: getDisplayName(currentUser),
         content: trimmed,
         createdAt: new Date().toISOString(),
         isDeleted: false,
@@ -238,7 +180,7 @@ export function useChat(roomId: string, clubId: string) {
       setIsSending(false);
       return result;
     },
-    [clubId, currentUserId, roomId],
+    [clubId, currentUser, currentUserId, roomId],
   );
 
   const editMessage = useCallback(

@@ -25,7 +25,6 @@ import {
   OperationMessage,
   GetChatMessagesResponse,
 } from "@/lib/types";
-import { getStoredToken } from "./auth";
 
 export async function getClubs(params: GetClubsParams = {}) {
   const validatedParams = GetClubsParamsSchema.parse(params);
@@ -64,17 +63,11 @@ export async function createClub(
   input: CreateClubPayload,
 ): Promise<CreateClubResponse> {
   const payload = CreateClubPayloadSchema.parse(input);
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to create a club");
-  }
 
   const response = await fetch(`${API_BASE_URL}/clubs`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     credentials: "include",
     body: JSON.stringify(payload),
@@ -100,17 +93,11 @@ export async function updateClub(
   }
 
   const payload = UpdateClubPayloadSchema.parse(input);
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to update a club");
-  }
 
   const response = await fetch(`${API_BASE_URL}/clubs/${clubId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
     },
     credentials: "include",
     body: JSON.stringify(payload),
@@ -133,16 +120,10 @@ export async function getClubById(id: string) {
   }
 
   const url = `${API_BASE_URL}/clubs/${id}`;
-  const token = getStoredToken();
 
   const response = await fetch(url, {
     method: "GET",
     credentials: "include",
-    headers: token
-      ? {
-          Authorization: `Bearer ${token}`,
-        }
-      : undefined,
   });
 
   const payload = await response.json();
@@ -159,18 +140,9 @@ export async function getClubById(id: string) {
 export async function getMyClubs() {
   const url = `${API_BASE_URL}/users/me/clubs`;
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to view your clubs");
-  }
-
   const response = await fetch(url, {
     method: "GET",
     credentials: "include",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   const payload = await response.json();
@@ -204,18 +176,9 @@ export async function joinClub(clubId: string): Promise<JoinClubResponse> {
     throw new Error("Club ID is required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to join a club");
-  }
-
   const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/join`, {
     method: "POST",
     credentials: "include",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   const payload = await response.json();
@@ -234,18 +197,9 @@ export async function leaveClub(clubId: string): Promise<JoinClubResponse> {
     throw new Error("Club ID is required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to leave a club");
-  }
-
   const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/member`, {
     method: "DELETE",
     credentials: "include",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   const payload = await response.json();
@@ -266,18 +220,9 @@ export async function cancelJoinRequest(
     throw new Error("Club ID is required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to cancel a join request");
-  }
-
   const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/join-request`, {
     method: "DELETE",
     credentials: "include",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   const payload = await response.json();
@@ -298,19 +243,13 @@ export async function getJoinRequests(clubId: string) {
     throw new Error("Club ID is required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to view join requests");
-  }
-
-  const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/join-requests`, {
-    method: "GET",
-    credentials: "include",
-    headers: {
-      Authorization: `Bearer ${token}`,
+  const response = await fetch(
+    `${API_BASE_URL}/clubs/${clubId}/join-requests`,
+    {
+      method: "GET",
+      credentials: "include",
     },
-  });
+  );
 
   const payload = await response.json();
 
@@ -333,21 +272,11 @@ export async function approveJoinRequest(
     throw new Error("Club ID and request ID are required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to approve requests");
-  }
-
   const response = await fetch(
     `${API_BASE_URL}/clubs/${clubId}/join-requests/${requestId}`,
     {
       method: "PATCH",
       credentials: "include",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ action: "APPROVE" }),
     },
   );
@@ -356,7 +285,9 @@ export async function approveJoinRequest(
 
   if (!response.ok) {
     const message =
-      payload?.error?.message || payload?.message || "Failed to approve request";
+      payload?.error?.message ||
+      payload?.message ||
+      "Failed to approve request";
     throw new Error(message);
   }
 
@@ -371,21 +302,11 @@ export async function rejectJoinRequest(
     throw new Error("Club ID and request ID are required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to reject requests");
-  }
-
   const response = await fetch(
     `${API_BASE_URL}/clubs/${clubId}/join-requests/${requestId}`,
     {
       method: "PATCH",
       credentials: "include",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ action: "REJECT" }),
     },
   );
@@ -410,19 +331,12 @@ export async function updateMemberRole(
     throw new Error("Club ID and user ID are required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to manage member roles");
-  }
-
   const response = await fetch(
     `${API_BASE_URL}/clubs/${clubId}/members/${userId}/role`,
     {
       method: "PATCH",
       credentials: "include",
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ role }),
@@ -449,18 +363,9 @@ export async function getClubMembers(
     throw new Error("Club ID is required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to view club members");
-  }
-
   const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/members`, {
     method: "GET",
     credentials: "include",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   const payload = await response.json();
@@ -483,17 +388,10 @@ export async function transferClubOwnership(
     throw new Error("Club ID and target user ID are required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to transfer ownership");
-  }
-
   const response = await fetch(`${API_BASE_URL}/clubs/${clubId}/ownership`, {
     method: "PATCH",
     credentials: "include",
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ targetUserId }),
@@ -517,18 +415,9 @@ export async function deleteClub(clubId: string): Promise<OperationMessage> {
     throw new Error("Club ID is required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to delete a club");
-  }
-
   const response = await fetch(`${API_BASE_URL}/clubs/${clubId}`, {
     method: "DELETE",
     credentials: "include",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   });
 
   const payload = await response.json();
@@ -556,12 +445,6 @@ export async function getChatMessages(
     throw new Error("Room ID is required");
   }
 
-  const token = getStoredToken();
-
-  if (!token) {
-    throw new Error("You must be logged in to view chat");
-  }
-
   const params = new URLSearchParams({
     roomId,
     limit: String(limit),
@@ -576,9 +459,6 @@ export async function getChatMessages(
     {
       method: "GET",
       credentials: "include",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     },
   );
 
@@ -586,7 +466,9 @@ export async function getChatMessages(
 
   if (!response.ok) {
     const message =
-      payload?.error?.message || payload?.message || "Failed to fetch chat messages";
+      payload?.error?.message ||
+      payload?.message ||
+      "Failed to fetch chat messages";
     throw new Error(message);
   }
 
