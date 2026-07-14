@@ -18,6 +18,7 @@ interface AppHeaderProps {
   mode: HeaderMode;
   isAuthenticated: boolean;
   userInitial?: string;
+  onLogout?: () => Promise<void> | void;
 }
 
 const LANDING_NAV_ITEMS: NavItem[] = [
@@ -36,6 +37,7 @@ export function AppHeader({
   mode,
   isAuthenticated,
   userInitial,
+  onLogout,
 }: AppHeaderProps) {
   const router = useRouter();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -53,7 +55,11 @@ export function AppHeader({
 
   const handleLogout = async () => {
     setIsMobileNavOpen(false);
-    await logoutUser();
+    if (onLogout) {
+      await onLogout();
+    } else {
+      await logoutUser();
+    }
     router.push("/auth/login");
   };
 

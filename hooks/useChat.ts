@@ -102,7 +102,71 @@ export function useChat(roomId: string, clubId: string) {
           });
         });
 
-        // keep the existing socket.on(...) handlers here unchanged
+        socket.on("message", (message: ChatMessage) => {
+          setMessages((current) => mergeMessage(current, message));
+        });
+
+        socket.on("messageEdited", (message: ChatMessage) => {
+          setMessages((current) =>
+            current.map((existing) =>
+              existing.id === message.id
+                ? { ...existing, ...message, deliveryStatus: "sent" }
+                : existing,
+            ),
+          );
+        });
+
+        socket.on("messageDeleted", (message: ChatMessage) => {
+          setMessages((current) =>
+            current.map((existing) =>
+              existing.id === message.id
+                ? { ...existing, ...message, deliveryStatus: "sent" }
+                : existing,
+            ),
+          );
+        });
+
+        socket.on(
+          "chatPresence",
+          ({
+            participants: nextParticipants,
+          }: {
+            participants: ChatParticipant[];
+          }) => {
+            setParticipants(nextParticipants);
+          },
+        );
+
+        socket.on("userTyping", (typingUser: TypingUser) => {
+          if (typingUser.userId === user.id) return;
+
+          setTypingUsers((current) => {
+            if (
+              current.some(
+                (existingUser) => existingUser.socketId === typingUser.socketId,
+              )
+            ) {
+              return current;
+            }
+
+            return [...current, typingUser];
+          });
+        });
+
+        socket.on(
+          "userStoppedTyping",
+          ({ socketId }: { socketId: string; userId?: string }) => {
+            setTypingUsers((current) =>
+              current.filter((typingUser) => typingUser.socketId !== socketId),
+            );
+          },
+        );
+
+        socket.on("chatError", ({ message }: { message?: string }) => {
+          if (message) {
+            setChatError(message);
+          }
+        });
       } catch {
         if (isMounted) {
           setChatError("You must be logged in to use chat.");
@@ -122,7 +186,7 @@ export function useChat(roomId: string, clubId: string) {
       setTypingUsers([]);
       isTypingRef.current = false;
     };
-  }, [clubId, currentUserId, roomId]);
+  }, [clubId, roomId]);
 
   const sendMessage = useCallback(
     async (content: string): Promise<boolean> => {

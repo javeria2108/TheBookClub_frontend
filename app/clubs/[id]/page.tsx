@@ -31,7 +31,7 @@ export default function ClubDetailPage() {
   const params = useParams();
   const router = useRouter();
   const clubId = params.id as string;
-  const { isAuthenticated, user } = useAuthState();
+  const { isAuthenticated, isReady, logout, user } = useAuthState();
   const { toast } = useToast();
 
   const [club, setClub] = useState<Club | null>(null);
@@ -143,8 +143,9 @@ export default function ClubDetailPage() {
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
       <AppHeader
         mode="app"
-        isAuthenticated={isAuthenticated}
+        isAuthenticated={isReady && isAuthenticated}
         userInitial={userInitial}
+        onLogout={logout}
       />
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-12 pt-28 md:px-8">

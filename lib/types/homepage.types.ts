@@ -4,6 +4,7 @@ export type AuthState = {
   isAuthenticated: boolean;
   isReady: boolean;
   user?: AuthStateUser;
+  logout: () => Promise<void>;
 };
 
 export type LandingClub = {

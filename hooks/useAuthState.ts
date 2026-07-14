@@ -1,14 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getCurrentUser } from "@/lib/auth";
+import { useCallback, useEffect, useState } from "react";
+import { getCurrentUser, logoutUser } from "@/lib/auth";
 import type { AuthState } from "@/lib/types";
 
+type AuthStateData = Omit<AuthState, "logout">;
+
 export function useAuthState(): AuthState {
-  const [state, setState] = useState<AuthState>({
+  const [state, setState] = useState<AuthStateData>({
     isAuthenticated: false,
     isReady: false,
   });
+
+  const logout = useCallback(async () => {
+    await logoutUser();
+    setState({
+      isAuthenticated: false,
+      isReady: true,
+    });
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -41,7 +51,10 @@ export function useAuthState(): AuthState {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [logout]);
 
-  return state;
+  return {
+    ...state,
+    logout,
+  };
 }

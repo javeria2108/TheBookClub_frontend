@@ -277,6 +277,9 @@ export async function approveJoinRequest(
     {
       method: "PATCH",
       credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ action: "APPROVE" }),
     },
   );
@@ -307,6 +310,9 @@ export async function rejectJoinRequest(
     {
       method: "PATCH",
       credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ action: "REJECT" }),
     },
   );

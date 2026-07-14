@@ -36,7 +36,7 @@ const cardReveal = {
 };
 
 export default function HomePage() {
-  const { isAuthenticated, user } = useAuthState();
+  const { isAuthenticated, isReady, logout, user } = useAuthState();
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [clubs, setClubs] = useState<Club[]>([]);
   const [isLoadingClubs, setIsLoadingClubs] = useState(true);
@@ -83,8 +83,9 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9] font-sans">
       <AppHeader
         mode="landing"
-        isAuthenticated={isAuthenticated}
+        isAuthenticated={isReady && isAuthenticated}
         userInitial={initial}
+        onLogout={logout}
       />
 
       <section className="relative flex min-h-screen items-center overflow-hidden px-5 pb-14 pt-28 md:px-8">

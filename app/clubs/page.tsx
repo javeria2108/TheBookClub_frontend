@@ -21,7 +21,7 @@ import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function ClubsPage() {
-  const { isAuthenticated, user } = useAuthState();
+  const { isAuthenticated, isReady, logout, user } = useAuthState();
   const [clubs, setClubs] = useState<Club[]>([]);
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -73,8 +73,9 @@ export default function ClubsPage() {
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
       <AppHeader
         mode="app"
-        isAuthenticated={isAuthenticated}
+        isAuthenticated={isReady && isAuthenticated}
         userInitial={userInitial}
+        onLogout={logout}
       />
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-12 pt-28 md:px-8">
