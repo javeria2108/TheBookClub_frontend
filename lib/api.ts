@@ -7,8 +7,19 @@ type ApiSuccess<T> = {
 };
 
 type ApiErrorShape =
-  | { message?: string; error?: { message?: string } }
+  | { message?: string; error?: { code?: string; message?: string } }
   | Record<string, unknown>;
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly code?: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
 
 function getErrorMessage(payload: ApiErrorShape, fallback: string): string {
   if (
@@ -33,6 +44,20 @@ function getErrorMessage(payload: ApiErrorShape, fallback: string): string {
   return fallback;
 }
 
+function getErrorCode(payload: ApiErrorShape): string | undefined {
+  if (
+    "error" in payload &&
+    payload.error &&
+    typeof payload.error === "object" &&
+    "code" in payload.error &&
+    typeof payload.error.code === "string"
+  ) {
+    return payload.error.code;
+  }
+
+  return undefined;
+}
+
 async function readJsonResponse<TResponse>(
   response: Response,
 ): Promise<TResponse> {
@@ -45,8 +70,10 @@ async function readJsonResponse<TResponse>(
   }
 
   if (!response.ok) {
-    throw new Error(
+    throw new ApiError(
       getErrorMessage(payload as ApiErrorShape, "Request failed"),
+      response.status,
+      getErrorCode(payload as ApiErrorShape),
     );
   }
 

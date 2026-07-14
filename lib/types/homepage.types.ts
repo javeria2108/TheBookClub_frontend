@@ -1,8 +1,12 @@
 export type AuthStateUser = { name: string };
 
+export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
+
 export type AuthState = {
+  status: AuthStatus;
   isAuthenticated: boolean;
   isReady: boolean;
+  error?: string;
   user?: AuthStateUser;
   logout: () => Promise<void>;
 };

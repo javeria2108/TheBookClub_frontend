@@ -83,7 +83,8 @@ export default function HomePage() {
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9] font-sans">
       <AppHeader
         mode="landing"
-        isAuthenticated={isReady && isAuthenticated}
+        isAuthenticated={isAuthenticated}
+        isAuthReady={isReady}
         userInitial={initial}
         onLogout={logout}
       />

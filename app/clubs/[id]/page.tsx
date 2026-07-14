@@ -143,7 +143,8 @@ export default function ClubDetailPage() {
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
       <AppHeader
         mode="app"
-        isAuthenticated={isReady && isAuthenticated}
+        isAuthenticated={isAuthenticated}
+        isAuthReady={isReady}
         userInitial={userInitial}
         onLogout={logout}
       />

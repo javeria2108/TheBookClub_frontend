@@ -17,6 +17,7 @@ type NavItem = {
 interface AppHeaderProps {
   mode: HeaderMode;
   isAuthenticated: boolean;
+  isAuthReady?: boolean;
   userInitial?: string;
   onLogout?: () => Promise<void> | void;
 }
@@ -36,6 +37,7 @@ const APP_NAV_ITEMS: NavItem[] = [
 export function AppHeader({
   mode,
   isAuthenticated,
+  isAuthReady = true,
   userInitial,
   onLogout,
 }: AppHeaderProps) {
@@ -94,7 +96,9 @@ export function AppHeader({
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          {isAuthenticated ? (
+          {!isAuthReady ? (
+            <div className="h-9 w-28 animate-pulse rounded-full border border-[#C9A96E]/20 bg-[#2A1810]/70" />
+          ) : isAuthenticated ? (
             <>
               {mode === "landing" ? (
                 <Link
@@ -178,7 +182,9 @@ export function AppHeader({
                 ),
               )}
 
-              {isAuthenticated ? (
+              {!isAuthReady ? (
+                <div className="h-9 w-28 animate-pulse rounded border border-[#C9A96E]/20 bg-[#2A1810]/70" />
+              ) : isAuthenticated ? (
                 <div className="space-y-2 pt-2">
                   {mode === "landing" ? (
                     <Link

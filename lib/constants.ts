@@ -12,11 +12,6 @@ export const API_ENDPOINTS = {
   },
 } as const;
 
-export const STORAGE_KEYS = {
-  AUTH_TOKEN: "auth_token",
-  USER_DATA: "user_data",
-} as const;
-
 export const ROUTES = {
   HOME: "/",
   LOGIN: "auth/login",
