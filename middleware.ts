@@ -7,7 +7,8 @@ export function middleware(request: NextRequest) {
   const authToken = request.cookies.get(AUTH_COOKIE_NAME)?.value;
   const isAuthenticated = Boolean(authToken);
 
-  const isProtectedRoute = pathname.startsWith("/dashboard");
+  const isProtectedRoute =
+    pathname.startsWith("/dashboard") || pathname.startsWith("/profile");
   const isAuthRoute =
     pathname.startsWith("/auth/login") || pathname.startsWith("/auth/signup");
 
@@ -25,5 +26,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/auth/login", "/auth/signup"],
+  matcher: ["/dashboard/:path*", "/profile/:path*", "/auth/login", "/auth/signup"],
 };

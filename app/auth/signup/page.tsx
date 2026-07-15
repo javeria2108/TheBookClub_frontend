@@ -3,7 +3,7 @@
 import { SignupFormData, signupSchema } from "@/lib/validations/auth.schema";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen, ChevronRight, Lock, Mail, User } from "lucide-react";
@@ -11,7 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { signupUser } from "@/lib/auth";
 import { motion } from "framer-motion";
 
-export default function SignupPage() {
+function SignupPageContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const router = useRouter();
@@ -203,5 +203,17 @@ export default function SignupPage() {
         </motion.div>
       </section>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]" />
+      }
+    >
+      <SignupPageContent />
+    </Suspense>
   );
 }

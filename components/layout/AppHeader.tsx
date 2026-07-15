@@ -32,6 +32,7 @@ const APP_NAV_ITEMS: NavItem[] = [
   { label: "Home", href: "/" },
   { label: "Clubs", href: "/clubs" },
   { label: "Dashboard", href: "/dashboard" },
+  { label: "Profile", href: "/profile" },
 ];
 
 export function AppHeader({
@@ -49,7 +50,9 @@ export function AppHeader({
     
     // In app mode, guests don't see Dashboard (middleware blocks it anyway)
     if (!isAuthenticated) {
-      return APP_NAV_ITEMS.filter((item) => item.label !== "Dashboard");
+      return APP_NAV_ITEMS.filter(
+        (item) => item.label !== "Dashboard" && item.label !== "Profile",
+      );
     }
     
     return APP_NAV_ITEMS;

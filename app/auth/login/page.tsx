@@ -3,7 +3,7 @@
 import { LoginFormData, loginSchema } from "@/lib/validations/auth.schema";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { BookOpen, ChevronRight, Lock, Mail } from "lucide-react";
@@ -11,7 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { loginUser } from "@/lib/auth";
 import { motion } from "framer-motion";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("returnTo") || "/dashboard";
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -159,5 +159,17 @@ export default function LoginPage() {
         </motion.div>
       </section>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]" />
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }

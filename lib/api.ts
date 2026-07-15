@@ -102,3 +102,30 @@ export async function postJson<TResponse, TBody>(
 
   return readJsonResponse<TResponse>(response);
 }
+
+export async function patchJson<TResponse, TBody>(
+  path: string,
+  body: TBody,
+): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(body),
+  });
+
+  return readJsonResponse<TResponse>(response);
+}
+
+export async function postForm<TResponse>(
+  path: string,
+  body: FormData,
+): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    credentials: "include",
+    body,
+  });
+
+  return readJsonResponse<TResponse>(response);
+}
