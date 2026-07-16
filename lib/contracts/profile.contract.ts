@@ -26,8 +26,8 @@ export const JoinedClubSummarySchema = z.object({
   coverImage: z.string().url().nullable(),
   memberCount: z.number().int().nonnegative(),
   memberRole: z.enum(["MEMBER", "MODERATOR", "OWNER"]),
-  joinedAt: z.string(),
-  createdAt: z.string(),
+  joinedAt: z.string().datetime(),
+  createdAt: z.string().datetime(),
 });
 
 export const UserProfileSchema = z.object({
@@ -38,8 +38,8 @@ export const UserProfileSchema = z.object({
   bio: z.string().nullable(),
   favoriteGenres: z.array(z.string()),
   role: z.enum(["USER", "ADMIN"]),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
   joinedClubs: z.array(JoinedClubSummarySchema),
 });
 

@@ -70,7 +70,11 @@ export function AvatarUpload({ profile, onUploaded }: AvatarUploadProps) {
             className="inline-flex items-center gap-2 rounded-lg border border-[#C9A96E]/35 px-4 py-2 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E] disabled:opacity-60"
           >
             <Camera className="h-4 w-4" />
-            {isUploading ? "Uploading..." : "Replace Avatar"}
+            {isUploading
+              ? "Uploading..."
+              : profile.avatarUrl
+                ? "Replace Avatar"
+                : "Upload Avatar"}
           </button>
           <p className="mt-2 text-xs text-[#F2E8D9]/55">
             JPEG, PNG, or WebP. Maximum 2 MB.
