@@ -3,14 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { BookOpen, Search, X } from "lucide-react";
 
-import { toast } from "@/components/ui/use-toast";
-import { importGoogleBook, searchGoogleBooks } from "@/lib/books";
-import type { Book, BookDiscoveryResult } from "@/lib/types";
+import { searchGoogleBooks } from "@/lib/books";
+import type { BookDiscoveryResult } from "@/lib/types";
 
 type BookSearchModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImported?: (book: Book) => void | Promise<void>;
+  onSelected?: (book: BookDiscoveryResult) => void | Promise<void>;
+  title?: string;
+  subtitle?: string;
 };
 
 const SEARCH_DEBOUNCE_MS = 450;
@@ -31,18 +32,20 @@ function getDescription(description: string | null): string {
 }
 
 function getResultKey(book: BookDiscoveryResult): string {
-  return book.internalBookId ?? book.googleBooksId ?? book.title;
+  return book.bookId ?? book.googleBooksId ?? book.title;
 }
 
 export function BookSearchModal({
   open,
   onOpenChange,
-  onImported,
+  onSelected,
+  title = "Choose a Book",
+  subtitle = "Search BookCircle and Google Books",
 }: BookSearchModalProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<BookDiscoveryResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const [importingId, setImportingId] = useState<string | null>(null);
+  const [selectingKey, setSelectingKey] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   const trimmedQuery = useMemo(() => query.trim(), [query]);
@@ -84,26 +87,14 @@ export function BookSearchModal({
     return () => window.clearTimeout(timeoutId);
   }, [open, trimmedQuery]);
 
-  const handleImport = async (googleBooksId: string) => {
+  const handleSelect = async (book: BookDiscoveryResult) => {
+    const resultKey = getResultKey(book);
+
     try {
-      setImportingId(googleBooksId);
-      const importedBook = await importGoogleBook(googleBooksId);
-      await onImported?.(importedBook);
-      toast({
-        title: "Book imported",
-        description: `${importedBook.title} is now saved in BookCircle.`,
-      });
-    } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "Unable to import book",
-        description:
-          err instanceof Error
-            ? err.message
-            : "Please try importing this book again.",
-      });
+      setSelectingKey(resultKey);
+      await onSelected?.(book);
     } finally {
-      setImportingId(null);
+      setSelectingKey(null);
     }
   };
 
@@ -131,8 +122,9 @@ export function BookSearchModal({
                 id="book-search-title"
                 className="mt-1 font-serif text-3xl text-[#F2E8D9]"
               >
-                Search Google Books
+                {title}
               </h2>
+              <p className="mt-2 text-sm text-[#F2E8D9]/65">{subtitle}</p>
             </div>
             <button
               type="button"
@@ -163,7 +155,8 @@ export function BookSearchModal({
                 Find a book to save
               </p>
               <p className="mt-2 max-w-md text-sm text-[#F2E8D9]/65">
-                Search Google Books, then import the metadata into BookCircle.
+                Search saved BookCircle books and Google Books, then choose one
+                for this club.
               </p>
             </div>
           ) : trimmedQuery.length < MIN_SEARCH_LENGTH ? (
@@ -206,8 +199,8 @@ export function BookSearchModal({
           ) : (
             <div className="space-y-4">
               {results.map((book) => {
-                const canImport = !book.isImported && Boolean(book.googleBooksId);
-                const isImporting = importingId === book.googleBooksId;
+                const resultKey = getResultKey(book);
+                const isSelecting = selectingKey === resultKey;
 
                 return (
                   <article
@@ -241,22 +234,19 @@ export function BookSearchModal({
                               ? ` - ${book.publishedYear}`
                               : ""}
                           </p>
+                          {book.isSaved ? (
+                            <p className="mt-2 inline-flex rounded-full border border-[#C9A96E]/30 px-3 py-1 text-xs text-[#C9A96E]">
+                              Saved in BookCircle
+                            </p>
+                          ) : null}
                         </div>
                         <button
                           type="button"
-                          disabled={!canImport || isImporting}
-                          onClick={() => {
-                            if (book.googleBooksId) {
-                              void handleImport(book.googleBooksId);
-                            }
-                          }}
+                          disabled={isSelecting}
+                          onClick={() => void handleSelect(book)}
                           className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          {book.isImported
-                            ? "Saved"
-                            : isImporting
-                              ? "Importing..."
-                              : "Import Book"}
+                          {isSelecting ? "Choosing..." : "Choose this book"}
                         </button>
                       </div>
 

@@ -25,7 +25,24 @@ import JoinRequestsPanel from "@/components/pages/clubs/JoinRequestsPanel";
 import MembersPanel from "@/components/pages/clubs/MembersPanel";
 import OwnerLeaveDialog from "@/components/pages/clubs/OwnerLeaveDialog";
 import ChatWindow from "@/components/clubs/ChatWindow";
+import { ReadingCycleDialog } from "@/components/clubs/ReadingCycleDialog";
+import { ReadingCycleEditDialog } from "@/components/clubs/ReadingCycleEditDialog";
+import { ReadingCycleSection } from "@/components/clubs/ReadingCycleSection";
 import { useToast } from "@/components/ui/use-toast";
+import {
+  cancelReadingCycle,
+  completeReadingCycle,
+  createReadingCycle,
+  getCurrentReadingCycle,
+  getReadingCycles,
+  startReadingCycle,
+  updateReadingCycle,
+} from "@/lib/reading-cycles";
+import type {
+  CreateReadingCyclePayload,
+  ReadingCycle,
+  UpdateReadingCyclePayload,
+} from "@/lib/types";
 
 export default function ClubDetailPage() {
   const params = useParams();
@@ -39,6 +56,16 @@ export default function ClubDetailPage() {
   const [error, setError] = useState("");
   const [pendingRequest, setPendingRequest] = useState(false);
   const [ownerLeaveModalOpen, setOwnerLeaveModalOpen] = useState(false);
+  const [readingCycles, setReadingCycles] = useState<ReadingCycle[]>([]);
+  const [publicCurrentCycle, setPublicCurrentCycle] =
+    useState<ReadingCycle | null>(null);
+  const [isReadingCycleLoading, setIsReadingCycleLoading] = useState(false);
+  const [readingCycleDialogOpen, setReadingCycleDialogOpen] = useState(false);
+  const [editingReadingCycle, setEditingReadingCycle] =
+    useState<ReadingCycle | null>(null);
+  const [readingCycleActionId, setReadingCycleActionId] = useState<
+    string | null
+  >(null);
 
   const memberManagement = useMemberManagement(clubId);
   const { setLoading: setMembersLoading, setMembers } = memberManagement;
@@ -79,6 +106,33 @@ export default function ClubDetailPage() {
   useEffect(() => {
     void loadClub();
   }, [loadClub]);
+
+  const loadReadingCycleData = useCallback(async () => {
+    if (!club) return;
+
+    try {
+      setIsReadingCycleLoading(true);
+
+      if (isAuthenticated && club.isMember) {
+        const data = await getReadingCycles(clubId);
+        setReadingCycles(data.readingCycles);
+        setPublicCurrentCycle(null);
+        return;
+      }
+
+      const readingCycle = await getCurrentReadingCycle(clubId);
+      setPublicCurrentCycle(readingCycle);
+      setReadingCycles([]);
+    } catch (err) {
+      console.error("Failed to load reading cycles:", err);
+    } finally {
+      setIsReadingCycleLoading(false);
+    }
+  }, [club, clubId, isAuthenticated]);
+
+  useEffect(() => {
+    void loadReadingCycleData();
+  }, [loadReadingCycleData]);
 
   const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
 
@@ -137,6 +191,103 @@ export default function ClubDetailPage() {
     }
 
     void handleLeaveClick(club);
+  };
+
+  const currentCycle =
+    readingCycles.find((cycle) => cycle.status === "ACTIVE") ??
+    readingCycles.find((cycle) => cycle.status === "PLANNED") ??
+    publicCurrentCycle;
+
+  const completedCycles = readingCycles.filter(
+    (cycle) => cycle.status === "COMPLETED",
+  );
+
+  const handleCreateReadingCycle = async (
+    payload: CreateReadingCyclePayload,
+  ) => {
+    const readingCycle = await createReadingCycle(clubId, payload);
+    await loadReadingCycleData();
+    toast({
+      title: "Reading cycle saved",
+      description: `${readingCycle.book.title} is ready for this club.`,
+    });
+    return readingCycle;
+  };
+
+  const handleStartReadingCycle = async (cycle: ReadingCycle) => {
+    try {
+      setReadingCycleActionId(cycle.id);
+      await startReadingCycle(clubId, cycle.id);
+      await loadReadingCycleData();
+      toast({
+        title: "Reading cycle started",
+        description: `${cycle.book.title} is now the club's current read.`,
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Unable to start cycle",
+        description:
+          err instanceof Error ? err.message : "Please try again in a moment.",
+      });
+    } finally {
+      setReadingCycleActionId(null);
+    }
+  };
+
+  const handleUpdateReadingCycle = async (
+    cycle: ReadingCycle,
+    payload: UpdateReadingCyclePayload,
+  ) => {
+    const updatedCycle = await updateReadingCycle(clubId, cycle.id, payload);
+    await loadReadingCycleData();
+    toast({
+      title: "Reading cycle updated",
+      description: `${updatedCycle.book.title} has a refreshed schedule.`,
+    });
+    return updatedCycle;
+  };
+
+  const handleCompleteReadingCycle = async (cycle: ReadingCycle) => {
+    try {
+      setReadingCycleActionId(cycle.id);
+      await completeReadingCycle(clubId, cycle.id);
+      await loadReadingCycleData();
+      toast({
+        title: "Reading cycle completed",
+        description: `${cycle.book.title} has been added to reading history.`,
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Unable to complete cycle",
+        description:
+          err instanceof Error ? err.message : "Please try again in a moment.",
+      });
+    } finally {
+      setReadingCycleActionId(null);
+    }
+  };
+
+  const handleCancelReadingCycle = async (cycle: ReadingCycle) => {
+    try {
+      setReadingCycleActionId(cycle.id);
+      await cancelReadingCycle(clubId, cycle.id);
+      await loadReadingCycleData();
+      toast({
+        title: "Reading cycle cancelled",
+        description: `${cycle.book.title} is no longer scheduled.`,
+      });
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Unable to cancel cycle",
+        description:
+          err instanceof Error ? err.message : "Please try again in a moment.",
+      });
+    } finally {
+      setReadingCycleActionId(null);
+    }
   };
 
   return (
@@ -329,6 +480,20 @@ export default function ClubDetailPage() {
               </div>
             </motion.div>
 
+            <ReadingCycleSection
+              currentCycle={currentCycle ?? null}
+              completedCycles={completedCycles}
+              isOwner={club.memberRole === "OWNER"}
+              isMember={Boolean(club.isMember)}
+              isLoading={isReadingCycleLoading}
+              onCreate={() => setReadingCycleDialogOpen(true)}
+              onEdit={setEditingReadingCycle}
+              onStart={(cycle) => void handleStartReadingCycle(cycle)}
+              onComplete={(cycle) => void handleCompleteReadingCycle(cycle)}
+              onCancel={(cycle) => void handleCancelReadingCycle(cycle)}
+              actionInProgress={readingCycleActionId}
+            />
+
             <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="space-y-8">
                 {club.memberRole &&
@@ -388,6 +553,20 @@ export default function ClubDetailPage() {
           setOwnerLeaveModalOpen(false);
           router.push("/clubs");
         }}
+      />
+      <ReadingCycleDialog
+        open={readingCycleDialogOpen}
+        onOpenChange={setReadingCycleDialogOpen}
+        onSubmit={handleCreateReadingCycle}
+      />
+      <ReadingCycleEditDialog
+        cycle={editingReadingCycle}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditingReadingCycle(null);
+          }
+        }}
+        onSubmit={handleUpdateReadingCycle}
       />
     </main>
   );

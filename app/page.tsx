@@ -17,9 +17,9 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Globe,
   Lock,
   MessageSquare,
+  Play,
   Users,
   Vote,
 } from "lucide-react";
@@ -39,25 +39,17 @@ export default function HomePage() {
   const { isAuthenticated, isReady, logout, user } = useAuthState();
   const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [clubs, setClubs] = useState<Club[]>([]);
-  const [isLoadingClubs, setIsLoadingClubs] = useState(true);
-  const [clubsError, setClubsError] = useState<string | null>(null);
 
   const featuredClub = clubs[0] ?? mockClubs[0];
 
   useEffect(() => {
     const fetchLandingClubs = async () => {
       try {
-        setIsLoadingClubs(true);
-        setClubsError(null);
         const data = await getClubs({ limit: 5 });
 
         setClubs(mapApiClubsToLandingClubs(data.clubs));
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Failed to load clubs";
-        setClubsError(message);
-      } finally {
-        setIsLoadingClubs(false);
+        console.error("Failed to load landing clubs", error);
       }
     };
 
@@ -80,7 +72,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9] font-sans">
+    <main className="min-h-screen bg-[#090807] text-[#F2E8D9] font-sans">
       <AppHeader
         mode="landing"
         isAuthenticated={isAuthenticated}
@@ -89,65 +81,78 @@ export default function HomePage() {
         onLogout={logout}
       />
 
-      <section className="relative flex min-h-screen items-center overflow-hidden px-5 pb-14 pt-28 md:px-8">
-        <div className="absolute right-[-8%] top-[14%] hidden h-[72%] w-[52%] overflow-hidden rounded-l-[44px] lg:block">
+      <section className="relative flex min-h-screen items-center overflow-hidden border-b border-[#C9A96E]/25 px-5 pb-20 pt-24 md:px-8">
+        <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=1600&q=80"
-            alt="Atmospheric library shelves"
+            src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=1800&q=85"
+            alt="Open books in a moody library"
             fill
-            className="object-cover"
+            className="object-cover opacity-45"
             priority
           />
-          <div className="absolute inset-0 bg-[#1A0F07]/35" />
         </div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_28%,rgba(24,191,183,0.38),transparent_30%),radial-gradient(circle_at_18%_18%,rgba(201,169,110,0.16),transparent_24%),linear-gradient(180deg,rgba(9,8,7,0.35)_0%,rgba(10,31,29,0.78)_42%,rgba(9,8,7,0.97)_100%)]" />
+        <div className="absolute inset-x-0 top-0 h-28 bg-[linear-gradient(180deg,rgba(9,8,7,0.86),transparent)]" />
+        <div className="absolute inset-x-0 bottom-0 h-40 bg-[linear-gradient(0deg,#090807,transparent)]" />
+        <div className="absolute left-0 right-0 top-20 h-px bg-[#C9A96E]/30" />
 
-        <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 gap-12 lg:grid-cols-12">
-          <div className="lg:col-span-7">
+        <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-12">
+          <div className="text-center lg:col-span-6 lg:text-left">
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="mb-5 text-[11px] uppercase tracking-[0.25em] text-[#C9A96E]"
+              className="mb-4 text-[11px] uppercase tracking-[0.28em] text-[#E8C46D]"
             >
-              For readers who go deeper
+              A candlelit home for book clubs
             </motion.p>
 
             <motion.h1
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="font-serif text-[52px] leading-[0.95] sm:text-[72px] lg:text-[96px]"
+              className="font-serif text-[58px] font-black uppercase leading-[0.86] text-[#F7DFA5] drop-shadow-[0_6px_16px_rgba(0,0,0,0.75)] sm:text-[86px] lg:text-[112px]"
             >
-              Find Your Reading Tribe.
+              BookCircle
             </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.18 }}
+              className="mt-2 font-serif text-2xl tracking-[0.22em] text-[#F2E8D9] sm:text-3xl"
+            >
+              Reading Club
+            </motion.p>
 
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.2 }}
-              className="mt-7 max-w-xl text-base leading-relaxed text-[#F2E8D9]/80 md:text-lg"
+              className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-[#F2E8D9]/80 md:text-lg lg:mx-0"
             >
-              Discover thoughtful clubs, read with intention, and build
-              conversations that outlast the final chapter.
+              Discover thoughtful circles, vote on the next great read, and
+              gather around conversations that glow long after the final page.
             </motion.p>
 
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-10 flex flex-wrap items-center gap-4"
+              className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start"
             >
               <Link
                 href={isAuthenticated ? "/clubs" : "/auth/signup"}
-                className="inline-flex items-center gap-2 rounded bg-[#C9A96E] px-7 py-3 text-sm font-semibold text-[#1A0F07] transition hover:-translate-y-px hover:shadow-[0_10px_24px_rgba(0,0,0,0.35)]"
+                className="inline-flex items-center gap-2 rounded-sm border border-[#FFE4A4]/70 bg-[linear-gradient(180deg,#FFE4A4_0%,#C99636_48%,#8B531E_100%)] px-8 py-3 text-sm font-black uppercase tracking-[0.08em] text-[#281306] shadow-[0_8px_0_#4c260d,0_18px_36px_rgba(0,0,0,0.45)] transition hover:-translate-y-px"
               >
-                {isAuthenticated ? "Browse Clubs" : "Explore Clubs"}
+                {isAuthenticated ? "Browse Clubs" : "Start Reading"}
                 <ChevronRight className="h-4 w-4" />
               </Link>
               <a
                 href="#how"
-                className="rounded border border-[#C9A96E]/70 px-7 py-3 text-sm font-medium text-[#F2E8D9] transition hover:bg-[#C9A96E]/10"
+                className="inline-flex items-center gap-2 rounded-sm border border-[#E8C46D]/60 bg-[#090807]/45 px-7 py-3 text-sm font-bold uppercase tracking-[0.08em] text-[#F2E8D9] transition hover:bg-[#C9A96E]/10"
               >
+                <Play className="h-4 w-4 fill-[#E8C46D] text-[#E8C46D]" />
                 How it Works
               </a>
             </motion.div>
@@ -156,12 +161,60 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="mt-8 inline-flex items-center gap-2 rounded-full border border-[#C9A96E]/35 bg-[#2A1810]/70 px-4 py-2 text-sm text-[#F2E8D9]/90"
+              className="mt-8 inline-flex items-center gap-2 border border-[#C9A96E]/35 bg-[#080706]/70 px-4 py-2 text-sm text-[#F2E8D9]/90 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur"
             >
               <Users className="h-4 w-4 text-[#C9A96E]" />
-              <span>240+ Members · 18 Cities · Reading Now</span>
+              <span>240+ members | 18 cities | reading now</span>
             </motion.div>
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 28, rotate: 2 }}
+            animate={{ opacity: 1, x: 0, rotate: 0 }}
+            transition={{ duration: 0.8, delay: 0.25 }}
+            className="relative mx-auto h-[430px] w-full max-w-[430px] lg:col-span-6"
+            aria-hidden="true"
+          >
+            <div className="absolute left-7 top-16 h-72 w-48 -rotate-[15deg] overflow-hidden rounded-md border border-[#E8C46D]/35 bg-[#130d08] shadow-[0_26px_46px_rgba(0,0,0,0.65)]">
+              <Image
+                src="https://images.unsplash.com/photo-1512820790803-83ca734da794?w=700&q=80"
+                alt=""
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-[#0d0907]/25" />
+            </div>
+            <div className="absolute right-7 top-28 h-72 w-48 rotate-[14deg] overflow-hidden rounded-md border border-[#E8C46D]/35 bg-[#130d08] shadow-[0_26px_46px_rgba(0,0,0,0.65)]">
+              <Image
+                src="https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=700&q=80"
+                alt=""
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-[#0d0907]/20" />
+            </div>
+            <div className="absolute left-1/2 top-5 h-[360px] w-60 -translate-x-1/2 overflow-hidden rounded-md border border-[#FFE4A4]/70 bg-[#120b07] shadow-[0_30px_70px_rgba(0,0,0,0.75)]">
+              <Image
+                src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800&q=85"
+                alt=""
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(9,8,7,0.04),rgba(9,8,7,0.58))]" />
+              <div className="absolute inset-x-5 bottom-5 border-t border-[#E8C46D]/45 pt-4 text-center">
+                <p className="font-serif text-2xl font-bold text-[#F7DFA5]">
+                  The Next Chapter
+                </p>
+                <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-[#F2E8D9]/75">
+                  Club pick
+                </p>
+              </div>
+            </div>
+            <div className="absolute left-1/2 top-44 flex h-16 w-16 -translate-x-1/2 items-center justify-center rounded-full border border-[#FFE4A4]/80 bg-[radial-gradient(circle,#FFE4A4_0%,#C99636_58%,#6C3715_100%)] text-[#281306] shadow-[0_0_35px_rgba(232,196,109,0.48)]">
+              <Play className="ml-1 h-7 w-7 fill-current" />
+            </div>
+            <div className="absolute bottom-0 left-1/2 h-28 w-80 -translate-x-1/2 rounded-[50%] bg-[#17b7ad]/20 blur-3xl" />
+          </motion.div>
         </div>
 
         <motion.div

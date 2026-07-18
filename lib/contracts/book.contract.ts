@@ -22,9 +22,10 @@ export const BookSchema = z.object({
 });
 
 export const BookDiscoveryResultSchema = z.object({
+  source: z.enum(["BOOKCIRCLE", "GOOGLE_BOOKS"]),
+  isSaved: z.boolean(),
+  bookId: z.string().uuid().nullable(),
   googleBooksId: z.string().min(1).nullable(),
-  internalBookId: z.string().uuid().nullable(),
-  isImported: z.boolean(),
   title: z.string().min(1),
   subtitle: z.string().nullable(),
   description: z.string().nullable(),

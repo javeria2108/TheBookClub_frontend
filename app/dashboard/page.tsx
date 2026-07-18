@@ -1,7 +1,6 @@
 "use client";
 
 import { CreateClubModal } from "@/components/clubs/CreateClubModal";
-import { BookSearchModal } from "@/components/books/BookSearchModal";
 import { getMyClubs } from "@/lib/clubs";
 import { AppHeader } from "@/components/layout/AppHeader";
 import type { Club } from "@/lib/types";
@@ -9,7 +8,6 @@ import {
   ArrowUpRight,
   BookOpen,
   Globe,
-  LibraryBig,
   Lock,
   Plus,
   Search,
@@ -29,7 +27,6 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isBookSearchOpen, setIsBookSearchOpen] = useState(false);
   const { toast } = useToast();
 
   const loadClubs = useCallback(async () => {
@@ -119,15 +116,6 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => setIsBookSearchOpen(true)}
-                className="inline-flex items-center gap-2 rounded border border-[#C9A96E]/40 px-4 py-2 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E]"
-              >
-                <LibraryBig className="h-4 w-4" />
-                Import Book
-              </button>
-
               <Link
                 href="/clubs"
                 className="inline-flex items-center gap-2 rounded border border-[#C9A96E]/40 px-4 py-2 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E]"
@@ -316,10 +304,6 @@ export default function DashboardPage() {
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         onCreated={handleClubCreated}
-      />
-      <BookSearchModal
-        open={isBookSearchOpen}
-        onOpenChange={setIsBookSearchOpen}
       />
     </main>
   );
