@@ -5,6 +5,7 @@ import { BookOpen, CalendarDays, CheckCircle2, Clock, XCircle } from "lucide-rea
 import { ReadingPlanPanel } from "@/components/clubs/ReadingPlanPanel";
 import { ReadingProgressPanel } from "@/components/clubs/ReadingProgressPanel";
 import { RelatedDiscussionsPreview } from "@/components/clubs/RelatedDiscussionsPreview";
+import { ReadingEntriesPanel } from "@/components/clubs/ReadingEntriesPanel";
 import type { CreateReadingTargetPayload, ReadingCycle, ReadingTarget } from "@/lib/types";
 import type { ReadingProgressResponse } from "@/lib/types";
 
@@ -293,6 +294,11 @@ export function ReadingCycleSection({
               <RelatedDiscussionsPreview
                 clubId={clubId}
                 cycleId={currentCycle.id}
+              />
+              <ReadingEntriesPanel
+                clubId={clubId}
+                cycle={currentCycle}
+                targets={targets}
               />
             </>
           ) : null}

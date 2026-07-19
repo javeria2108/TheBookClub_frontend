@@ -6,3 +6,4 @@ export * from "./profile.types";
 export * from "./reading-cycle.types";
 export * from "./discussion.types";
 export * from "./book-vote.types";
+export * from "./reading-entry.types";
