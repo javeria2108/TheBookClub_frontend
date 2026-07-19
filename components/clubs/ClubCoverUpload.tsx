@@ -11,6 +11,7 @@ type ClubCoverUploadProps = {
   error?: string;
   label?: string;
   helperText?: string;
+  previewClassName?: string;
 };
 
 export function ClubCoverUpload({
@@ -20,6 +21,7 @@ export function ClubCoverUpload({
   error,
   label = "Cover Image",
   helperText = "Upload a JPEG, PNG, or WebP image up to 5 MB.",
+  previewClassName = "aspect-[16/9]",
 }: ClubCoverUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(value);
@@ -72,10 +74,10 @@ export function ClubCoverUpload({
 
   return (
     <div className="space-y-2">
-      <label className="text-sm text-[#F2E8D9]/80">{label}</label>
+      <label className="app-field-label">{label}</label>
 
-      <div className="overflow-hidden rounded-xl border border-[#C9A96E]/25 bg-[#1A0F07]/70">
-        <div className="relative aspect-[16/9] bg-[#100904]">
+      <div className="overflow-hidden rounded-xl border border-[var(--app-border-subtle)] bg-[rgba(8,11,10,0.42)]">
+        <div className={`relative bg-[var(--app-surface-subtle)] ${previewClassName}`}>
           {previewUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -84,29 +86,29 @@ export function ClubCoverUpload({
               className="h-full w-full object-cover"
             />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center text-[#F2E8D9]/55">
-              <ImagePlus className="h-10 w-10 text-[#C9A96E]/70" />
+            <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center text-[var(--app-text-muted)]">
+              <ImagePlus className="h-10 w-10 text-[var(--app-accent-gold)]" />
               <p className="text-sm">No cover image selected yet</p>
             </div>
           )}
 
           {isUploading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#050302]/70 backdrop-blur-sm">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#C9A96E]/30 px-4 py-2 text-sm text-[#F2E8D9]">
-                <Loader2 className="h-4 w-4 animate-spin text-[#C9A96E]" />
+            <div className="absolute inset-0 flex items-center justify-center bg-[rgba(3,6,5,0.72)] backdrop-blur-sm">
+              <div className="inline-flex items-center gap-2 rounded-lg border border-[var(--app-border-subtle)] bg-[var(--app-surface-elevated)] px-4 py-2 text-sm text-[var(--app-text-primary)]">
+                <Loader2 className="h-4 w-4 animate-spin text-[var(--app-accent-gold)]" />
                 Uploading...
               </div>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-[#C9A96E]/15 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-[#F2E8D9]/55">{helperText}</p>
+        <div className="flex flex-col gap-2 border-t border-[var(--app-border-subtle)] p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4">
+          <p className="text-xs text-[var(--app-text-muted)]">{helperText}</p>
           <button
             type="button"
             disabled={disabled || isUploading}
             onClick={() => inputRef.current?.click()}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#C9A96E]/35 px-4 py-2 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E] hover:text-[#C9A96E] disabled:cursor-not-allowed disabled:opacity-60"
+            className="app-button-secondary min-h-10 w-full py-2 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
             <Upload className="h-4 w-4" />
             {previewUrl ? "Choose Another Image" : "Upload Cover Image"}

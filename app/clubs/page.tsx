@@ -134,10 +134,10 @@ export default function ClubsPage() {
 
         <form
           onSubmit={handleSearchSubmit}
-          className="app-surface mb-6 rounded-2xl p-4"
+          className="app-surface mb-6 min-w-0 rounded-2xl p-4"
         >
           <div className="flex flex-col gap-3 lg:flex-row">
-            <div className="relative flex-1">
+            <div className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--app-accent-gold)]" />
               <input
                 value={searchInput}
@@ -146,11 +146,11 @@ export default function ClubsPage() {
                 className="app-input w-full py-3 pl-10 pr-3 text-sm"
               />
             </div>
-            <button type="submit" className="app-button-primary">
+            <button type="submit" className="app-button-primary w-full lg:w-auto">
               Search
             </button>
           </div>
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-4 flex max-w-full gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
             {VISIBILITY_FILTERS.map((filter) => (
               <button
                 key={filter.value}
@@ -159,7 +159,7 @@ export default function ClubsPage() {
                   setPage(1);
                   setVisibility(filter.value);
                 }}
-                className={`min-h-10 rounded-full border px-4 text-sm ${
+                  className={`min-h-10 shrink-0 rounded-full border px-4 text-sm ${
                   visibility === filter.value
                     ? "border-[var(--app-accent-gold)] bg-[var(--app-accent-teal-soft)] text-[var(--app-accent-gold-hover)]"
                     : "border-[var(--app-border-subtle)] text-[var(--app-text-secondary)]"
@@ -171,7 +171,7 @@ export default function ClubsPage() {
             {genres.slice(0, 4).map((genre) => (
               <span
                 key={genre}
-                className="inline-flex min-h-10 items-center rounded-full border border-[var(--app-border-subtle)] px-4 text-sm text-[var(--app-text-muted)]"
+                className="inline-flex min-h-10 shrink-0 items-center rounded-full border border-[var(--app-border-subtle)] px-4 text-sm text-[var(--app-text-muted)]"
               >
                 {genre}
               </span>
@@ -230,7 +230,7 @@ export default function ClubsPage() {
                     alt={`${club.name} cover`}
                     className="aspect-[16/10]"
                   />
-                  <div className="flex flex-1 flex-col p-5">
+                  <div className="flex min-w-0 flex-1 flex-col p-4 sm:p-5">
                     <div className="mb-3 flex flex-wrap gap-2">
                       <StatusBadge tone={club.isPublic ? "teal" : "gold"}>
                         {club.isPublic ? (
@@ -256,12 +256,12 @@ export default function ClubsPage() {
                       </span>
                       <span>{club.genre || "General"}</span>
                     </div>
-                    <div className="mt-5 flex items-center justify-between gap-3 border-t border-[var(--app-border-subtle)] pt-4">
-                      <p className="text-xs uppercase tracking-[0.14em] text-[var(--app-text-muted)]">
+                    <div className="mt-5 flex min-w-0 flex-col gap-3 border-t border-[var(--app-border-subtle)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-xs uppercase tracking-[0.1em] text-[var(--app-text-muted)] sm:tracking-[0.14em]">
                         Reading details inside
                       </p>
                       {club.isMember ? (
-                        <Link href={`/clubs/${club.id}`} className="app-button-primary">
+                        <Link href={`/clubs/${club.id}`} className="app-button-primary w-full sm:w-auto">
                           <BookOpen className="h-4 w-4" />
                           {actionLabel}
                         </Link>
@@ -270,7 +270,7 @@ export default function ClubsPage() {
                           type="button"
                           disabled={isBusy}
                           onClick={() => void cancelJoinRequest(club)}
-                          className="app-button-secondary"
+                          className="app-button-secondary w-full sm:w-auto"
                         >
                           {isBusy ? "Cancelling..." : "Cancel request"}
                         </button>
@@ -279,14 +279,14 @@ export default function ClubsPage() {
                           type="button"
                           disabled={isBusy}
                           onClick={() => void joinClub(club)}
-                          className="app-button-primary"
+                          className="app-button-primary w-full sm:w-auto"
                         >
                           {isBusy ? "Working..." : actionLabel}
                         </button>
                       ) : (
                         <Link
                           href={`/auth/login?returnTo=${encodeURIComponent(`/clubs/${club.id}`)}`}
-                          className="app-button-primary"
+                          className="app-button-primary w-full sm:w-auto"
                         >
                           {actionLabel}
                         </Link>

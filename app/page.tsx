@@ -81,7 +81,7 @@ export default function HomePage() {
         onLogout={logout}
       />
 
-      <section className="relative flex min-h-screen items-center overflow-hidden border-b border-[#C9A96E]/25 px-5 pb-20 pt-24 md:px-8">
+      <section className="relative flex min-h-screen items-center overflow-hidden border-b border-[#C9A96E]/25 px-4 pb-20 pt-24 md:px-8">
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=1800&q=85"
@@ -97,12 +97,12 @@ export default function HomePage() {
         <div className="absolute left-0 right-0 top-20 h-px bg-[#C9A96E]/30" />
 
         <div className="relative z-10 mx-auto grid w-full max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-12">
-          <div className="text-center lg:col-span-6 lg:text-left">
+          <div className="min-w-0 text-center lg:col-span-6 lg:text-left">
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="mb-4 text-[11px] uppercase tracking-[0.28em] text-[#E8C46D]"
+              className="mb-4 text-[11px] uppercase tracking-[0.18em] text-[#E8C46D] sm:tracking-[0.28em]"
             >
               A candlelit home for book clubs
             </motion.p>
@@ -111,7 +111,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="font-serif text-[58px] font-black uppercase leading-[0.86] text-[#F7DFA5] drop-shadow-[0_6px_16px_rgba(0,0,0,0.75)] sm:text-[86px] lg:text-[112px]"
+              className="break-words font-serif text-4xl font-black uppercase leading-[0.9] text-[#F7DFA5] drop-shadow-[0_6px_16px_rgba(0,0,0,0.75)] sm:text-7xl md:text-[86px] lg:text-[112px]"
             >
               BookCircle
             </motion.h1>
@@ -120,7 +120,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.18 }}
-              className="mt-2 font-serif text-2xl tracking-[0.22em] text-[#F2E8D9] sm:text-3xl"
+              className="mt-2 font-serif text-2xl tracking-[0.12em] text-[#F2E8D9] sm:text-3xl sm:tracking-[0.22em]"
             >
               Reading Club
             </motion.p>
@@ -139,18 +139,18 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-10 flex flex-wrap items-center justify-center gap-4 lg:justify-start"
+              className="mt-10 flex min-w-0 flex-wrap items-center justify-center gap-4 lg:justify-start"
             >
               <Link
                 href={isAuthenticated ? "/clubs" : "/auth/signup"}
-                className="inline-flex items-center gap-2 rounded-sm border border-[#FFE4A4]/70 bg-[linear-gradient(180deg,#FFE4A4_0%,#C99636_48%,#8B531E_100%)] px-8 py-3 text-sm font-black uppercase tracking-[0.08em] text-[#281306] shadow-[0_8px_0_#4c260d,0_18px_36px_rgba(0,0,0,0.45)] transition hover:-translate-y-px"
+                className="inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-sm border border-[#FFE4A4]/70 bg-[linear-gradient(180deg,#FFE4A4_0%,#C99636_48%,#8B531E_100%)] px-6 py-3 text-center text-sm font-black uppercase tracking-[0.06em] text-[#281306] shadow-[0_8px_0_#4c260d,0_18px_36px_rgba(0,0,0,0.45)] transition hover:-translate-y-px sm:px-8 sm:tracking-[0.08em]"
               >
                 {isAuthenticated ? "Browse Clubs" : "Start Reading"}
                 <ChevronRight className="h-4 w-4" />
               </Link>
               <a
                 href="#how"
-                className="inline-flex items-center gap-2 rounded-sm border border-[#E8C46D]/60 bg-[#090807]/45 px-7 py-3 text-sm font-bold uppercase tracking-[0.08em] text-[#F2E8D9] transition hover:bg-[#C9A96E]/10"
+                className="inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-sm border border-[#E8C46D]/60 bg-[#090807]/45 px-5 py-3 text-center text-sm font-bold uppercase tracking-[0.06em] text-[#F2E8D9] transition hover:bg-[#C9A96E]/10 sm:px-7 sm:tracking-[0.08em]"
               >
                 <Play className="h-4 w-4 fill-[#E8C46D] text-[#E8C46D]" />
                 How it Works
@@ -172,7 +172,7 @@ export default function HomePage() {
             initial={{ opacity: 0, x: 28, rotate: 2 }}
             animate={{ opacity: 1, x: 0, rotate: 0 }}
             transition={{ duration: 0.8, delay: 0.25 }}
-            className="relative mx-auto h-[430px] w-full max-w-[430px] lg:col-span-6"
+            className="relative mx-auto hidden h-[430px] w-full max-w-[430px] sm:block lg:col-span-6"
             aria-hidden="true"
           >
             <div className="absolute left-7 top-16 h-72 w-48 -rotate-[15deg] overflow-hidden rounded-md border border-[#E8C46D]/35 bg-[#130d08] shadow-[0_26px_46px_rgba(0,0,0,0.65)]">
@@ -247,7 +247,7 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 18 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="mt-3 font-serif text-5xl font-black leading-none text-[#F7DFA5] md:text-7xl"
+                className="mt-3 break-words font-serif text-4xl font-black leading-none text-[#F7DFA5] sm:text-5xl md:text-7xl"
               >
                 Everything a club needs
               </motion.h2>
@@ -333,7 +333,7 @@ export default function HomePage() {
               <p className="text-[11px] uppercase tracking-[0.28em] text-[#E8C46D]">
                 How to play
               </p>
-              <h2 className="mt-3 font-serif text-5xl font-black leading-none text-[#F7DFA5] md:text-7xl">
+              <h2 className="mt-3 break-words font-serif text-4xl font-black leading-none text-[#F7DFA5] sm:text-5xl md:text-7xl">
                 Gather. Vote. Read.
               </h2>
               <p className="mt-5 text-sm leading-relaxed text-[#F2E8D9]/70">
@@ -392,7 +392,7 @@ export default function HomePage() {
                 custom={index}
                 className="rounded-md border border-[#C9A96E]/25 bg-[#100B08]/86 p-6 shadow-[0_18px_44px_rgba(0,0,0,0.36)]"
               >
-                <p className="font-serif text-7xl leading-none text-[#E8C46D]/75">
+                <p className="font-serif text-5xl leading-none text-[#E8C46D]/75 sm:text-7xl">
                   {step.step}
                 </p>
                 <div className="relative mt-5 h-40 overflow-hidden rounded-sm border border-[#C9A96E]/20">
@@ -404,7 +404,7 @@ export default function HomePage() {
                   />
                   <div className="absolute inset-0 bg-[#090807]/18" />
                 </div>
-                <h3 className="mt-5 font-serif text-3xl text-[#F7DFA5]">{step.title}</h3>
+                <h3 className="mt-5 break-words font-serif text-2xl text-[#F7DFA5] sm:text-3xl">{step.title}</h3>
                 <p className="mt-3 text-sm text-[#F2E8D9]/75">
                   {step.description}
                 </p>
@@ -441,10 +441,10 @@ export default function HomePage() {
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#C9A96E]">
               Featured Club
             </p>
-            <h2 className="mt-3 font-serif text-5xl font-black leading-[0.95] text-[#F7DFA5] md:text-[64px]">
+            <h2 className="mt-3 break-words font-serif text-4xl font-black leading-[0.95] text-[#F7DFA5] sm:text-5xl md:text-[64px]">
               {featuredClub.name}
             </h2>
-            <div className="mt-6 flex gap-8 text-sm text-[#F2E8D9]/80">
+            <div className="mt-6 flex flex-wrap gap-6 text-sm text-[#F2E8D9]/80 sm:gap-8">
               <div>
                 <p className="text-[11px] uppercase tracking-[0.18em] text-[#C9A96E]">
                   Members
@@ -482,7 +482,7 @@ export default function HomePage() {
               key={item.label}
               className={`text-center ${index > 0 ? "lg:border-l lg:border-[#C9A96E]/20" : ""}`}
             >
-              <p className="font-serif text-5xl font-black leading-none text-[#F7DFA5] md:text-7xl">
+              <p className="font-serif text-4xl font-black leading-none text-[#F7DFA5] sm:text-5xl md:text-7xl">
                 {item.value}
               </p>
               <p className="mt-3 text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
@@ -505,7 +505,7 @@ export default function HomePage() {
               transition={{ duration: 0.45 }}
               className="border-y border-[#C9A96E]/25 py-12 text-center"
             >
-              <p className="font-serif text-4xl italic leading-tight text-[#F7DFA5] md:text-6xl lg:text-7xl">
+              <p className="break-words font-serif text-3xl italic leading-tight text-[#F7DFA5] sm:text-4xl md:text-6xl lg:text-7xl">
                 “{testimonials[testimonialIndex].quote}”
               </p>
               <div className="mt-9 flex flex-col items-center gap-3">
@@ -553,7 +553,7 @@ export default function HomePage() {
           <p className="text-[11px] uppercase tracking-[0.28em] text-[#FFE4A4]">
             Open the circle
           </p>
-          <h2 className="mt-3 font-serif text-5xl font-black leading-tight text-[#F7DFA5] md:text-7xl">
+          <h2 className="mt-3 break-words font-serif text-4xl font-black leading-tight text-[#F7DFA5] sm:text-5xl md:text-7xl">
             Read More. Think Deeper.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-[#F2E8D9]/75">
@@ -575,7 +575,7 @@ export default function HomePage() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full rounded-sm border border-[#FFE4A4]/35 bg-[#080706]/80 px-4 py-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/45 focus:border-[#FFE4A4] focus:outline-none"
+                className="min-w-0 w-full rounded-sm border border-[#FFE4A4]/35 bg-[#080706]/80 px-4 py-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/45 focus:border-[#FFE4A4] focus:outline-none"
               />
               <button
                 type="submit"

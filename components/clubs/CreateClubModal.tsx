@@ -82,19 +82,19 @@ export function CreateClubModal({ open, onOpenChange, onCreated }: Props) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050302]/75 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[#C9A96E]/30 bg-[#100904] shadow-[0_30px_90px_rgba(0,0,0,0.6)]">
-        <div className="border-b border-[#C9A96E]/20 bg-[#2A1810]/90 p-6">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex gap-3">
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
+    <div className="app-modal-backdrop">
+      <div className="app-modal-panel create-club-modal">
+        <div className="app-modal-header shrink-0 p-3 sm:p-5">
+          <div className="flex min-w-0 items-start justify-between gap-4">
+            <div className="flex min-w-0 gap-3 sm:items-start">
+              <span className="app-icon-frame hidden h-11 w-11 shrink-0 rounded-xl sm:inline-flex">
                 <BookOpen className="h-5 w-5" />
               </span>
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-[var(--app-accent-gold)] sm:text-[11px] sm:tracking-[0.2em]">
                   New Reading Circle
                 </p>
-                <h3 className="mt-1 font-serif text-3xl text-[#F2E8D9]">
+                <h3 className="mt-1 break-words font-serif text-2xl leading-tight text-[var(--app-text-primary)] sm:text-3xl">
                   Create Club
                 </h3>
               </div>
@@ -103,13 +103,13 @@ export function CreateClubModal({ open, onOpenChange, onCreated }: Props) {
               type="button"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
-              className="rounded-full border border-[#C9A96E]/20 p-2 text-[#F2E8D9]/70 transition hover:border-[#C9A96E]/50 hover:text-[#F2E8D9]"
+              className="shrink-0 rounded-lg border border-[var(--app-border-subtle)] p-2 text-[var(--app-text-secondary)] transition hover:border-[var(--app-border-strong)] hover:text-[var(--app-text-primary)]"
               aria-label="Close create club modal"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
-          <p className="mt-4 text-sm text-[#F2E8D9]/70">
+          <p className="mt-2 hidden max-w-2xl text-sm leading-6 text-[var(--app-text-secondary)] sm:block">
             Give the club a clear promise. Readers should understand the mood,
             genre, and privacy before they join.
           </p>
@@ -117,88 +117,94 @@ export function CreateClubModal({ open, onOpenChange, onCreated }: Props) {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-5 p-6"
+          className="flex min-h-0 flex-1 flex-col"
           noValidate
         >
-          <ClubCoverUpload
-            value={coverImage}
-            onChange={(url) => {
-              setCoverImage(url);
-              if (url) {
-                setCoverError(null);
-              }
-            }}
-            disabled={isSubmitting}
-            error={coverError ?? undefined}
-          />
+          <div className="create-club-modal-body grid gap-4 p-3 sm:gap-5 sm:p-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+            <div>
+              <ClubCoverUpload
+                value={coverImage}
+                onChange={(url) => {
+                  setCoverImage(url);
+                  if (url) {
+                    setCoverError(null);
+                  }
+                }}
+                disabled={isSubmitting}
+                error={coverError ?? undefined}
+                helperText="JPEG, PNG, or WebP. Max 5 MB."
+                previewClassName="create-club-cover-preview"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <label htmlFor="name" className="text-sm text-[#F2E8D9]/80">
-              Club Name
-            </label>
-            <input
-              id="name"
-              placeholder="Sci-Fi Readers"
-              className="w-full rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] px-3 py-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/40 focus:border-[#C9A96E] focus:outline-none"
-              {...register("name")}
-            />
-            {errors.name && (
-              <p className="text-sm text-[#f87171]">{errors.name.message}</p>
-            )}
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label htmlFor="name" className="app-field-label">
+                  Club Name
+                </label>
+                <input
+                  id="name"
+                  placeholder="Sci-Fi Readers"
+                  className="app-input w-full px-3 py-3 text-sm"
+                  {...register("name")}
+                />
+                {errors.name && (
+                  <p className="text-sm text-[#f87171]">{errors.name.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="description" className="app-field-label">
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  placeholder="What your club is about..."
+                  rows={5}
+                  className="app-input min-h-32 w-full resize-none px-3 py-3 text-sm lg:min-h-40"
+                  {...register("description")}
+                />
+                {errors.description && (
+                  <p className="text-sm text-[#f87171]">
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
+
+              <label className="app-choice-row flex min-w-0 cursor-pointer gap-4 rounded-xl p-4 text-sm transition hover:border-[var(--app-border-strong)]">
+                <span className="app-icon-frame h-9 w-9 shrink-0 rounded-lg">
+                  <Globe className="h-4 w-4" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-medium text-[var(--app-text-primary)]">
+                    Public club
+                  </span>
+                  <span className="text-xs text-[var(--app-text-muted)]">
+                    Anyone can discover and join.
+                  </span>
+                </span>
+                <input
+                  type="checkbox"
+                  className="mt-1 h-5 w-5 shrink-0 accent-[var(--app-accent-gold)]"
+                  {...register("isPublic")}
+                />
+              </label>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="description" className="text-sm text-[#F2E8D9]/80">
-              Description
-            </label>
-            <textarea
-              id="description"
-              placeholder="What your club is about..."
-              rows={4}
-              className="min-h-28 w-full resize-none rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] px-3 py-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/40 focus:border-[#C9A96E] focus:outline-none"
-              {...register("description")}
-            />
-            {errors.description && (
-              <p className="text-sm text-[#f87171]">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
-
-          <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-[#C9A96E]/20 bg-[#2A1810]/70 p-4 text-sm">
-            <span className="flex items-center gap-3">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
-                <Globe className="h-4 w-4" />
-              </span>
-              <span>
-                <span className="block font-medium text-[#F2E8D9]">
-                  Public club
-                </span>
-                <span className="text-xs text-[#F2E8D9]/55">
-                  Anyone can discover and join.
-                </span>
-              </span>
-            </span>
-            <input
-              type="checkbox"
-              className="h-5 w-5 accent-[#C9A96E]"
-              {...register("isPublic")}
-            />
-          </label>
-
-          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+          <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-[var(--app-border-subtle)] bg-[rgba(8,11,10,0.58)] p-3 sm:flex-row sm:justify-end sm:gap-3 sm:p-5">
             <button
               type="button"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center rounded-lg border border-[#C9A96E]/35 px-4 py-2.5 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E] disabled:opacity-60"
+              className="app-button-secondary w-full disabled:opacity-60 sm:w-auto"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#C9A96E] px-4 py-2.5 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:opacity-60"
+              className="app-button-primary w-full disabled:opacity-60 sm:w-auto"
             >
               <Lock className="h-4 w-4" />
               {isSubmitting ? "Creating..." : "Create Club"}

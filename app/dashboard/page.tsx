@@ -32,6 +32,8 @@ type ClubCycle = {
   cycle: ReadingCycle | null;
 };
 
+const HOME_READING_CYCLE_LIMIT = 6;
+
 function getGreeting(name?: string | null) {
   const hour = new Date().getHours();
   const time =
@@ -72,8 +74,11 @@ export default function DashboardPage() {
       setIsLoading(true);
       setError("");
       const data = await getMyClubs();
-      const cycles = await Promise.all(
-        data.clubs.map(async (club) => {
+      setClubCycles(data.clubs.map((club) => ({ club, cycle: null })));
+      setIsLoading(false);
+
+      const visibleClubCycles = await Promise.all(
+        data.clubs.slice(0, HOME_READING_CYCLE_LIMIT).map(async (club) => {
           try {
             return {
               club,
@@ -84,7 +89,15 @@ export default function DashboardPage() {
           }
         }),
       );
-      setClubCycles(cycles);
+      const cycleByClubId = new Map(
+        visibleClubCycles.map((item) => [item.club.id, item.cycle]),
+      );
+      setClubCycles(
+        data.clubs.map((club) => ({
+          club,
+          cycle: cycleByClubId.get(club.id) ?? null,
+        })),
+      );
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Failed to load your home";
@@ -94,14 +107,13 @@ export default function DashboardPage() {
         title: "Failed to load home",
         description: message,
       });
-    } finally {
       setIsLoading(false);
     }
   }, [toast]);
 
   useEffect(() => {
     if (!isReady || !isAuthenticated) return;
-    void loadHome();
+    void Promise.resolve().then(loadHome);
   }, [isAuthenticated, isReady, loadHome]);
 
   const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
@@ -192,11 +204,12 @@ export default function DashboardPage() {
                 description="The most relevant active or planned read across your circles."
               />
               {featuredCycle?.cycle ? (
-                <article className="app-surface-elevated grid gap-6 rounded-2xl p-5 lg:grid-cols-[180px_1fr] lg:p-6">
+                <article className="app-surface-elevated grid min-w-0 gap-6 overflow-hidden rounded-2xl p-4 sm:p-5 lg:grid-cols-[180px_1fr] lg:p-6">
                   <CoverImage
                     src={featuredCycle.cycle.book.coverImage}
                     alt={`${featuredCycle.cycle.book.title} cover`}
-                    className="aspect-[2/3] rounded-xl"
+                    fit="contain"
+                    className="mx-auto aspect-[2/3] w-full max-w-[190px] rounded-xl lg:max-w-none"
                   />
                   <div className="min-w-0">
                     <div className="flex flex-wrap gap-2">
@@ -207,7 +220,7 @@ export default function DashboardPage() {
                       </StatusBadge>
                       <StatusBadge tone="muted">{featuredCycle.club.name}</StatusBadge>
                     </div>
-                    <h2 className="mt-4 break-words font-serif text-3xl leading-tight md:text-4xl">
+                    <h2 className="mt-4 break-words font-serif text-2xl leading-tight sm:text-3xl md:text-4xl">
                       {featuredCycle.cycle.book.title}
                     </h2>
                     <p className="mt-2 text-sm text-[var(--app-text-secondary)]">
@@ -225,17 +238,17 @@ export default function DashboardPage() {
                         {featuredCycle.cycle.goalDescription}
                       </p>
                     ) : null}
-                    <div className="mt-6 flex flex-wrap gap-3">
+                    <div className="mt-6 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
                       <Link
                         href={`/clubs/${featuredCycle.club.id}/reading`}
-                        className="app-button-primary"
+                        className="app-button-primary w-full sm:w-auto"
                       >
                         <BookOpen className="h-4 w-4" />
                         Open Reading
                       </Link>
                       <Link
                         href={`/clubs/${featuredCycle.club.id}/discussion`}
-                        className="app-button-secondary"
+                        className="app-button-secondary w-full sm:w-auto"
                       >
                         <MessageCircle className="h-4 w-4" />
                         Open Discussion
@@ -268,8 +281,8 @@ export default function DashboardPage() {
               />
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {clubCycles.slice(0, 6).map(({ club, cycle }) => (
-                  <article key={club.id} className="app-surface rounded-2xl p-4">
-                    <div className="flex items-start justify-between gap-3">
+                  <article key={club.id} className="app-surface min-w-0 overflow-hidden rounded-2xl p-4">
+                    <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <h3 className="break-words font-serif text-2xl leading-tight">
                         {club.name}
                       </h3>
@@ -282,12 +295,12 @@ export default function DashboardPage() {
                         ? `${cycle.status === "ACTIVE" ? "Currently reading" : "Planning"} ${cycle.book.title}`
                         : "No active read announced yet."}
                     </p>
-                    <div className="mt-5 flex items-center justify-between gap-3">
+                    <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                       <span className="inline-flex items-center gap-1 text-sm text-[var(--app-text-secondary)]">
                         <Users className="h-4 w-4 text-[var(--app-accent-gold)]" />
                         {club.memberCount ?? 0}
                       </span>
-                      <Link href={`/clubs/${club.id}`} className="app-button-secondary">
+                      <Link href={`/clubs/${club.id}`} className="app-button-secondary w-full sm:w-auto">
                         Open club
                       </Link>
                     </div>

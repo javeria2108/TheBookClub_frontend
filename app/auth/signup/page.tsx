@@ -48,7 +48,7 @@ function SignupPageContent() {
 
   return (
     <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
-      <section className="mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 px-5 py-8 md:grid-cols-2 md:gap-10 md:px-8">
+      <section className="mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 px-4 py-6 sm:px-5 sm:py-8 md:grid-cols-2 md:gap-10 md:px-8">
         <motion.div
           initial={{ opacity: 0, x: -18 }}
           animate={{ opacity: 1, x: 0 }}
@@ -64,10 +64,10 @@ function SignupPageContent() {
           />
           <div className="absolute inset-0 bg-linear-to-t from-[#1A0F07]/90 via-[#1A0F07]/40 to-transparent" />
           <div className="absolute bottom-8 left-8 right-8">
-            <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-[#C9A96E] sm:tracking-[0.2em]">
               BookCircle
             </p>
-            <h2 className="mt-3 font-serif text-4xl leading-tight">
+            <h2 className="mt-3 break-words font-serif text-3xl leading-tight lg:text-4xl">
               Start your reading circle.
             </h2>
             <p className="mt-3 max-w-md text-sm text-[#F2E8D9]/75">
@@ -81,11 +81,11 @@ function SignupPageContent() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.08 }}
-          className="my-auto rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810] p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
+          className="my-auto min-w-0 rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810] p-4 shadow-[0_24px_60px_rgba(0,0,0,0.35)] sm:p-6 md:p-8"
         >
-          <div className="mb-7 flex items-center gap-3">
-            <BookOpen className="h-6 w-6 text-[#C9A96E]" />
-            <h1 className="font-serif text-3xl">Create Account</h1>
+          <div className="mb-7 flex min-w-0 items-center gap-3">
+            <BookOpen className="h-6 w-6 shrink-0 text-[#C9A96E]" />
+            <h1 className="break-words font-serif text-3xl">Create Account</h1>
           </div>
 
           <form

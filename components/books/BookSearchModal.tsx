@@ -105,67 +105,67 @@ export function BookSearchModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050302]/75 p-4 backdrop-blur-sm">
+    <div className="app-modal-backdrop">
       <section
         aria-modal="true"
         role="dialog"
         aria-labelledby="book-search-title"
-        className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-[#C9A96E]/30 bg-[#100904] shadow-[0_30px_90px_rgba(0,0,0,0.6)]"
+        className="app-modal-panel flex max-w-3xl flex-col overflow-hidden"
       >
-        <header className="border-b border-[#C9A96E]/20 bg-[#2A1810]/90 p-5">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+        <header className="app-modal-header p-4 sm:p-5">
+          <div className="flex min-w-0 items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--app-accent-gold)] sm:tracking-[0.2em]">
                 Book Discovery
               </p>
               <h2
                 id="book-search-title"
-                className="mt-1 font-serif text-3xl text-[#F2E8D9]"
+                className="mt-1 break-words font-serif text-2xl text-[var(--app-text-primary)] sm:text-3xl"
               >
                 {title}
               </h2>
-              <p className="mt-2 text-sm text-[#F2E8D9]/65">{subtitle}</p>
+              <p className="mt-2 text-sm text-[var(--app-text-secondary)]">{subtitle}</p>
             </div>
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-full border border-[#C9A96E]/20 p-2 text-[#F2E8D9]/70 transition hover:border-[#C9A96E]/50 hover:text-[#F2E8D9]"
+              className="shrink-0 rounded-lg border border-[var(--app-border-subtle)] p-2 text-[var(--app-text-secondary)] transition hover:border-[var(--app-border-strong)] hover:text-[var(--app-text-primary)]"
               aria-label="Close book search"
             >
               <X className="h-4 w-4" />
             </button>
           </div>
           <div className="relative mt-5">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#C9A96E]/70" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--app-accent-gold)]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search by title, author, or ISBN..."
-              className="w-full rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] py-3 pl-10 pr-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/40 focus:border-[#C9A96E] focus:outline-none"
+              className="app-input w-full py-3 pl-10 pr-3 text-sm"
               autoFocus
             />
           </div>
         </header>
 
-        <div className="min-h-80 overflow-y-auto p-5">
+        <div className="min-h-80 overflow-y-auto p-4 sm:p-5">
           {!trimmedQuery ? (
-            <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-[#C9A96E]/25 bg-[#2A1810]/50 p-8 text-center">
-              <BookOpen className="mb-4 h-9 w-9 text-[#C9A96E]" />
-              <p className="font-serif text-2xl text-[#F2E8D9]">
+            <div className="app-surface flex min-h-72 flex-col items-center justify-center rounded-xl border-dashed p-8 text-center">
+              <BookOpen className="mb-4 h-9 w-9 text-[var(--app-accent-gold)]" />
+              <p className="font-serif text-2xl text-[var(--app-text-primary)]">
                 Find a book to save
               </p>
-              <p className="mt-2 max-w-md text-sm text-[#F2E8D9]/65">
+              <p className="mt-2 max-w-md text-sm text-[var(--app-text-secondary)]">
                 Search saved BookCircle books and Google Books, then choose one
                 for this club.
               </p>
             </div>
           ) : trimmedQuery.length < MIN_SEARCH_LENGTH ? (
-            <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-dashed border-[#C9A96E]/25 bg-[#2A1810]/50 p-8 text-center">
-              <Search className="mb-4 h-9 w-9 text-[#C9A96E]" />
-              <p className="font-serif text-2xl text-[#F2E8D9]">
+            <div className="app-surface flex min-h-72 flex-col items-center justify-center rounded-xl border-dashed p-8 text-center">
+              <Search className="mb-4 h-9 w-9 text-[var(--app-accent-gold)]" />
+              <p className="font-serif text-2xl text-[var(--app-text-primary)]">
                 Keep typing
               </p>
-              <p className="mt-2 max-w-md text-sm text-[#F2E8D9]/65">
+              <p className="mt-2 max-w-md text-sm text-[var(--app-text-secondary)]">
                 Enter at least {MIN_SEARCH_LENGTH} characters so the search can
                 return useful book matches.
               </p>
@@ -175,23 +175,23 @@ export function BookSearchModal({
               {Array.from({ length: 4 }).map((_, index) => (
                 <div
                   key={index}
-                  className="h-36 animate-pulse rounded-xl border border-[#C9A96E]/15 bg-[#2A1810]"
+                  className="h-36 animate-pulse rounded-xl border border-[var(--app-border-subtle)] bg-[var(--app-surface)]"
                 />
               ))}
             </div>
           ) : error ? (
             <div className="rounded-xl border border-[#8B4A3C]/60 bg-[#8B4A3C]/15 p-5 text-center">
-              <p className="font-serif text-2xl text-[#F2E8D9]">
+              <p className="font-serif text-2xl text-[var(--app-text-primary)]">
                 Search failed
               </p>
-              <p className="mt-2 text-sm text-[#F2E8D9]/70">{error}</p>
+              <p className="mt-2 text-sm text-[var(--app-text-secondary)]">{error}</p>
             </div>
           ) : results.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[#C9A96E]/25 bg-[#2A1810]/50 p-8 text-center">
-              <p className="font-serif text-2xl text-[#F2E8D9]">
+            <div className="app-surface rounded-xl border-dashed p-8 text-center">
+              <p className="font-serif text-2xl text-[var(--app-text-primary)]">
                 Book not found
               </p>
-              <p className="mt-2 text-sm text-[#F2E8D9]/65">
+              <p className="mt-2 text-sm text-[var(--app-text-secondary)]">
                 Book with title &quot;{trimmedQuery}&quot; was not found. Try a
                 more specific title, author, or ISBN.
               </p>
@@ -205,37 +205,37 @@ export function BookSearchModal({
                 return (
                   <article
                     key={getResultKey(book)}
-                    className="grid gap-4 rounded-xl border border-[#C9A96E]/18 bg-[#2A1810]/80 p-4 sm:grid-cols-[88px_1fr]"
+                    className="app-surface grid min-w-0 gap-4 rounded-xl p-4 md:grid-cols-[88px_minmax(0,1fr)]"
                   >
-                    <div className="h-32 w-[88px] overflow-hidden rounded-lg border border-[#C9A96E]/20 bg-[#1A0F07]">
+                    <div className="mx-auto h-32 w-[88px] overflow-hidden rounded-lg border border-[var(--app-border-subtle)] bg-[var(--app-surface-subtle)] md:mx-0">
                       {book.coverImage ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={book.coverImage}
                           alt=""
-                          className="h-full w-full object-cover"
+                          className="h-full w-full object-contain"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center">
-                          <BookOpen className="h-8 w-8 text-[#C9A96E]/60" />
+                            <BookOpen className="h-8 w-8 text-[var(--app-accent-gold)]" />
                         </div>
                       )}
                     </div>
 
                     <div className="min-w-0">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                          <h3 className="font-serif text-2xl leading-tight text-[#F2E8D9]">
+                        <div className="min-w-0">
+                          <h3 className="break-words font-serif text-2xl leading-tight text-[var(--app-text-primary)]">
                             {book.title}
                           </h3>
-                          <p className="mt-1 text-sm text-[#F2E8D9]/65">
+                          <p className="mt-1 text-sm text-[var(--app-text-secondary)]">
                             {getAuthorsLabel(book.authors)}
                             {book.publishedYear
                               ? ` - ${book.publishedYear}`
                               : ""}
                           </p>
                           {book.isSaved ? (
-                            <p className="mt-2 inline-flex rounded-full border border-[#C9A96E]/30 px-3 py-1 text-xs text-[#C9A96E]">
+                            <p className="mt-2 inline-flex rounded-lg border border-[var(--app-border-subtle)] bg-[var(--app-accent-teal-soft)] px-3 py-1 text-xs text-[var(--app-accent-gold)]">
                               Saved in BookCircle
                             </p>
                           ) : null}
@@ -244,13 +244,13 @@ export function BookSearchModal({
                           type="button"
                           disabled={isSelecting}
                           onClick={() => void handleSelect(book)}
-                          className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="app-button-primary w-full shrink-0 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
                           {isSelecting ? "Choosing..." : "Choose this book"}
                         </button>
                       </div>
 
-                      <p className="mt-3 text-sm leading-6 text-[#F2E8D9]/70">
+                      <p className="mt-3 text-sm leading-6 text-[var(--app-text-secondary)]">
                         {getDescription(book.description)}
                       </p>
                     </div>

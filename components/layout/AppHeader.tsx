@@ -89,10 +89,10 @@ export function AppHeader({
             : "border-[var(--app-border-subtle)] bg-[rgba(8,11,10,0.82)] backdrop-blur-md"
         }`}
       >
-        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-5 md:px-8">
-          <Link href={mode === "landing" ? "/" : "/dashboard"} className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-[var(--app-accent-gold)]" />
-            <span className="font-serif text-2xl leading-none text-[var(--app-text-primary)]">
+        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between gap-3 px-4 md:px-8">
+          <Link href={mode === "landing" ? "/" : "/dashboard"} className="flex min-w-0 items-center gap-2">
+            <BookOpen className="h-5 w-5 shrink-0 text-[var(--app-accent-gold)]" />
+            <span className="truncate font-serif text-2xl leading-none text-[var(--app-text-primary)] sm:text-3xl md:text-2xl">
               BookCircle
             </span>
           </Link>
@@ -198,7 +198,7 @@ export function AppHeader({
           <button
             aria-label={isMobileNavOpen ? "Close navigation" : "Open navigation"}
             onClick={() => setIsMobileNavOpen((value) => !value)}
-            className="md:hidden"
+            className="shrink-0 md:hidden"
             type="button"
           >
             {isMobileNavOpen ? (
@@ -279,7 +279,7 @@ export function AppHeader({
           className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--app-border-subtle)] bg-[rgba(8,11,10,0.94)] px-2 pb-[calc(8px+env(safe-area-inset-bottom))] pt-2 backdrop-blur-md md:hidden"
           aria-label="Mobile primary navigation"
         >
-          <div className="grid grid-cols-4 gap-1">
+          <div className="grid min-w-0 grid-cols-4 gap-1">
             {APP_NAV_ITEMS.map((item) => {
               const Icon = item.icon ?? Home;
               const active = isActivePath(pathname, item.href);
@@ -288,14 +288,14 @@ export function AppHeader({
                   key={item.label}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl text-[11px] font-medium ${
+                  className={`flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-xl px-1 text-[10px] font-medium sm:text-[11px] ${
                     active
                       ? "bg-[var(--app-accent-teal-soft)] text-[var(--app-accent-gold-hover)]"
                       : "text-[var(--app-text-secondary)]"
                   }`}
                 >
-                  <Icon className="h-5 w-5" />
-                  {item.label}
+                  <Icon className="h-5 w-5 shrink-0" />
+                  <span className="max-w-full truncate">{item.label}</span>
                 </Link>
               );
             })}

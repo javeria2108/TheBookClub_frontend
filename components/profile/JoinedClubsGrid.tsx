@@ -43,8 +43,8 @@ export function JoinedClubsGrid({ clubs }: JoinedClubsGridProps) {
             className="h-36 transition duration-500 group-hover:scale-[1.02]"
           />
 
-          <div className="p-5">
-            <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 p-4 sm:p-5">
+            <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
               <h3 className="break-words font-serif text-2xl leading-tight text-[var(--app-text-primary)]">
                 {club.name}
               </h3>
@@ -55,7 +55,7 @@ export function JoinedClubsGrid({ clubs }: JoinedClubsGridProps) {
             <p className="mt-2 line-clamp-3 min-h-14 text-sm text-[var(--app-text-secondary)]">
               {club.description || "This club has not added a description yet."}
             </p>
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+            <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
               <div className="flex flex-wrap gap-2">
                 <StatusBadge tone={club.isPublic ? "teal" : "gold"}>
                   {club.isPublic ? (

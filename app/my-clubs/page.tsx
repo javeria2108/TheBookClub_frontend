@@ -110,24 +110,24 @@ export default function MyClubsPage() {
           }
         />
 
-        <div className="app-surface mb-6 rounded-2xl p-4">
+        <div className="app-surface mb-6 min-w-0 rounded-2xl p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="relative flex-1">
+            <div className="relative min-w-0 flex-1">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--app-accent-gold)]" />
               <input
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="Search by name, genre, or description"
+                placeholder="Search clubs"
                 className="app-input w-full py-3 pl-10 pr-3 text-sm"
               />
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1 lg:pb-0">
+            <div className="flex max-w-full flex-wrap gap-2">
               {FILTERS.map((filter) => (
                 <button
                   key={filter.value}
                   type="button"
                   onClick={() => setActiveFilter(filter.value)}
-                  className={`min-h-10 whitespace-nowrap rounded-full border px-4 text-sm ${
+                  className={`min-h-10 shrink-0 whitespace-nowrap rounded-full border px-4 text-sm ${
                     activeFilter === filter.value
                       ? "border-[var(--app-accent-gold)] bg-[var(--app-accent-teal-soft)] text-[var(--app-accent-gold-hover)]"
                       : "border-[var(--app-border-subtle)] text-[var(--app-text-secondary)]"
@@ -193,7 +193,7 @@ export default function MyClubsPage() {
             {filteredClubs.map((club) => (
               <article
                 key={club.id}
-                className="app-surface group grid gap-4 rounded-2xl p-4 transition hover:border-[var(--app-border-strong)] sm:grid-cols-[112px_1fr]"
+                className="app-surface group grid min-w-0 gap-4 overflow-hidden rounded-2xl p-4 transition hover:border-[var(--app-border-strong)] sm:grid-cols-[112px_1fr]"
               >
                 <CoverImage
                   src={club.coverImage}
@@ -201,7 +201,7 @@ export default function MyClubsPage() {
                   className="aspect-[4/3] rounded-xl sm:aspect-square"
                 />
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
                     <h2 className="min-w-0 break-words font-serif text-2xl leading-tight">
                       {club.name}
                     </h2>
@@ -227,11 +227,11 @@ export default function MyClubsPage() {
                     </span>
                     <span>{club.genre || "General"}</span>
                   </div>
-                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-                    <p className="text-xs uppercase tracking-[0.16em] text-[var(--app-text-muted)]">
+                  <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                    <p className="text-xs uppercase tracking-[0.12em] text-[var(--app-text-muted)] sm:tracking-[0.16em]">
                       Current read appears inside the club
                     </p>
-                    <Link href={`/clubs/${club.id}`} className="app-button-primary">
+                    <Link href={`/clubs/${club.id}`} className="app-button-primary w-full sm:w-auto">
                       <BookOpen className="h-4 w-4" />
                       Open club
                     </Link>

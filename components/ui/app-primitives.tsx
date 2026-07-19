@@ -26,6 +26,7 @@ type CoverImageProps = {
   src?: string | null;
   alt: string;
   className?: string;
+  fit?: "cover" | "contain";
 };
 
 type SectionHeaderProps = {
@@ -49,14 +50,14 @@ export function PageHeader({
   action,
 }: PageHeaderProps) {
   return (
-    <header className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+    <header className="mb-8 flex min-w-0 flex-col gap-5 md:flex-row md:items-end md:justify-between">
       <div className="min-w-0">
         {eyebrow ? (
           <p className="text-[11px] uppercase tracking-[0.24em] text-[var(--app-accent-gold)]">
             {eyebrow}
           </p>
         ) : null}
-        <h1 className="mt-2 font-serif text-4xl font-bold leading-tight text-[var(--app-text-primary)] md:text-5xl">
+        <h1 className="mt-2 break-words font-serif text-3xl font-bold leading-tight text-[var(--app-text-primary)] sm:text-4xl md:text-5xl">
           {title}
         </h1>
         {description ? (
@@ -65,16 +66,16 @@ export function PageHeader({
           </p>
         ) : null}
       </div>
-      {action ? <div className="flex flex-wrap gap-3">{action}</div> : null}
+      {action ? <div className="flex min-w-0 flex-wrap gap-3">{action}</div> : null}
     </header>
   );
 }
 
 export function SectionHeader({ title, description, action }: SectionHeaderProps) {
   return (
-    <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-      <div>
-        <h2 className="font-serif text-2xl text-[var(--app-text-primary)]">
+    <div className="mb-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <h2 className="break-words font-serif text-2xl text-[var(--app-text-primary)]">
           {title}
         </h2>
         {description ? (
@@ -135,13 +136,24 @@ export function StatusBadge({ children, tone = "muted" }: StatusBadgeProps) {
   );
 }
 
-export function CoverImage({ src, alt, className = "" }: CoverImageProps) {
+export function CoverImage({
+  src,
+  alt,
+  className = "",
+  fit = "cover",
+}: CoverImageProps) {
   return (
     <div
       className={`relative overflow-hidden bg-[radial-gradient(circle_at_24%_18%,rgba(216,181,109,0.20),transparent_30%),linear-gradient(135deg,#14231f,#090b0a)] ${className}`}
     >
       {src ? (
-        <Image src={src} alt={alt} fill className="object-cover" sizes="320px" />
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          className={fit === "contain" ? "object-contain" : "object-cover"}
+          sizes="(max-width: 767px) 180px, 320px"
+        />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-[var(--app-accent-gold)]">
           <BookOpen className="h-10 w-10" />

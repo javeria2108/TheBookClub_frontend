@@ -29,12 +29,12 @@ export function DiscoverSection({ clubs }: DiscoverSectionProps) {
 
       <div className="relative mx-auto w-full max-w-7xl">
         <div className="flex flex-col justify-between gap-6 border-b border-[#C9A96E]/25 pb-8 lg:flex-row lg:items-end">
-          <div>
+          <div className="min-w-0">
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-[11px] uppercase tracking-[0.28em] text-[#E8C46D]"
+              className="text-[11px] uppercase tracking-[0.18em] text-[#E8C46D] sm:tracking-[0.28em]"
             >
               Choose your table
             </motion.p>
@@ -43,7 +43,7 @@ export function DiscoverSection({ clubs }: DiscoverSectionProps) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.04 }}
-              className="mt-3 font-serif text-5xl font-black leading-none text-[#F7DFA5] md:text-7xl"
+              className="mt-3 break-words font-serif text-4xl font-black leading-none text-[#F7DFA5] sm:text-5xl md:text-7xl"
             >
               Explore Clubs
             </motion.h2>
@@ -61,7 +61,7 @@ export function DiscoverSection({ clubs }: DiscoverSectionProps) {
           </motion.p>
         </div>
 
-        <div className="mt-12 flex gap-6 overflow-x-auto pb-5">
+        <div className="-mx-4 mt-10 flex snap-x gap-4 overflow-x-auto px-4 pb-5 sm:mx-0 sm:mt-12 sm:gap-6 sm:px-0">
           {clubs.map((club, index) => (
             <motion.article
               key={club.id}
@@ -71,9 +71,9 @@ export function DiscoverSection({ clubs }: DiscoverSectionProps) {
               viewport={{ once: true }}
               custom={index}
               whileHover={{ y: -6 }}
-              className="group min-w-72 max-w-80 flex-1 overflow-hidden rounded-md border border-[#E8C46D]/35 bg-[#100b08] shadow-[0_26px_56px_rgba(0,0,0,0.58)]"
+              className="group min-w-0 w-[min(18rem,calc(100vw-2rem))] shrink-0 snap-start overflow-hidden rounded-md border border-[#E8C46D]/35 bg-[#100b08] shadow-[0_26px_56px_rgba(0,0,0,0.58)] sm:w-80"
             >
-              <div className="relative h-52 overflow-hidden border-b border-[#E8C46D]/25">
+              <div className="relative h-44 overflow-hidden border-b border-[#E8C46D]/25 sm:h-52">
                 <Image
                   src={club.coverImage}
                   alt={club.name}
@@ -94,19 +94,19 @@ export function DiscoverSection({ clubs }: DiscoverSectionProps) {
                 </p>
               </div>
 
-              <div className="space-y-4 p-5">
-                <h3 className="font-serif text-3xl leading-none text-[#F7DFA5]">
+              <div className="space-y-4 p-4 sm:p-5">
+                <h3 className="break-words font-serif text-2xl leading-tight text-[#F7DFA5] sm:text-3xl sm:leading-none">
                   {club.name}
                 </h3>
                 <p className="line-clamp-2 text-sm text-[#F2E8D9]/70">
                   {club.description}
                 </p>
-                <div className="flex items-center justify-between border-t border-[#C9A96E]/20 pt-4">
-                  <div className="flex items-center gap-2 text-sm text-[#E8C46D]">
+                <div className="flex flex-col gap-3 border-t border-[#C9A96E]/20 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-center gap-2 text-sm text-[#E8C46D]">
                     <Users className="h-4 w-4" />
-                    <span>{club.memberCount} members</span>
+                    <span className="truncate">{club.memberCount} members</span>
                   </div>
-                  <p className="text-xs uppercase tracking-[0.16em] text-[#F2E8D9]/60">
+                  <p className="text-xs uppercase tracking-[0.12em] text-[#F2E8D9]/60 sm:tracking-[0.16em]">
                     View inside
                   </p>
                 </div>

@@ -180,29 +180,29 @@ export function ReadingCycleDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050302]/75 p-4 backdrop-blur-sm">
+    <div className="app-modal-backdrop">
       <section
         aria-modal="true"
         role="dialog"
         aria-labelledby="reading-cycle-dialog-title"
-        className="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-[#C9A96E]/30 bg-[#100904] shadow-[0_30px_90px_rgba(0,0,0,0.6)]"
+        className="app-modal-panel max-w-3xl"
       >
-        <header className="flex items-start justify-between gap-4 border-b border-[#C9A96E]/20 bg-[#2A1810]/90 p-5">
-          <div>
+        <header className="app-modal-header flex min-w-0 items-start justify-between gap-4 p-4 sm:p-5">
+          <div className="min-w-0">
             <button
               type="button"
               onClick={() => setSelectedBook(null)}
-              className="mb-3 inline-flex items-center gap-2 text-sm text-[#C9A96E] hover:text-[#d8b884]"
+              className="mb-3 inline-flex min-w-0 items-center gap-2 text-sm font-semibold text-[var(--app-accent-gold)] hover:text-[var(--app-accent-gold-hover)]"
             >
               <ChevronLeft className="h-4 w-4" />
               Choose a different book
             </button>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--app-accent-gold)] sm:tracking-[0.2em]">
               Reading Cycle
             </p>
             <h2
               id="reading-cycle-dialog-title"
-              className="mt-1 font-serif text-3xl text-[#F2E8D9]"
+              className="mt-1 break-words font-serif text-2xl text-[var(--app-text-primary)] sm:text-3xl"
             >
               Set the Schedule
             </h2>
@@ -210,43 +210,43 @@ export function ReadingCycleDialog({
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="rounded-full border border-[#C9A96E]/20 p-2 text-[#F2E8D9]/70 transition hover:border-[#C9A96E]/50 hover:text-[#F2E8D9]"
+            className="shrink-0 rounded-lg border border-[var(--app-border-subtle)] p-2 text-[var(--app-text-secondary)] transition hover:border-[var(--app-border-strong)] hover:text-[var(--app-text-primary)]"
             aria-label="Close reading cycle dialog"
           >
             <X className="h-4 w-4" />
           </button>
         </header>
 
-        <div className="grid gap-6 p-5 md:grid-cols-[170px_1fr]">
+        <div className="grid min-w-0 gap-6 p-4 lg:grid-cols-[170px_minmax(0,1fr)] lg:p-5">
           <div>
-            <div className="aspect-[2/3] overflow-hidden rounded-xl border border-[#C9A96E]/25 bg-[#1A0F07]">
+            <div className="mx-auto aspect-[2/3] w-full max-w-[170px] overflow-hidden rounded-xl border border-[var(--app-border-subtle)] bg-[var(--app-surface-subtle)] lg:max-w-none">
               {selectedBook.coverImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={selectedBook.coverImage}
                   alt=""
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-contain"
                 />
               ) : (
                 <div className="flex h-full items-center justify-center">
-                  <CalendarDays className="h-10 w-10 text-[#C9A96E]/70" />
+                  <CalendarDays className="h-10 w-10 text-[var(--app-accent-gold)]" />
                 </div>
               )}
             </div>
           </div>
 
-          <div className="space-y-5">
+          <div className="min-w-0 space-y-5">
             <div>
-              <h3 className="font-serif text-3xl leading-tight text-[#F2E8D9]">
+              <h3 className="break-words font-serif text-2xl leading-tight text-[var(--app-text-primary)] sm:text-3xl">
                 {selectedBook.title}
               </h3>
-              <p className="mt-1 text-sm text-[#F2E8D9]/65">
+              <p className="mt-1 text-sm text-[var(--app-text-secondary)]">
                 {getAuthorsLabel(selectedBook.authors)}
               </p>
             </div>
 
             <fieldset>
-              <legend className="mb-2 text-sm font-medium text-[#F2E8D9]">
+              <legend className="mb-2 text-sm font-medium text-[var(--app-text-secondary)]">
                 Cycle status
               </legend>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -255,16 +255,16 @@ export function ReadingCycleDialog({
                     key={option}
                     type="button"
                     onClick={() => setStatus(option)}
-                    className={`rounded-xl border p-4 text-left transition ${
+                    className={`min-w-0 rounded-xl border p-4 text-left transition ${
                       status === option
-                        ? "border-[#C9A96E] bg-[#C9A96E]/15"
-                        : "border-[#C9A96E]/20 bg-[#1A0F07]/70 hover:border-[#C9A96E]/50"
+                        ? "border-[var(--app-accent-gold)] bg-[var(--app-accent-teal-soft)]"
+                        : "border-[var(--app-border-subtle)] bg-[rgba(244,234,216,0.045)] hover:border-[var(--app-border-strong)]"
                     }`}
                   >
-                    <span className="block text-sm font-semibold text-[#F2E8D9]">
+                    <span className="block text-sm font-semibold text-[var(--app-text-primary)]">
                       {option === "ACTIVE" ? "Start now" : "Plan for later"}
                     </span>
-                    <span className="mt-1 block text-xs text-[#F2E8D9]/60">
+                    <span className="mt-1 block text-xs text-[var(--app-text-muted)]">
                       {option === "ACTIVE"
                         ? "Make this the club's current read."
                         : "Save it as the club's upcoming read."}
@@ -276,14 +276,14 @@ export function ReadingCycleDialog({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="block">
-                <span className="text-sm font-medium text-[#F2E8D9]">
+                <span className="app-field-label">
                   Start date
                 </span>
                 <input
                   type="date"
                   value={startDate}
                   onChange={(event) => setStartDate(event.target.value)}
-                  className="mt-2 w-full rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] px-3 py-3 text-sm text-[#F2E8D9] focus:border-[#C9A96E] focus:outline-none"
+                  className="app-input mt-2 w-full px-3 py-3 text-sm"
                 />
                 {errors.startDate ? (
                   <p className="mt-1 text-xs text-[#D35454]">
@@ -293,14 +293,14 @@ export function ReadingCycleDialog({
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium text-[#F2E8D9]">
+                <span className="app-field-label">
                   Target end date
                 </span>
                 <input
                   type="date"
                   value={targetEndDate}
                   onChange={(event) => setTargetEndDate(event.target.value)}
-                  className="mt-2 w-full rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] px-3 py-3 text-sm text-[#F2E8D9] focus:border-[#C9A96E] focus:outline-none"
+                  className="app-input mt-2 w-full px-3 py-3 text-sm"
                 />
                 {errors.targetEndDate ? (
                   <p className="mt-1 text-xs text-[#D35454]">
@@ -311,14 +311,14 @@ export function ReadingCycleDialog({
             </div>
 
             <label className="block">
-              <span className="text-sm font-medium text-[#F2E8D9]">
+              <span className="app-field-label">
                 Reading goal
               </span>
               <textarea
                 value={goalDescription}
                 onChange={(event) => setGoalDescription(event.target.value)}
                 rows={4}
-                className="mt-2 w-full rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] px-3 py-3 text-sm leading-6 text-[#F2E8D9] focus:border-[#C9A96E] focus:outline-none"
+                className="app-input mt-2 w-full px-3 py-3 text-sm leading-6"
               />
               {errors.goalDescription ? (
                 <p className="mt-1 text-xs text-[#D35454]">
@@ -327,11 +327,11 @@ export function ReadingCycleDialog({
               ) : null}
             </label>
 
-            <div className="rounded-xl border border-[#C9A96E]/20 bg-[#1A0F07]/70 p-4">
-              <p className="text-xs uppercase tracking-[0.18em] text-[#C9A96E]">
+            <div className="app-choice-row rounded-xl p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-[var(--app-accent-gold)]">
                 Confirmation
               </p>
-              <p className="mt-2 text-sm text-[#F2E8D9]/75">
+              <p className="mt-2 text-sm text-[var(--app-text-secondary)]">
                 {status === "ACTIVE"
                   ? "This will become the club's current read."
                   : "This will become the club's upcoming read."}
@@ -339,7 +339,7 @@ export function ReadingCycleDialog({
             </div>
 
             {errors.submit ? (
-              <p className="rounded-lg border border-[#D35454]/45 bg-[#D35454]/10 p-3 text-sm text-[#F2E8D9]">
+              <p className="rounded-lg border border-[rgba(196,95,95,0.45)] bg-[rgba(196,95,95,0.12)] p-3 text-sm text-[var(--app-text-primary)]">
                 {errors.submit}
               </p>
             ) : null}
@@ -348,7 +348,7 @@ export function ReadingCycleDialog({
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                className="rounded-lg border border-[#C9A96E]/30 px-4 py-3 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E]"
+                className="app-button-secondary w-full sm:w-auto"
               >
                 Cancel
               </button>
@@ -356,7 +356,7 @@ export function ReadingCycleDialog({
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => void handleSubmit()}
-                className="rounded-lg bg-[#C9A96E] px-4 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-60"
+                className="app-button-primary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               >
                 {isSubmitting ? "Saving..." : "Start reading cycle"}
               </button>

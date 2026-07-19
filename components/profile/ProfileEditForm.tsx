@@ -87,13 +87,13 @@ export function ProfileEditForm({
   };
 
   return (
-    <section className="app-surface-elevated rounded-2xl p-6 md:p-8">
+    <section className="app-surface-elevated min-w-0 rounded-2xl p-4 sm:p-6 md:p-8">
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--app-accent-gold)]">
+        <div className="min-w-0">
+          <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--app-accent-gold)] sm:tracking-[0.2em]">
             Profile Settings
           </p>
-          <h1 className="mt-2 font-serif text-4xl text-[var(--app-text-primary)]">
+          <h1 className="mt-2 break-words font-serif text-3xl text-[var(--app-text-primary)] sm:text-4xl">
             Shape your reader identity
           </h1>
         </div>
@@ -101,14 +101,14 @@ export function ProfileEditForm({
           type="button"
           onClick={onCancel}
           disabled={isSaving}
-          className="app-button-secondary disabled:opacity-60"
+          className="app-button-secondary w-full disabled:opacity-60 sm:w-auto"
         >
           <X className="h-4 w-4" />
           Cancel
         </button>
       </div>
 
-      <div className="mb-7 rounded-2xl border border-[var(--app-border-subtle)] bg-[rgba(8,11,10,0.34)] p-4">
+      <div className="mb-7 rounded-2xl border border-[var(--app-border-subtle)] bg-[rgba(8,11,10,0.34)] p-4 sm:p-5">
         <AvatarUpload profile={profile} onUploaded={onAvatarUploaded} />
       </div>
 
@@ -142,7 +142,7 @@ export function ProfileEditForm({
             placeholder="Share the kinds of books, ideas, and conversations you love."
             className="app-input min-h-32 w-full resize-none px-3 py-3 text-sm disabled:opacity-60"
           />
-          <div className="flex items-center justify-between gap-3 text-xs text-[var(--app-text-muted)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--app-text-muted)]">
             <span>Keep it short and human.</span>
             <span>{bio.trim().length}/500</span>
           </div>
@@ -169,14 +169,14 @@ export function ProfileEditForm({
             type="button"
             onClick={onCancel}
             disabled={isSaving}
-            className="app-button-secondary disabled:opacity-60"
+            className="app-button-secondary w-full disabled:opacity-60 sm:w-auto"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSaving}
-            className="app-button-primary disabled:opacity-60"
+            className="app-button-primary w-full disabled:opacity-60 sm:w-auto"
           >
             <Save className="h-4 w-4" />
             {isSaving ? "Saving..." : "Save Changes"}

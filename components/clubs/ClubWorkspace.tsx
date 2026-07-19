@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -14,7 +15,6 @@ import {
 } from "lucide-react";
 
 import { AppHeader } from "@/components/layout/AppHeader";
-import ChatWindow from "@/components/clubs/ChatWindow";
 import { ReadingCycleDialog } from "@/components/clubs/ReadingCycleDialog";
 import { ReadingCycleEditDialog } from "@/components/clubs/ReadingCycleEditDialog";
 import { ReadingCycleSection } from "@/components/clubs/ReadingCycleSection";
@@ -50,6 +50,12 @@ import type {
   ReadingCycle,
   UpdateReadingCyclePayload,
 } from "@/lib/types";
+
+const ChatWindow = dynamic(() => import("@/components/clubs/ChatWindow"), {
+  loading: () => (
+    <div className="app-surface min-h-[420px] animate-pulse rounded-2xl" />
+  ),
+});
 
 export type ClubWorkspaceView =
   | "overview"
@@ -119,6 +125,15 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
     string | null
   >(null);
 
+  const shouldLoadReadingCycleData =
+    view === "overview" || view === "reading";
+  const shouldLoadMembers =
+    view === "members" || view === "manage";
+  const shouldLoadJoinRequests =
+    view === "manage" &&
+    (club?.memberRole === "OWNER" || club?.memberRole === "MODERATOR") &&
+    !club?.isPublic;
+
   const memberManagement = useMemberManagement(clubId);
   const { setLoading: setMembersLoading, setMembers } = memberManagement;
 
@@ -160,11 +175,11 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
   }, [loadClub]);
 
   const loadReadingCycleData = useCallback(async () => {
-    if (!club) return;
+    if (!club || !shouldLoadReadingCycleData) return;
 
     try {
       setIsReadingCycleLoading(true);
-      if (isAuthenticated && club.isMember) {
+      if (view === "reading" && isAuthenticated && club.isMember) {
         const data = await getReadingCycles(clubId);
         setReadingCycles(data.readingCycles);
         setPublicCurrentCycle(null);
@@ -179,30 +194,37 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
     } finally {
       setIsReadingCycleLoading(false);
     }
-  }, [club, clubId, isAuthenticated]);
+  }, [club, clubId, isAuthenticated, shouldLoadReadingCycleData, view]);
 
   useEffect(() => {
+    if (!shouldLoadReadingCycleData) {
+      setReadingCycles([]);
+      setPublicCurrentCycle(null);
+      setIsReadingCycleLoading(false);
+      return;
+    }
+
     void loadReadingCycleData();
-  }, [loadReadingCycleData]);
+  }, [loadReadingCycleData, shouldLoadReadingCycleData]);
 
   const moderation = useClubModeration(clubId);
   const { loadRequests } = moderation;
 
   useEffect(() => {
-    if (!club?.memberRole) return;
+    if (!club?.memberRole || !shouldLoadJoinRequests) return;
 
-    if (club.memberRole === "OWNER" || club.memberRole === "MODERATOR") {
-      loadRequests().catch(() => {
-        console.error("Failed to load join requests");
-      });
-    }
+    loadRequests().catch(() => {
+      console.error("Failed to load join requests");
+    });
+  }, [club?.memberRole, loadRequests, shouldLoadJoinRequests]);
 
-    if (club.isMember) {
-      loadMembers().catch(() => {
-        console.error("Failed to load members");
-      });
-    }
-  }, [club?.isMember, club?.memberRole, loadMembers, loadRequests]);
+  useEffect(() => {
+    if (!club?.isMember || !shouldLoadMembers) return;
+
+    loadMembers().catch(() => {
+      console.error("Failed to load members");
+    });
+  }, [club?.isMember, loadMembers, shouldLoadMembers]);
 
   useEffect(() => {
     if (!isLoading && club && view === "manage" && club.memberRole !== "OWNER") {
@@ -371,15 +393,15 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
           />
         ) : club ? (
           <div className="space-y-6">
-            <header className="app-surface-elevated overflow-hidden rounded-2xl">
+            <header className="app-surface-elevated min-w-0 overflow-hidden rounded-2xl">
               <div className="grid gap-0 lg:grid-cols-[1fr_320px]">
-                <div className="p-5 md:p-7">
+                <div className="min-w-0 p-4 md:p-7">
                   <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
                     <div className="min-w-0">
-                      <p className="text-[11px] uppercase tracking-[0.22em] text-[var(--app-accent-gold)]">
+                      <p className="text-[11px] uppercase tracking-[0.16em] text-[var(--app-accent-gold)] sm:tracking-[0.22em]">
                         BookCircle club
                       </p>
-                      <h1 className="mt-2 break-words font-serif text-4xl font-bold leading-tight md:text-5xl">
+                      <h1 className="mt-2 break-words font-serif text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
                         {club.name}
                       </h1>
                       <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--app-text-secondary)]">
@@ -413,7 +435,7 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                     <span>Created {formatDate(club.createdAt)}</span>
                   </div>
 
-                  <div className="mt-6 flex flex-wrap gap-3">
+                  <div className="mt-6 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
                     {isAuthenticated ? (
                       <button
                         type="button"
@@ -425,7 +447,7 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                               : void handleJoinClick(club)
                         }
                         disabled={joiningClubId === club.id}
-                        className={club.isMember ? "app-button-secondary" : "app-button-primary"}
+                        className={`${club.isMember ? "app-button-secondary" : "app-button-primary"} w-full sm:w-auto`}
                       >
                         {club.isMember
                           ? joiningClubId === club.id
@@ -444,13 +466,13 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                     ) : (
                       <Link
                         href={`/auth/login?returnTo=${encodeURIComponent(`/clubs/${club.id}`)}`}
-                        className="app-button-primary"
+                        className="app-button-primary w-full sm:w-auto"
                       >
                         Join Club
                       </Link>
                     )}
                     {isOwner ? (
-                      <Link href={`/clubs/${clubId}/manage`} className="app-button-secondary">
+                      <Link href={`/clubs/${clubId}/manage`} className="app-button-secondary w-full sm:w-auto">
                         <Settings2 className="h-4 w-4" />
                         Manage
                       </Link>
@@ -460,13 +482,13 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                 <CoverImage
                   src={club.coverImage}
                   alt={`${club.name} cover`}
-                  className="min-h-64 border-t border-[var(--app-border-subtle)] lg:border-l lg:border-t-0"
+                  className="h-48 border-t border-[var(--app-border-subtle)] sm:h-64 lg:h-auto lg:min-h-64 lg:border-l lg:border-t-0"
                 />
               </div>
             </header>
 
             <nav
-              className="flex gap-2 overflow-x-auto border-b border-[var(--app-border-subtle)] pb-2"
+              className="-mx-1 flex max-w-full gap-2 overflow-x-auto border-b border-[var(--app-border-subtle)] px-1 pb-2"
               aria-label="Club navigation"
             >
               {CLUB_TABS.filter(
@@ -479,7 +501,7 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                     key={tab.view}
                     href={tabHref(clubId, tab.view)}
                     aria-current={active ? "page" : undefined}
-                    className={`min-h-11 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium ${
+                    className={`min-h-11 shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium ${
                       active
                         ? "border-[var(--app-accent-gold)] bg-[var(--app-accent-teal-soft)] text-[var(--app-accent-gold-hover)]"
                         : "border-transparent text-[var(--app-text-secondary)] hover:border-[var(--app-border-subtle)]"
@@ -591,22 +613,23 @@ function ClubOverview({
   isMember: boolean;
 }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <section className="space-y-6">
-        <div className="app-surface rounded-2xl p-5">
+        <div className="app-surface min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
           <SectionHeader title="Current reading" />
           {currentCycle ? (
-            <div className="grid gap-5 sm:grid-cols-[120px_1fr]">
+            <div className="grid min-w-0 gap-5 md:grid-cols-[132px_minmax(0,1fr)]">
               <CoverImage
                 src={currentCycle.book.coverImage}
                 alt={`${currentCycle.book.title} cover`}
-                className="aspect-[2/3] rounded-xl"
+                fit="contain"
+                className="mx-auto aspect-[2/3] w-full max-w-[168px] rounded-xl md:max-w-none"
               />
-              <div>
+              <div className="min-w-0">
                 <StatusBadge tone={currentCycle.status === "ACTIVE" ? "teal" : "gold"}>
                   {currentCycle.status === "ACTIVE" ? "Currently reading" : "Up next"}
                 </StatusBadge>
-                <h2 className="mt-3 break-words font-serif text-3xl leading-tight">
+                <h2 className="mt-3 break-words font-serif text-2xl leading-tight sm:text-3xl">
                   {currentCycle.book.title}
                 </h2>
                 <p className="mt-2 text-sm text-[var(--app-text-secondary)]">
@@ -639,7 +662,7 @@ function ClubOverview({
           )}
         </div>
 
-        <div className="app-surface rounded-2xl p-5">
+        <div className="app-surface min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
           <SectionHeader title="Discussion preview" />
           <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
             The live discussion now has its own focused room, so the overview
@@ -656,7 +679,7 @@ function ClubOverview({
       </section>
 
       <aside className="space-y-6">
-        <div className="app-surface rounded-2xl p-5">
+        <div className="app-surface min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
           <SectionHeader title="Members" />
           <p className="text-3xl font-semibold">{club.memberCount ?? membersCount}</p>
           <p className="mt-1 text-sm text-[var(--app-text-secondary)]">
@@ -670,7 +693,7 @@ function ClubOverview({
             </div>
           ) : null}
         </div>
-        <div className="app-surface rounded-2xl p-5">
+        <div className="app-surface min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
           <SectionHeader title="About" />
           <p className="line-clamp-4 text-sm leading-6 text-[var(--app-text-secondary)]">
             {club.description || "No description available."}
@@ -694,7 +717,7 @@ function ClubDiscussion({
   canChat: boolean;
 }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
       {canChat ? (
         <ChatWindow clubId={club.id} roomId={`${club.id}-general`} />
       ) : (
@@ -724,13 +747,13 @@ function ClubDiscussion({
 
 function ClubAbout({ club }: { club: Club }) {
   return (
-    <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
+    <div className="grid min-w-0 gap-6 lg:grid-cols-[360px_1fr]">
       <CoverImage
         src={club.coverImage}
         alt={`${club.name} cover`}
         className="aspect-[4/3] rounded-2xl lg:aspect-[3/4]"
       />
-      <section className="app-surface rounded-2xl p-6">
+      <section className="app-surface min-w-0 overflow-hidden rounded-2xl p-4 sm:p-6">
         <SectionHeader title="About this club" />
         <p className="text-base leading-7 text-[var(--app-text-secondary)]">
           {club.description || "No description available."}
@@ -793,32 +816,32 @@ function ClubManage({
 }) {
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 lg:grid-cols-3">
-        <section className="app-surface rounded-2xl p-5">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-3">
+        <section className="app-surface min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
           <SectionHeader title="General" />
           <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
             Edit club details, visibility, genre, and cover.
           </p>
           <div className="mt-4">
-            <Link href={`/clubs/${clubId}/settings`} className="app-button-secondary">
+            <Link href={`/clubs/${clubId}/settings`} className="app-button-secondary w-full sm:w-auto">
               <Settings2 className="h-4 w-4" />
               Open settings
             </Link>
           </div>
         </section>
-        <section className="app-surface rounded-2xl p-5">
+        <section className="app-surface min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
           <SectionHeader title="Reading cycle" />
           <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
             {plannedCycle
               ? `${plannedCycle.book.title} is planned next.`
               : "Plan the next shared read for this club."}
           </p>
-          <button type="button" onClick={onPlanRead} className="app-button-secondary mt-4">
+          <button type="button" onClick={onPlanRead} className="app-button-secondary mt-4 w-full sm:w-auto">
             <CalendarDays className="h-4 w-4" />
             Plan Next Read
           </button>
         </section>
-        <section className="app-surface rounded-2xl p-5">
+        <section className="app-surface min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
           <SectionHeader title="Danger zone" />
           <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
             Destructive club actions remain inside settings and require
@@ -829,7 +852,6 @@ function ClubManage({
 
       {!club.isPublic ? (
         <JoinRequestsPanel
-          clubId={clubId}
           requests={moderation.requests}
           loading={moderation.loading}
           actionInProgress={moderation.actionInProgress}
@@ -850,7 +872,7 @@ function ClubManage({
         showEmails
       />
 
-      <div className="app-surface rounded-2xl p-5">
+      <div className="app-surface min-w-0 overflow-hidden rounded-2xl p-4 sm:p-5">
         <SectionHeader title="More actions" />
         <p className="inline-flex items-center gap-2 text-sm text-[var(--app-text-secondary)]">
           <MoreHorizontal className="h-4 w-4 text-[var(--app-accent-gold)]" />

@@ -1,10 +1,8 @@
-import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
 import type { JoinRequest } from "@/hooks/useClubModeration";
 
 interface JoinRequestsPanelProps {
-  clubId: string;
   requests: JoinRequest[];
   loading: boolean;
   actionInProgress: string | null;
@@ -14,7 +12,6 @@ interface JoinRequestsPanelProps {
 }
 
 export default function JoinRequestsPanel({
-  clubId,
   requests,
   loading,
   actionInProgress,
@@ -22,11 +19,6 @@ export default function JoinRequestsPanel({
   onReject,
   onRefresh,
 }: JoinRequestsPanelProps) {
-  useEffect(() => {
-    // Load requests on mount
-    void onRefresh();
-  }, [clubId, onRefresh]);
-
   const pendingRequests = requests.filter((r) => r.status === "PENDING");
   const reviewedRequests = requests.filter((r) => r.status !== "PENDING");
 
@@ -35,26 +27,26 @@ export default function JoinRequestsPanel({
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, delay: 0.1 }}
-      className="rounded-2xl border border-[#C9A96E]/25 bg-[#2A1810]/90 p-6 shadow-[0_24px_60px_rgba(0,0,0,0.35)] md:p-8"
+      className="app-surface-elevated min-w-0 rounded-2xl p-4 sm:p-6 md:p-8"
     >
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="font-serif text-2xl text-[#F2E8D9]">Join Requests</h2>
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="break-words font-serif text-2xl text-[var(--app-text-primary)]">Join Requests</h2>
         <button
           onClick={() => void onRefresh()}
           disabled={loading}
-          className="text-xs px-3 py-1.5 rounded bg-[#C9A96E]/20 text-[#C9A96E] hover:bg-[#C9A96E]/30 transition disabled:opacity-50"
+          className="rounded-lg px-3 py-2 text-xs text-[var(--app-accent-gold)] transition hover:bg-[rgba(216,181,109,0.08)] disabled:opacity-50"
         >
           {loading ? "Loading..." : "Refresh"}
         </button>
       </div>
 
       {pendingRequests.length === 0 && reviewedRequests.length === 0 ? (
-        <p className="text-[#F2E8D9]/60 text-sm">No join requests yet.</p>
+        <p className="text-sm text-[var(--app-text-secondary)]">No join requests yet.</p>
       ) : (
         <div className="space-y-4">
           {pendingRequests.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-[#C9A96E] uppercase tracking-wide mb-3">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--app-accent-gold)]">
                 Pending ({pendingRequests.length})
               </h3>
               <div className="space-y-3">
@@ -64,24 +56,24 @@ export default function JoinRequestsPanel({
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="flex items-center justify-between gap-4 rounded-lg border border-[#C9A96E]/20 bg-[#1A0F07]/50 p-4"
+                    className="app-choice-row flex min-w-0 flex-col gap-4 rounded-lg p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[#F2E8D9] truncate">
+                      <p className="truncate font-semibold text-[var(--app-text-primary)]">
                         {request.username}
                       </p>
-                      <p className="text-xs text-[#F2E8D9]/60 truncate">
+                      <p className="truncate text-xs text-[var(--app-text-muted)]">
                         {request.email}
                       </p>
-                      <p className="text-xs text-[#C9A96E]/60 mt-1">
+                      <p className="mt-1 text-xs text-[var(--app-accent-gold)]">
                         Requested {new Date(request.createdAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
+                    <div className="flex w-full flex-shrink-0 gap-2 sm:w-auto">
                       <button
                         onClick={() => void onApprove(request.id)}
                         disabled={actionInProgress === request.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 transition disabled:opacity-50 text-xs font-medium"
+                        className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded bg-emerald-600/20 px-3 py-2 text-xs font-medium text-emerald-400 transition hover:bg-emerald-600/30 disabled:opacity-50 sm:flex-none"
                       >
                         {actionInProgress === request.id ? (
                           <span className="inline-block animate-spin">⟳</span>
@@ -93,7 +85,7 @@ export default function JoinRequestsPanel({
                       <button
                         onClick={() => void onReject(request.id)}
                         disabled={actionInProgress === request.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded bg-red-600/20 text-red-400 hover:bg-red-600/30 transition disabled:opacity-50 text-xs font-medium"
+                        className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded bg-red-600/20 px-3 py-2 text-xs font-medium text-red-400 transition hover:bg-red-600/30 disabled:opacity-50 sm:flex-none"
                       >
                         {actionInProgress === request.id ? (
                           <span className="inline-block animate-spin">⟳</span>
@@ -111,20 +103,20 @@ export default function JoinRequestsPanel({
 
           {reviewedRequests.length > 0 && (
             <div>
-              <h3 className="text-sm font-semibold text-[#C9A96E]/60 uppercase tracking-wide mb-3">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--app-text-muted)]">
                 Reviewed ({reviewedRequests.length})
               </h3>
               <div className="space-y-3">
                 {reviewedRequests.map((request) => (
                   <div
                     key={request.id}
-                    className="flex items-center justify-between gap-4 rounded-lg border border-[#C9A96E]/10 bg-[#1A0F07]/30 p-4 opacity-70"
+                    className="app-choice-row flex min-w-0 flex-col gap-3 rounded-lg p-4 opacity-70 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-[#F2E8D9] truncate">
+                      <p className="truncate font-semibold text-[var(--app-text-primary)]">
                         {request.username}
                       </p>
-                      <p className="text-xs text-[#F2E8D9]/60 truncate">
+                      <p className="truncate text-xs text-[var(--app-text-muted)]">
                         {request.email}
                       </p>
                     </div>

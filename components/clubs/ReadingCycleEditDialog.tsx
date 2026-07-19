@@ -98,21 +98,21 @@ export function ReadingCycleEditDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#050302]/75 p-4 backdrop-blur-sm">
+    <div className="app-modal-backdrop">
       <section
         aria-modal="true"
         role="dialog"
         aria-labelledby="reading-cycle-edit-title"
-        className="w-full max-w-xl rounded-2xl border border-[#C9A96E]/30 bg-[#100904] shadow-[0_30px_90px_rgba(0,0,0,0.6)]"
+        className="app-modal-panel max-w-xl"
       >
-        <header className="flex items-start justify-between gap-4 border-b border-[#C9A96E]/20 bg-[#2A1810]/90 p-5">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
+        <header className="app-modal-header flex min-w-0 items-start justify-between gap-4 p-4 sm:p-5">
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-[0.14em] text-[var(--app-accent-gold)] sm:tracking-[0.2em]">
               Reading Cycle
             </p>
             <h2
               id="reading-cycle-edit-title"
-              className="mt-1 font-serif text-3xl text-[#F2E8D9]"
+              className="mt-1 break-words font-serif text-2xl text-[var(--app-text-primary)] sm:text-3xl"
             >
               Edit Schedule
             </h2>
@@ -120,33 +120,33 @@ export function ReadingCycleEditDialog({
           <button
             type="button"
             onClick={() => onOpenChange(false)}
-            className="rounded-full border border-[#C9A96E]/20 p-2 text-[#F2E8D9]/70 transition hover:border-[#C9A96E]/50 hover:text-[#F2E8D9]"
+            className="shrink-0 rounded-lg border border-[var(--app-border-subtle)] p-2 text-[var(--app-text-secondary)] transition hover:border-[var(--app-border-strong)] hover:text-[var(--app-text-primary)]"
             aria-label="Close edit dialog"
           >
             <X className="h-4 w-4" />
           </button>
         </header>
 
-        <div className="space-y-5 p-5">
+        <div className="space-y-5 p-4 sm:p-5">
           <div>
-            <h3 className="font-serif text-2xl text-[#F2E8D9]">
+            <h3 className="break-words font-serif text-2xl text-[var(--app-text-primary)]">
               {activeCycle.book.title}
             </h3>
-            <p className="mt-1 text-sm text-[#F2E8D9]/60">
+            <p className="mt-1 text-sm text-[var(--app-text-secondary)]">
               Update the dates or shared goal for this reading cycle.
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
-              <span className="text-sm font-medium text-[#F2E8D9]">
+              <span className="app-field-label">
                 Start date
               </span>
               <input
                 type="date"
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
-                className="mt-2 w-full rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] px-3 py-3 text-sm text-[#F2E8D9] focus:border-[#C9A96E] focus:outline-none"
+                className="app-input mt-2 w-full px-3 py-3 text-sm"
               />
               {errors.startDate ? (
                 <p className="mt-1 text-xs text-[#D35454]">
@@ -156,14 +156,14 @@ export function ReadingCycleEditDialog({
             </label>
 
             <label className="block">
-              <span className="text-sm font-medium text-[#F2E8D9]">
+              <span className="app-field-label">
                 Target end date
               </span>
               <input
                 type="date"
                 value={targetEndDate}
                 onChange={(event) => setTargetEndDate(event.target.value)}
-                className="mt-2 w-full rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] px-3 py-3 text-sm text-[#F2E8D9] focus:border-[#C9A96E] focus:outline-none"
+                className="app-input mt-2 w-full px-3 py-3 text-sm"
               />
               {errors.targetEndDate ? (
                 <p className="mt-1 text-xs text-[#D35454]">
@@ -174,19 +174,19 @@ export function ReadingCycleEditDialog({
           </div>
 
           <label className="block">
-            <span className="text-sm font-medium text-[#F2E8D9]">
+            <span className="app-field-label">
               Reading goal
             </span>
             <textarea
               value={goalDescription}
               onChange={(event) => setGoalDescription(event.target.value)}
               rows={4}
-              className="mt-2 w-full rounded-lg border border-[#C9A96E]/30 bg-[#1A0F07] px-3 py-3 text-sm leading-6 text-[#F2E8D9] focus:border-[#C9A96E] focus:outline-none"
+              className="app-input mt-2 w-full px-3 py-3 text-sm leading-6"
             />
           </label>
 
           {errors.submit ? (
-            <p className="rounded-lg border border-[#D35454]/45 bg-[#D35454]/10 p-3 text-sm text-[#F2E8D9]">
+            <p className="rounded-lg border border-[rgba(196,95,95,0.45)] bg-[rgba(196,95,95,0.12)] p-3 text-sm text-[var(--app-text-primary)]">
               {errors.submit}
             </p>
           ) : null}
@@ -195,7 +195,7 @@ export function ReadingCycleEditDialog({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="rounded-lg border border-[#C9A96E]/30 px-4 py-3 text-sm text-[#F2E8D9] transition hover:border-[#C9A96E]"
+              className="app-button-secondary w-full sm:w-auto"
             >
               Cancel
             </button>
@@ -203,7 +203,7 @@ export function ReadingCycleEditDialog({
               type="button"
               disabled={isSubmitting}
               onClick={() => void handleSubmit()}
-              className="rounded-lg bg-[#C9A96E] px-4 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-60"
+              className="app-button-primary w-full disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
               {isSubmitting ? "Saving..." : "Save changes"}
             </button>

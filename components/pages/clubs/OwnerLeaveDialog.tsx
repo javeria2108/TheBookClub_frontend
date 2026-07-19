@@ -114,14 +114,14 @@ export default function OwnerLeaveDialog({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="w-full max-w-xl rounded-2xl border border-[#C9A96E]/35 bg-[#2A1810] p-6 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <h2 className="font-serif text-2xl text-[#F2E8D9]">
+    <div className="app-modal-backdrop">
+      <div className="app-modal-panel max-w-xl p-4 sm:p-6">
+        <div className="mb-4 flex min-w-0 items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="break-words font-serif text-2xl text-[var(--app-text-primary)]">
               Leave As Club Owner
             </h2>
-            <p className="mt-1 text-sm text-[#F2E8D9]/70">
+            <p className="mt-1 text-sm text-[var(--app-text-secondary)]">
               Owners must either delete the club or transfer ownership before
               leaving.
             </p>
@@ -130,7 +130,7 @@ export default function OwnerLeaveDialog({
             type="button"
             onClick={onClose}
             disabled={isLoading}
-            className="rounded p-1 text-[#F2E8D9]/70 transition hover:bg-[#1A0F07]/70 hover:text-[#F2E8D9]"
+            className="shrink-0 rounded-lg border border-[var(--app-border-subtle)] p-1.5 text-[var(--app-text-secondary)] transition hover:border-[var(--app-border-strong)] hover:text-[var(--app-text-primary)]"
             aria-label="Close owner leave dialog"
           >
             <X className="h-5 w-5" />
@@ -152,20 +152,20 @@ export default function OwnerLeaveDialog({
               type="button"
               onClick={() => void loadTransferCandidates()}
               disabled={isLoading}
-              className="w-full rounded border border-[#C9A96E]/40 bg-[#C9A96E]/15 px-4 py-3 text-left text-sm font-semibold text-[#F2E8D9] transition hover:bg-[#C9A96E]/25 disabled:opacity-60"
+              className="app-choice-row w-full rounded-lg px-4 py-3 text-left text-sm font-semibold text-[var(--app-text-primary)] transition hover:border-[var(--app-border-strong)] disabled:opacity-60"
             >
               Transfer Ownership To Another Member
             </button>
           </div>
         ) : (
           <div className="space-y-4">
-            <p className="text-sm text-[#F2E8D9]/80">
+            <p className="text-sm text-[var(--app-text-secondary)]">
               Select a member or moderator to become the new owner.
             </p>
 
-            <div className="max-h-64 space-y-2 overflow-y-auto rounded border border-[#C9A96E]/25 bg-[#1A0F07]/40 p-2">
+            <div className="max-h-64 space-y-2 overflow-y-auto rounded-lg border border-[var(--app-border-subtle)] bg-[rgba(8,11,10,0.42)] p-2">
               {candidates.length === 0 ? (
-                <p className="px-2 py-1 text-sm text-[#F2E8D9]/65">
+                <p className="px-2 py-1 text-sm text-[var(--app-text-secondary)]">
                   No eligible member found. Invite members first.
                 </p>
               ) : (
@@ -176,15 +176,15 @@ export default function OwnerLeaveDialog({
                     onClick={() => setSelectedNextOwnerId(member.userId)}
                     className={`w-full rounded px-3 py-2 text-left transition ${
                       selectedNextOwnerId === member.userId
-                        ? "border border-[#C9A96E] bg-[#C9A96E]/20"
-                        : "border border-transparent bg-[#2A1810]/60 hover:bg-[#2A1810]"
+                        ? "border border-[var(--app-accent-gold)] bg-[var(--app-accent-teal-soft)]"
+                        : "border border-transparent bg-[rgba(244,234,216,0.045)] hover:bg-[rgba(244,234,216,0.07)]"
                     }`}
                   >
-                    <p className="text-sm font-semibold text-[#F2E8D9]">
+                    <p className="text-sm font-semibold text-[var(--app-text-primary)]">
                       {member.username}
                     </p>
-                    <p className="text-xs text-[#F2E8D9]/65">{member.email}</p>
-                    <p className="text-[11px] uppercase tracking-wide text-[#C9A96E]/90">
+                    <p className="break-all text-xs text-[var(--app-text-muted)]">{member.email}</p>
+                    <p className="text-[11px] uppercase tracking-wide text-[var(--app-accent-gold)]">
                       {member.role}
                     </p>
                   </button>
@@ -192,12 +192,12 @@ export default function OwnerLeaveDialog({
               )}
             </div>
 
-            <div className="flex flex-wrap items-center justify-end gap-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
               <button
                 type="button"
                 onClick={() => setStep("choice")}
                 disabled={isLoading}
-                className="rounded border border-[#C9A96E]/35 px-4 py-2 text-sm text-[#F2E8D9] transition hover:bg-[#C9A96E]/15 disabled:opacity-60"
+                className="app-button-secondary w-full disabled:opacity-60 sm:w-auto"
               >
                 Back
               </button>
@@ -205,7 +205,7 @@ export default function OwnerLeaveDialog({
                 type="button"
                 onClick={() => void handleTransferAndLeave()}
                 disabled={isLoading || !selectedNextOwnerId}
-                className="rounded bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884] disabled:opacity-60"
+                className="app-button-primary w-full disabled:opacity-60 sm:w-auto"
               >
                 {isLoading ? "Transferring..." : "Transfer and Leave"}
               </button>

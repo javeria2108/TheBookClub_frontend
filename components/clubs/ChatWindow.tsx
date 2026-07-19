@@ -188,23 +188,23 @@ export default function ChatWindow({
         : `${typingUsers.length} readers are typing...`;
 
   return (
-    <div className="flex h-[620px] flex-col overflow-hidden rounded-xl border border-[#C9A96E]/25 bg-[#100904] shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
-      <div className="border-b border-[#C9A96E]/20 bg-[#2A1810]/90 px-4 py-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#C9A96E]/15 text-[#C9A96E]">
+    <div className="app-surface-elevated flex h-[560px] min-w-0 flex-col overflow-hidden rounded-xl sm:h-[620px]">
+      <div className="app-modal-header px-4 py-4">
+        <div className="flex min-w-0 items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="app-icon-frame h-9 w-9 shrink-0 rounded-lg">
               <MessageCircle className="h-4 w-4" />
             </span>
-            <div>
+            <div className="min-w-0">
               <p className="font-serif text-xl leading-none">Club Chat</p>
-              <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[#C9A96E]">
+              <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-[var(--app-accent-gold)]">
                 General Room
               </p>
             </div>
           </div>
 
-          <div className="inline-flex items-center gap-1 rounded-full border border-[#C9A96E]/20 px-3 py-1 text-xs text-[#F2E8D9]/70">
-            <Users className="h-3.5 w-3.5 text-[#C9A96E]" />
+          <div className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-[var(--app-border-subtle)] px-3 py-1 text-xs text-[var(--app-text-secondary)]">
+            <Users className="h-3.5 w-3.5 text-[var(--app-accent-gold)]" />
             {participants.length}
           </div>
         </div>
@@ -212,7 +212,7 @@ export default function ChatWindow({
 
       <div
         ref={listRef}
-        className="flex-1 space-y-4 overflow-auto bg-[radial-gradient(circle_at_top,rgba(201,169,110,0.08),transparent_55%)] p-4"
+        className="flex-1 space-y-4 overflow-auto bg-[radial-gradient(circle_at_top,rgba(26,165,156,0.08),transparent_55%)] p-4"
       >
         {hasMoreHistory ? (
           <div className="text-center">
@@ -220,7 +220,7 @@ export default function ChatWindow({
               type="button"
               onClick={() => void loadOlderMessages()}
               disabled={isLoadingMore}
-              className="inline-flex items-center gap-2 rounded-full border border-[#C9A96E]/30 px-3 py-1.5 text-xs text-[#C9A96E] transition hover:bg-[#C9A96E]/10 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg border border-[var(--app-border-subtle)] px-3 py-1.5 text-xs text-[var(--app-accent-gold)] transition hover:bg-[rgba(216,181,109,0.08)] disabled:opacity-60"
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 ${isLoadingMore ? "animate-spin" : ""}`}
@@ -235,12 +235,12 @@ export default function ChatWindow({
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
-                className="h-14 animate-pulse rounded-xl bg-[#2A1810]/70"
+                className="h-14 animate-pulse rounded-xl bg-[var(--app-surface)]"
               />
             ))}
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[#C9A96E]/25 bg-[#1A0F07]/35 px-4 text-center text-sm text-[#F2E8D9]/65">
+          <div className="flex h-full items-center justify-center rounded-xl border border-dashed border-[var(--app-border-subtle)] bg-[rgba(244,234,216,0.045)] px-4 text-center text-sm text-[var(--app-text-secondary)]">
             No messages yet. Start the first conversation.
           </div>
         ) : (
@@ -265,23 +265,23 @@ export default function ChatWindow({
                 className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`w-full max-w-[88%] ${
+                  className={`min-w-0 w-full max-w-[88%] ${
                     isOwn ? "items-end" : "items-start"
                   }`}
                 >
                   <div
-                    className={`mb-1 flex items-center gap-2 text-xs ${
+                    className={`mb-1 flex min-w-0 flex-wrap items-center gap-2 text-xs ${
                       isOwn ? "justify-end" : "justify-start"
                     }`}
                   >
                     {!isOwn ? (
-                      <span className="font-medium text-[#C9A96E]">
+                      <span className="font-medium text-[var(--app-accent-gold)]">
                         {message.username}
                       </span>
                     ) : null}
-                    <span className="text-[#F2E8D9]/45">{messageTime}</span>
+                    <span className="text-[var(--app-text-muted)]">{messageTime}</span>
                     {message.deliveryStatus === "sending" ? (
-                      <span className="text-[#C9A96E]/70">Sending</span>
+                      <span className="text-[var(--app-accent-gold)]">Sending</span>
                     ) : null}
                     {message.deliveryStatus === "failed" ? (
                       <span className="text-red-300">Failed</span>
@@ -295,7 +295,7 @@ export default function ChatWindow({
                       <button
                         type="button"
                         onClick={() => startEditing(message.id, message.content)}
-                        className="inline-flex items-center gap-1 rounded-full border border-[#C9A96E]/40 px-2 py-0.5 text-[#C9A96E] hover:bg-[#C9A96E]/15"
+                        className="inline-flex items-center gap-1 rounded-lg border border-[var(--app-border-subtle)] px-2 py-0.5 text-[var(--app-accent-gold)] hover:bg-[rgba(216,181,109,0.08)]"
                         disabled={actionLoadingMessageId === message.id}
                       >
                         <PenLine className="h-3 w-3" />
@@ -327,18 +327,18 @@ export default function ChatWindow({
                         if (!ok) return;
                         cancelEditing();
                       }}
-                      className="space-y-2 rounded-xl border border-[#C9A96E]/30 bg-[#1A0F07] p-3"
+                      className="app-choice-row min-w-0 space-y-2 rounded-xl p-3"
                     >
                       <input
                         value={editText}
                         onChange={(event) => setEditText(event.target.value)}
-                        className="w-full rounded-lg border border-[#C9A96E]/30 bg-[#2A1810] px-2.5 py-1.5 text-sm text-[#F2E8D9]"
+                        className="app-input w-full px-2.5 py-1.5 text-sm"
                         autoFocus
                       />
                       <div className="flex justify-end gap-2">
                         <button
                           type="submit"
-                          className="rounded-lg bg-[#C9A96E] px-2.5 py-1 text-xs font-semibold text-[#1A0F07]"
+                          className="rounded-lg bg-[var(--app-accent-gold)] px-2.5 py-1 text-xs font-semibold text-[#171008]"
                           disabled={actionLoadingMessageId === message.id}
                         >
                           {actionLoadingMessageId === message.id
@@ -348,7 +348,7 @@ export default function ChatWindow({
                         <button
                           type="button"
                           onClick={cancelEditing}
-                          className="rounded-lg border border-[#C9A96E]/40 px-2.5 py-1 text-xs"
+                          className="rounded-lg border border-[var(--app-border-subtle)] px-2.5 py-1 text-xs"
                         >
                           Cancel
                         </button>
@@ -365,18 +365,18 @@ export default function ChatWindow({
                       }}
                       className={`w-full rounded-xl border p-3 text-left text-sm leading-relaxed transition ${
                         isOwn
-                          ? "border-[#C9A96E]/35 bg-[#C9A96E]/18 text-[#F2E8D9] hover:border-[#C9A96E]/65"
-                          : "border-[#C9A96E]/15 bg-[#1A0F07]/75 text-[#F2E8D9]/92"
+                          ? "border-[var(--app-accent-gold)] bg-[var(--app-accent-teal-soft)] text-[var(--app-text-primary)] hover:border-[var(--app-border-strong)]"
+                          : "border-[var(--app-border-subtle)] bg-[rgba(244,234,216,0.045)] text-[var(--app-text-primary)]"
                       } ${
                         canUseActions ? "cursor-pointer" : "cursor-default"
-                      } ${activeMessageId === message.id ? "border-[#C9A96E]/70" : ""} ${
+                      } ${activeMessageId === message.id ? "border-[var(--app-accent-gold)]" : ""} ${
                         message.deliveryStatus === "failed"
                           ? "border-red-300/45"
                           : ""
                       }`}
                     >
                       {message.isDeleted ? (
-                        <span className="italic text-[#F2E8D9]/45">
+                        <span className="italic text-[var(--app-text-muted)]">
                           This message was deleted.
                         </span>
                       ) : (
@@ -391,7 +391,7 @@ export default function ChatWindow({
         )}
       </div>
 
-      <div className="min-h-6 border-t border-[#C9A96E]/10 bg-[#1A0F07]/70 px-4 py-1.5 text-xs text-[#C9A96E]/80">
+      <div className="min-h-6 border-t border-[var(--app-border-subtle)] bg-[rgba(8,11,10,0.44)] px-4 py-1.5 text-xs text-[var(--app-accent-gold)]">
         {typingLabel}
       </div>
 
@@ -406,19 +406,19 @@ export default function ChatWindow({
           if (!ok) return;
           setText("");
         }}
-        className="border-t border-[#C9A96E]/20 bg-[#1A0F07]/70 p-3"
+        className="border-t border-[var(--app-border-subtle)] bg-[rgba(8,11,10,0.44)] p-3"
       >
-        <div className="flex gap-2">
+        <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
           <input
             value={text}
             onChange={(event) => handleTextChange(event.target.value)}
-            className="w-full rounded-lg border border-[#C9A96E]/30 bg-[#2A1810] px-3 py-2 text-[#F2E8D9] placeholder:text-[#F2E8D9]/45 focus:border-[#C9A96E]/55 focus:outline-none"
+            className="app-input w-full px-3 py-2"
             placeholder="Write a message..."
             disabled={isSending}
           />
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-lg bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] shadow-[0_8px_20px_rgba(201,169,110,0.35)] transition hover:bg-[#d8b884] disabled:cursor-not-allowed disabled:opacity-70"
+            className="app-button-primary w-full disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
             disabled={isSending || !text.trim()}
           >
             {!isSending ? <Send className="h-4 w-4" /> : null}
