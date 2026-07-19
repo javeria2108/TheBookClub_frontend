@@ -40,13 +40,16 @@ import {
   completeReadingCycle,
   createReadingCycle,
   getCurrentReadingCycle,
+  getReadingProgress,
   getReadingCycles,
   startReadingCycle,
+  updateMyReadingProgress,
   updateReadingCycle,
 } from "@/lib/reading-cycles";
 import type {
   Club,
   CreateReadingCyclePayload,
+  ReadingProgressResponse,
   ReadingCycle,
   UpdateReadingCyclePayload,
 } from "@/lib/types";
@@ -124,6 +127,13 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
   const [readingCycleActionId, setReadingCycleActionId] = useState<
     string | null
   >(null);
+  const [readingProgress, setReadingProgress] =
+    useState<ReadingProgressResponse | null>(null);
+  const [isReadingProgressLoading, setIsReadingProgressLoading] =
+    useState(false);
+  const [readingProgressError, setReadingProgressError] = useState("");
+  const [isReadingProgressSaving, setIsReadingProgressSaving] =
+    useState(false);
 
   const shouldLoadReadingCycleData =
     view === "overview" || view === "reading";
@@ -280,6 +290,37 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
   const isOwner = club?.memberRole === "OWNER";
   const isMember = Boolean(club?.isMember);
 
+  const shouldLoadReadingProgress =
+    view === "reading" && isAuthenticated && isMember && Boolean(currentCycle);
+
+  const loadReadingProgressData = useCallback(async () => {
+    if (!currentCycle || !shouldLoadReadingProgress) return;
+
+    try {
+      setIsReadingProgressLoading(true);
+      setReadingProgressError("");
+      const progress = await getReadingProgress(clubId, currentCycle.id);
+      setReadingProgress(progress);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load reading progress";
+      setReadingProgressError(message);
+    } finally {
+      setIsReadingProgressLoading(false);
+    }
+  }, [clubId, currentCycle, shouldLoadReadingProgress]);
+
+  useEffect(() => {
+    if (!shouldLoadReadingProgress) {
+      setReadingProgress(null);
+      setReadingProgressError("");
+      setIsReadingProgressLoading(false);
+      return;
+    }
+
+    void loadReadingProgressData();
+  }, [loadReadingProgressData, shouldLoadReadingProgress]);
+
   const onLeavePressed = () => {
     if (!club) return;
     if (club.memberRole === "OWNER") {
@@ -353,6 +394,34 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
       });
     } finally {
       setReadingCycleActionId(null);
+    }
+  };
+
+  const handleUpdateReadingProgress = async (progressPercentage: number) => {
+    if (!currentCycle) return;
+
+    try {
+      setIsReadingProgressSaving(true);
+      setReadingProgressError("");
+      const progress = await updateMyReadingProgress(clubId, currentCycle.id, {
+        progressPercentage,
+      });
+      setReadingProgress(progress);
+      toast({
+        title: "Progress updated",
+        description: `${progressPercentage}% has been saved for this read.`,
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Unable to update progress";
+      setReadingProgressError(message);
+      toast({
+        variant: "destructive",
+        title: "Unable to update progress",
+        description: message,
+      });
+    } finally {
+      setIsReadingProgressSaving(false);
     }
   };
 
@@ -535,6 +604,12 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                 onComplete={(cycle) => void handleCompleteReadingCycle(cycle)}
                 onCancel={(cycle) => void handleCancelReadingCycle(cycle)}
                 actionInProgress={readingCycleActionId}
+                progress={readingProgress}
+                isProgressLoading={isReadingProgressLoading}
+                progressError={readingProgressError}
+                isProgressSaving={isReadingProgressSaving}
+                onRetryProgress={() => void loadReadingProgressData()}
+                onUpdateProgress={handleUpdateReadingProgress}
               />
             ) : null}
 

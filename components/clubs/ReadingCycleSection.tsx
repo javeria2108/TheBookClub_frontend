@@ -2,7 +2,9 @@
 
 import { BookOpen, CalendarDays, CheckCircle2, Clock, XCircle } from "lucide-react";
 
+import { ReadingProgressPanel } from "@/components/clubs/ReadingProgressPanel";
 import type { ReadingCycle } from "@/lib/types";
+import type { ReadingProgressResponse } from "@/lib/types";
 
 type ReadingCycleSectionProps = {
   currentCycle: ReadingCycle | null;
@@ -16,6 +18,12 @@ type ReadingCycleSectionProps = {
   onComplete: (cycle: ReadingCycle) => void;
   onCancel: (cycle: ReadingCycle) => void;
   actionInProgress: string | null;
+  progress: ReadingProgressResponse | null;
+  isProgressLoading: boolean;
+  progressError: string;
+  isProgressSaving: boolean;
+  onRetryProgress: () => void;
+  onUpdateProgress: (progressPercentage: number) => Promise<void>;
 };
 
 function formatDate(value: string): string {
@@ -63,6 +71,12 @@ export function ReadingCycleSection({
   onComplete,
   onCancel,
   actionInProgress,
+  progress,
+  isProgressLoading,
+  progressError,
+  isProgressSaving,
+  onRetryProgress,
+  onUpdateProgress,
 }: ReadingCycleSectionProps) {
   const isCurrentPlanned = currentCycle?.status === "PLANNED";
   const isCurrentActive = currentCycle?.status === "ACTIVE";
@@ -101,129 +115,143 @@ export function ReadingCycleSection({
           </div>
         </div>
       ) : currentCycle ? (
-        <div className="grid min-w-0 gap-6 p-4 sm:p-5 lg:grid-cols-[180px_minmax(0,1fr)] lg:p-6">
-          <div className="mx-auto aspect-[2/3] w-full max-w-[170px] overflow-hidden rounded-xl border border-[var(--app-border-subtle)] bg-[var(--app-surface-subtle)] lg:max-w-none">
-            {currentCycle.book.coverImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={currentCycle.book.coverImage}
-                alt=""
-                className="h-full w-full object-contain"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center">
-                <BookOpen className="h-12 w-12 text-[var(--app-accent-gold)]" />
-              </div>
-            )}
-          </div>
-
-          <div className="min-w-0">
-            <span className="inline-flex rounded-lg border border-[var(--app-border-subtle)] bg-[var(--app-accent-teal-soft)] px-3 py-1 text-xs uppercase tracking-[0.16em] text-[var(--app-accent-gold)]">
-              {getStatusLabel(currentCycle.status)}
-            </span>
-            <h3 className="mt-4 break-words font-serif text-3xl leading-tight text-[var(--app-text-primary)] sm:text-4xl">
-              {currentCycle.book.title}
-            </h3>
-            <p className="mt-2 text-sm text-[var(--app-text-secondary)]">
-              {getAuthorsLabel(currentCycle.book.authors)}
-            </p>
-
-            <div className="mt-5 grid min-w-0 gap-3 md:grid-cols-3">
-              <div className="app-choice-row min-w-0 rounded-xl p-4">
-                <CalendarDays className="mb-2 h-4 w-4 text-[var(--app-accent-gold)]" />
-                <p className="break-words text-sm text-[var(--app-text-primary)]">
-                  {formatDate(currentCycle.startDate)}
-                </p>
-                <p className="mt-1 text-xs text-[var(--app-text-muted)]">Start date</p>
-              </div>
-              <div className="app-choice-row min-w-0 rounded-xl p-4">
-                <Clock className="mb-2 h-4 w-4 text-[var(--app-accent-gold)]" />
-                <p className="break-words text-sm text-[var(--app-text-primary)]">
-                  {formatDate(currentCycle.targetEndDate)}
-                </p>
-                <p className="mt-1 text-xs text-[var(--app-text-muted)]">Target end</p>
-              </div>
-              <div className="app-choice-row min-w-0 rounded-xl p-4">
-                <CheckCircle2 className="mb-2 h-4 w-4 text-[var(--app-accent-gold)]" />
-                <p className="break-words text-sm text-[var(--app-text-primary)]">
-                  {currentCycle.status === "COMPLETED" &&
-                  currentCycle.completedAt
-                    ? formatDate(currentCycle.completedAt)
-                    : getDaysRemaining(currentCycle.targetEndDate)}
-                </p>
-                <p className="mt-1 text-xs text-[var(--app-text-muted)]">Timeline</p>
-              </div>
+        <div className="space-y-6 p-4 sm:p-5 lg:p-6">
+          <div className="grid min-w-0 gap-6 lg:grid-cols-[180px_minmax(0,1fr)]">
+            <div className="mx-auto aspect-[2/3] w-full max-w-[170px] overflow-hidden rounded-xl border border-[var(--app-border-subtle)] bg-[var(--app-surface-subtle)] lg:max-w-none">
+              {currentCycle.book.coverImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={currentCycle.book.coverImage}
+                  alt=""
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center">
+                  <BookOpen className="h-12 w-12 text-[var(--app-accent-gold)]" />
+                </div>
+              )}
             </div>
 
-            {currentCycle.goalDescription ? (
-              <p className="app-choice-row mt-5 rounded-xl p-4 text-sm leading-6 text-[var(--app-text-secondary)]">
-                {currentCycle.goalDescription}
+            <div className="min-w-0">
+              <span className="inline-flex rounded-lg border border-[var(--app-border-subtle)] bg-[var(--app-accent-teal-soft)] px-3 py-1 text-xs uppercase tracking-[0.16em] text-[var(--app-accent-gold)]">
+                {getStatusLabel(currentCycle.status)}
+              </span>
+              <h3 className="mt-4 break-words font-serif text-3xl leading-tight text-[var(--app-text-primary)] sm:text-4xl">
+                {currentCycle.book.title}
+              </h3>
+              <p className="mt-2 text-sm text-[var(--app-text-secondary)]">
+                {getAuthorsLabel(currentCycle.book.authors)}
               </p>
-            ) : null}
 
-            <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
-              {currentCycle.book.previewUrl ? (
-                <a
-                  href={currentCycle.book.previewUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="app-button-secondary w-full sm:w-auto"
-                >
-                  Preview
-                </a>
+              <div className="mt-5 grid min-w-0 gap-3 md:grid-cols-3">
+                <div className="app-choice-row min-w-0 rounded-xl p-4">
+                  <CalendarDays className="mb-2 h-4 w-4 text-[var(--app-accent-gold)]" />
+                  <p className="break-words text-sm text-[var(--app-text-primary)]">
+                    {formatDate(currentCycle.startDate)}
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--app-text-muted)]">Start date</p>
+                </div>
+                <div className="app-choice-row min-w-0 rounded-xl p-4">
+                  <Clock className="mb-2 h-4 w-4 text-[var(--app-accent-gold)]" />
+                  <p className="break-words text-sm text-[var(--app-text-primary)]">
+                    {formatDate(currentCycle.targetEndDate)}
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--app-text-muted)]">Target end</p>
+                </div>
+                <div className="app-choice-row min-w-0 rounded-xl p-4">
+                  <CheckCircle2 className="mb-2 h-4 w-4 text-[var(--app-accent-gold)]" />
+                  <p className="break-words text-sm text-[var(--app-text-primary)]">
+                    {currentCycle.status === "COMPLETED" &&
+                    currentCycle.completedAt
+                      ? formatDate(currentCycle.completedAt)
+                      : getDaysRemaining(currentCycle.targetEndDate)}
+                  </p>
+                  <p className="mt-1 text-xs text-[var(--app-text-muted)]">Timeline</p>
+                </div>
+              </div>
+
+              {currentCycle.goalDescription ? (
+                <p className="app-choice-row mt-5 rounded-xl p-4 text-sm leading-6 text-[var(--app-text-secondary)]">
+                  {currentCycle.goalDescription}
+                </p>
               ) : null}
-              {currentCycle.book.infoUrl ? (
-                <a
-                  href={currentCycle.book.infoUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="app-button-secondary w-full sm:w-auto"
-                >
-                  Book details
-                </a>
-              ) : null}
-              {isOwner && isCurrentPlanned ? (
-                <button
-                  type="button"
-                  disabled={actionInProgress === currentCycle.id}
-                  onClick={() => onStart(currentCycle)}
-                  className="app-button-primary w-full disabled:opacity-60 sm:w-auto"
-                >
-                  Start cycle
-                </button>
-              ) : null}
-              {isOwner && (isCurrentActive || isCurrentPlanned) ? (
-                <button
-                  type="button"
-                  onClick={() => onEdit(currentCycle)}
-                  className="app-button-secondary w-full sm:w-auto"
-                >
-                  Edit schedule
-                </button>
-              ) : null}
-              {isOwner && isCurrentActive ? (
-                <button
-                  type="button"
-                  disabled={actionInProgress === currentCycle.id}
-                  onClick={() => onComplete(currentCycle)}
-                  className="app-button-primary w-full disabled:opacity-60 sm:w-auto"
-                >
-                  Complete
-                </button>
-              ) : null}
-              {isOwner && (isCurrentActive || isCurrentPlanned) ? (
-                <button
-                  type="button"
-                  disabled={actionInProgress === currentCycle.id}
-                  onClick={() => onCancel(currentCycle)}
-                  className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-[rgba(196,95,95,0.45)] px-4 py-2 text-sm text-[var(--app-text-primary)] transition hover:border-[var(--app-danger)] sm:w-auto"
-                >
-                  <XCircle className="h-4 w-4" />
-                  Cancel
-                </button>
-              ) : null}
+
+              <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap">
+                {currentCycle.book.previewUrl ? (
+                  <a
+                    href={currentCycle.book.previewUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="app-button-secondary w-full sm:w-auto"
+                  >
+                    Preview
+                  </a>
+                ) : null}
+                {currentCycle.book.infoUrl ? (
+                  <a
+                    href={currentCycle.book.infoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="app-button-secondary w-full sm:w-auto"
+                  >
+                    Book details
+                  </a>
+                ) : null}
+                {isOwner && isCurrentPlanned ? (
+                  <button
+                    type="button"
+                    disabled={actionInProgress === currentCycle.id}
+                    onClick={() => onStart(currentCycle)}
+                    className="app-button-primary w-full disabled:opacity-60 sm:w-auto"
+                  >
+                    Start cycle
+                  </button>
+                ) : null}
+                {isOwner && (isCurrentActive || isCurrentPlanned) ? (
+                  <button
+                    type="button"
+                    onClick={() => onEdit(currentCycle)}
+                    className="app-button-secondary w-full sm:w-auto"
+                  >
+                    Edit schedule
+                  </button>
+                ) : null}
+                {isOwner && isCurrentActive ? (
+                  <button
+                    type="button"
+                    disabled={actionInProgress === currentCycle.id}
+                    onClick={() => onComplete(currentCycle)}
+                    className="app-button-primary w-full disabled:opacity-60 sm:w-auto"
+                  >
+                    Complete
+                  </button>
+                ) : null}
+                {isOwner && (isCurrentActive || isCurrentPlanned) ? (
+                  <button
+                    type="button"
+                    disabled={actionInProgress === currentCycle.id}
+                    onClick={() => onCancel(currentCycle)}
+                    className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg border border-[rgba(196,95,95,0.45)] px-4 py-2 text-sm text-[var(--app-text-primary)] transition hover:border-[var(--app-danger)] sm:w-auto"
+                  >
+                    <XCircle className="h-4 w-4" />
+                    Cancel
+                  </button>
+                ) : null}
+              </div>
             </div>
           </div>
+
+          {isMember ? (
+            <ReadingProgressPanel
+              cycle={currentCycle}
+              progress={progress}
+              isLoading={isProgressLoading}
+              error={progressError}
+              isSaving={isProgressSaving}
+              onRetry={onRetryProgress}
+              onUpdate={onUpdateProgress}
+            />
+          ) : null}
         </div>
       ) : (
         <div className="p-8 text-center">

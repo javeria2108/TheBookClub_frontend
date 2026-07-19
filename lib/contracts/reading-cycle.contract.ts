@@ -38,6 +38,49 @@ export const NullableReadingCycleResponseSchema = z.object({
   readingCycle: ReadingCycleSchema.nullable(),
 });
 
+export const ReadingProgressStatusSchema = z.enum([
+  "NOT_STARTED",
+  "IN_PROGRESS",
+  "COMPLETED",
+]);
+
+export const ReadingProgressSchema = z.object({
+  id: z.string().uuid().nullable(),
+  status: ReadingProgressStatusSchema,
+  progressPercentage: z.number().int().min(0).max(100),
+  startedAt: z.string().datetime().nullable(),
+  completedAt: z.string().datetime().nullable(),
+  updatedAt: z.string().datetime().nullable(),
+});
+
+export const ReadingProgressMemberSchema = ReadingProgressSchema.extend({
+  user: z.object({
+    id: z.string().uuid(),
+    name: z.string().min(1),
+    avatarUrl: z.string().url().nullable(),
+    role: z.enum(["MEMBER", "MODERATOR", "OWNER"]),
+  }),
+});
+
+export const ReadingProgressSummarySchema = z.object({
+  totalMembers: z.number().int().nonnegative(),
+  startedMembers: z.number().int().nonnegative(),
+  inProgressMembers: z.number().int().nonnegative(),
+  completedMembers: z.number().int().nonnegative(),
+  averageProgressPercentage: z.number().int().min(0).max(100),
+});
+
+export const ReadingProgressResponseSchema = z.object({
+  cycleId: z.string().uuid(),
+  ownProgress: ReadingProgressSchema,
+  summary: ReadingProgressSummarySchema,
+  members: z.array(ReadingProgressMemberSchema),
+});
+
+export const UpdateReadingProgressPayloadSchema = z.object({
+  progressPercentage: z.number().int().min(0).max(100),
+});
+
 export const CreateReadingCyclePayloadSchema = z.object({
   bookSelection: z.discriminatedUnion("source", [
     z.object({
