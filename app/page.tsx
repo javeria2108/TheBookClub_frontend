@@ -230,18 +230,35 @@ export default function HomePage() {
         clubs={clubs}
       />
 
-      <section className="bg-[#F2E8D9] px-5 py-24 text-[#1A0F07] md:px-8">
+      <section className="relative overflow-hidden border-y border-[#C9A96E]/20 bg-[#0B0907] px-5 py-24 text-[#F2E8D9] md:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_84%_18%,rgba(201,169,110,0.16),transparent_28%),radial-gradient(circle_at_18%_84%,rgba(19,176,168,0.12),transparent_30%)]" />
         <div className="mx-auto w-full max-w-7xl">
-          <motion.h2
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="font-serif text-5xl md:text-6xl"
-          >
-            Everything a reading club needs
-          </motion.h2>
+          <div className="relative grid grid-cols-1 gap-10 lg:grid-cols-12 lg:items-end">
+            <div className="lg:col-span-7">
+              <motion.p
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-[11px] uppercase tracking-[0.28em] text-[#E8C46D]"
+              >
+                The reading room
+              </motion.p>
+              <motion.h2
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="mt-3 font-serif text-5xl font-black leading-none text-[#F7DFA5] md:text-7xl"
+              >
+                Everything a club needs
+              </motion.h2>
+            </div>
+            <p className="max-w-xl text-sm leading-relaxed text-[#F2E8D9]/72 lg:col-span-5">
+              BookCircle keeps the ritual simple: gather people, choose a book,
+              keep the conversation alive, and preserve the trail of ideas.
+            </p>
+          </div>
 
-          <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="relative mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {[
               {
                 title: "Focused Club Chat",
@@ -290,11 +307,15 @@ export default function HomePage() {
                   viewport={{ once: true }}
                   custom={index}
                   whileHover={{ y: -4 }}
-                  className="rounded-xl border border-[#C9A96E]/45 bg-[#fff7ec] p-7 transition hover:border-[#C9A96E]"
+                  className="rounded-md border border-[#C9A96E]/25 bg-[#140D08]/82 p-7 shadow-[inset_0_1px_0_rgba(255,228,164,0.08),0_18px_44px_rgba(0,0,0,0.35)] transition hover:border-[#E8C46D]/70 hover:bg-[#181009]"
                 >
-                  <Icon className="h-9 w-9 text-[#C9A96E]" />
-                  <h3 className="mt-5 font-serif text-2xl">{feature.title}</h3>
-                  <p className="mt-3 text-sm leading-relaxed text-[#1A0F07]/75">
+                  <div className="flex h-11 w-11 items-center justify-center border border-[#E8C46D]/35 bg-[#090807] text-[#E8C46D]">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-5 font-serif text-2xl text-[#F7DFA5]">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[#F2E8D9]/68">
                     {feature.description}
                   </p>
                 </motion.article>
@@ -304,10 +325,38 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="how" className="bg-[#1A0F07] px-5 py-24 md:px-8">
-        <div className="mx-auto w-full max-w-7xl">
-          <h2 className="font-serif text-5xl md:text-6xl">How it Works</h2>
-          <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <section id="how" className="relative overflow-hidden bg-[#080706] px-5 py-24 md:px-8">
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,#080706_0%,#121D1B_48%,#080706_100%)]" />
+        <div className="relative mx-auto w-full max-w-7xl">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-center">
+            <div className="lg:col-span-4">
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[#E8C46D]">
+                How to play
+              </p>
+              <h2 className="mt-3 font-serif text-5xl font-black leading-none text-[#F7DFA5] md:text-7xl">
+                Gather. Vote. Read.
+              </h2>
+              <p className="mt-5 text-sm leading-relaxed text-[#F2E8D9]/70">
+                Three moves take a quiet shelf and turn it into a living club
+                with rhythm, memory, and room for every reader.
+              </p>
+            </div>
+
+            <div className="relative h-72 overflow-hidden rounded-md border border-[#E8C46D]/30 shadow-[0_28px_70px_rgba(0,0,0,0.55)] lg:col-span-8">
+              <Image
+                src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=1400&q=85"
+                alt="Readers browsing books together"
+                fill
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(24,191,183,0.30),transparent_32%),linear-gradient(90deg,rgba(8,7,6,0.72),rgba(8,7,6,0.1),rgba(8,7,6,0.75))]" />
+              <div className="absolute left-1/2 top-1/2 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#FFE4A4]/80 bg-[radial-gradient(circle,#FFE4A4_0%,#C99636_58%,#6C3715_100%)] text-[#281306] shadow-[0_0_35px_rgba(232,196,109,0.48)]">
+                <Play className="ml-1 h-7 w-7 fill-current" />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
             {[
               {
                 step: "01",
@@ -341,20 +390,21 @@ export default function HomePage() {
                 whileInView="visible"
                 viewport={{ once: true }}
                 custom={index}
-                className="rounded-xl border border-[#C9A96E]/20 p-6"
+                className="rounded-md border border-[#C9A96E]/25 bg-[#100B08]/86 p-6 shadow-[0_18px_44px_rgba(0,0,0,0.36)]"
               >
-                <p className="font-serif text-7xl leading-none text-[#C9A96E]/70">
+                <p className="font-serif text-7xl leading-none text-[#E8C46D]/75">
                   {step.step}
                 </p>
-                <div className="relative mt-5 h-40 overflow-hidden rounded-lg">
+                <div className="relative mt-5 h-40 overflow-hidden rounded-sm border border-[#C9A96E]/20">
                   <Image
                     src={step.image}
                     alt={step.title}
                     fill
                     className="object-cover"
                   />
+                  <div className="absolute inset-0 bg-[#090807]/18" />
                 </div>
-                <h3 className="mt-5 font-serif text-3xl">{step.title}</h3>
+                <h3 className="mt-5 font-serif text-3xl text-[#F7DFA5]">{step.title}</h3>
                 <p className="mt-3 text-sm text-[#F2E8D9]/75">
                   {step.description}
                 </p>
@@ -364,13 +414,14 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[#1A0F07] px-5 pb-20 pt-8 md:px-8">
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 lg:grid-cols-5">
+      <section className="relative overflow-hidden bg-[#080706] px-5 pb-24 pt-8 md:px-8">
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-[radial-gradient(circle_at_50%_100%,rgba(19,176,168,0.18),transparent_42%)]" />
+        <div className="relative mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 border-y border-[#C9A96E]/25 py-12 lg:grid-cols-5 lg:items-center">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="relative h-96 overflow-hidden rounded-2xl lg:col-span-3"
+            className="relative h-96 overflow-hidden rounded-md border border-[#E8C46D]/35 shadow-[0_28px_70px_rgba(0,0,0,0.55)] lg:col-span-3"
           >
             <Image
               src={featuredClub.coverImage}
@@ -378,6 +429,7 @@ export default function HomePage() {
               fill
               className="object-cover"
             />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,7,6,0.08),rgba(8,7,6,0.58))]" />
           </motion.div>
 
           <motion.div
@@ -389,7 +441,7 @@ export default function HomePage() {
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#C9A96E]">
               Featured Club
             </p>
-            <h2 className="mt-3 font-serif text-5xl leading-[0.95] md:text-[64px]">
+            <h2 className="mt-3 font-serif text-5xl font-black leading-[0.95] text-[#F7DFA5] md:text-[64px]">
               {featuredClub.name}
             </h2>
             <div className="mt-6 flex gap-8 text-sm text-[#F2E8D9]/80">
@@ -418,7 +470,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-[#C9A96E]/20 bg-[#2A1810] px-5 py-14 md:px-8">
+      <section className="border-y border-[#C9A96E]/25 bg-[#0E1C1A] px-5 py-14 md:px-8">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-y-8 lg:grid-cols-4">
           {[
             { value: "240+", label: "Members" },
@@ -430,7 +482,7 @@ export default function HomePage() {
               key={item.label}
               className={`text-center ${index > 0 ? "lg:border-l lg:border-[#C9A96E]/20" : ""}`}
             >
-              <p className="font-serif text-5xl leading-none md:text-7xl">
+              <p className="font-serif text-5xl font-black leading-none text-[#F7DFA5] md:text-7xl">
                 {item.value}
               </p>
               <p className="mt-3 text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
@@ -441,8 +493,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[#F2E8D9] px-5 py-24 text-[#1A0F07] md:px-8">
-        <div className="mx-auto w-full max-w-5xl">
+      <section className="relative overflow-hidden bg-[#090807] px-5 py-24 text-[#F2E8D9] md:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(201,169,110,0.14),transparent_32%)]" />
+        <div className="relative mx-auto w-full max-w-5xl">
           <AnimatePresence mode="wait">
             <motion.div
               key={testimonialIndex}
@@ -450,9 +503,9 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ duration: 0.45 }}
-              className="text-center"
+              className="border-y border-[#C9A96E]/25 py-12 text-center"
             >
-              <p className="font-serif text-4xl italic leading-tight md:text-6xl lg:text-7xl">
+              <p className="font-serif text-4xl italic leading-tight text-[#F7DFA5] md:text-6xl lg:text-7xl">
                 “{testimonials[testimonialIndex].quote}”
               </p>
               <div className="mt-9 flex flex-col items-center gap-3">
@@ -466,7 +519,7 @@ export default function HomePage() {
                 <p className="font-medium">
                   {testimonials[testimonialIndex].author}
                 </p>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#8B4A3C]">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-[#E8C46D]">
                   {testimonials[testimonialIndex].role}
                 </p>
               </div>
@@ -477,7 +530,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={prevTestimonial}
-              className="rounded-full border border-[#8B4A3C]/35 p-2 transition hover:bg-[#8B4A3C]/10"
+              className="rounded-full border border-[#E8C46D]/35 p-2 text-[#E8C46D] transition hover:bg-[#E8C46D]/10"
               aria-label="Previous testimonial"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -485,7 +538,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={nextTestimonial}
-              className="rounded-full border border-[#8B4A3C]/35 p-2 transition hover:bg-[#8B4A3C]/10"
+              className="rounded-full border border-[#E8C46D]/35 p-2 text-[#E8C46D] transition hover:bg-[#E8C46D]/10"
               aria-label="Next testimonial"
             >
               <ChevronRight className="h-4 w-4" />
@@ -494,9 +547,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="bg-[#1A0F07] px-5 py-20 md:px-8">
-        <div className="mx-auto w-full max-w-5xl text-center">
-          <h2 className="font-serif text-5xl leading-tight md:text-7xl">
+      <section className="relative overflow-hidden border-y border-[#C9A96E]/25 bg-[#0E6B67] px-5 py-20 md:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_24%,rgba(255,228,164,0.18),transparent_30%),linear-gradient(180deg,rgba(11,54,52,0.16),rgba(8,7,6,0.34))]" />
+        <div className="relative mx-auto w-full max-w-5xl text-center">
+          <p className="text-[11px] uppercase tracking-[0.28em] text-[#FFE4A4]">
+            Open the circle
+          </p>
+          <h2 className="mt-3 font-serif text-5xl font-black leading-tight text-[#F7DFA5] md:text-7xl">
             Read More. Think Deeper.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-[#F2E8D9]/75">
@@ -506,7 +563,7 @@ export default function HomePage() {
           {isAuthenticated ? (
             <Link
               href="/dashboard"
-              className="mt-8 inline-flex items-center gap-2 rounded bg-[#C9A96E] px-7 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+              className="mt-8 inline-flex items-center gap-2 rounded-sm border border-[#FFE4A4]/70 bg-[linear-gradient(180deg,#FFE4A4_0%,#C99636_48%,#8B531E_100%)] px-7 py-3 text-sm font-black uppercase tracking-[0.08em] text-[#281306] shadow-[0_8px_0_#4c260d,0_18px_36px_rgba(0,0,0,0.35)] transition hover:-translate-y-px"
             >
               Go to Your Dashboard <ChevronRight className="h-4 w-4" />
             </Link>
@@ -518,11 +575,11 @@ export default function HomePage() {
               <input
                 type="email"
                 placeholder="Enter your email"
-                className="w-full rounded border border-[#C9A96E]/35 bg-[#2A1810] px-4 py-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/40 focus:border-[#C9A96E] focus:outline-none"
+                className="w-full rounded-sm border border-[#FFE4A4]/35 bg-[#080706]/80 px-4 py-3 text-sm text-[#F2E8D9] placeholder:text-[#F2E8D9]/45 focus:border-[#FFE4A4] focus:outline-none"
               />
               <button
                 type="submit"
-                className="rounded bg-[#C9A96E] px-6 py-3 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+                className="rounded-sm border border-[#FFE4A4]/70 bg-[linear-gradient(180deg,#FFE4A4_0%,#C99636_52%,#8B531E_100%)] px-6 py-3 text-sm font-black uppercase tracking-[0.08em] text-[#281306] transition hover:-translate-y-px"
               >
                 Get Started Free
               </button>
@@ -533,7 +590,7 @@ export default function HomePage() {
 
       <footer
         id="about"
-        className="border-t border-[#C9A96E]/20 bg-[#2A1810] px-5 py-16 md:px-8"
+        className="border-t border-[#C9A96E]/20 bg-[#080706] px-5 py-16 md:px-8"
       >
         <div className="mx-auto w-full max-w-7xl">
           <div className="grid grid-cols-1 gap-10 md:grid-cols-4">

@@ -5,10 +5,19 @@ const nextConfig: NextConfig = {
     root: __dirname,
   },
   images: {
+    dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
     remotePatterns: [
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "http",
+        hostname: "books.google.com",
+      },
+      {
+        protocol: "https",
+        hostname: "books.google.com",
       },
       {
         protocol: "http",

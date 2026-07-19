@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, Globe, Lock, Users } from "lucide-react";
 
+import { CoverImage, EmptyState, StatusBadge } from "@/components/ui/app-primitives";
 import type { JoinedClubSummary } from "@/lib/types";
 
 type JoinedClubsGridProps = {
@@ -12,20 +13,20 @@ type JoinedClubsGridProps = {
 export function JoinedClubsGrid({ clubs }: JoinedClubsGridProps) {
   if (clubs.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-[#C9A96E]/30 bg-[#2A1810]/75 p-8 text-center">
-        <BookOpen className="mx-auto mb-4 h-9 w-9 text-[#C9A96E]" />
-        <h2 className="font-serif text-2xl text-[#F2E8D9]">No clubs yet</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-[#F2E8D9]/70">
-          Join a reading circle to make your profile feel lived in.
-        </p>
+      <EmptyState
+        icon={<BookOpen className="h-6 w-6" />}
+        title="No clubs yet"
+        description="Join a reading circle to make your profile feel lived in."
+        action={
         <Link
           href="/clubs"
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+          className="app-button-primary"
         >
           Discover Clubs
           <ArrowUpRight className="h-4 w-4" />
         </Link>
-      </div>
+        }
+      />
     );
   }
 
@@ -34,50 +35,44 @@ export function JoinedClubsGrid({ clubs }: JoinedClubsGridProps) {
       {clubs.map((club) => (
         <article
           key={club.id}
-          className="group overflow-hidden rounded-xl border border-[#C9A96E]/20 bg-[#2A1810] shadow-[0_18px_45px_rgba(0,0,0,0.3)] transition hover:-translate-y-1 hover:border-[#C9A96E]/55"
+          className="app-surface group overflow-hidden rounded-2xl transition hover:-translate-y-1 hover:border-[var(--app-border-strong)]"
         >
-          <div className="relative h-32 bg-[#100904]">
-            {club.coverImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={club.coverImage}
-                alt=""
-                className="h-full w-full object-cover opacity-85 transition duration-500 group-hover:scale-105"
-              />
-            ) : (
-              <div className="h-full w-full bg-[radial-gradient(circle_at_top_left,rgba(201,169,110,0.24),transparent_38%),linear-gradient(135deg,#3A2114,#100904)]" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#1A0F07]/90 to-transparent" />
-            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#100904]/80 px-3 py-1 text-xs text-[#F2E8D9]">
-              {club.isPublic ? (
-                <Globe className="h-3.5 w-3.5 text-[#C9A96E]" />
-              ) : (
-                <Lock className="h-3.5 w-3.5 text-[#C9A96E]" />
-              )}
-              {club.isPublic ? "Public" : "Private"}
-            </span>
-          </div>
+          <CoverImage
+            src={club.coverImage}
+            alt={`${club.name} cover`}
+            className="h-36 transition duration-500 group-hover:scale-[1.02]"
+          />
 
           <div className="p-5">
-            <div className="flex items-start justify-between gap-3">
-              <h3 className="font-serif text-2xl leading-tight text-[#F2E8D9]">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <h3 className="break-words font-serif text-2xl leading-tight text-[var(--app-text-primary)]">
                 {club.name}
               </h3>
-              <span className="rounded-full border border-[#C9A96E]/25 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-[#C9A96E]">
+              <StatusBadge tone={club.memberRole === "OWNER" ? "gold" : "muted"}>
                 {club.memberRole.toLowerCase()}
-              </span>
+              </StatusBadge>
             </div>
-            <p className="mt-2 line-clamp-3 min-h-14 text-sm text-[#F2E8D9]/70">
+            <p className="mt-2 line-clamp-3 min-h-14 text-sm text-[var(--app-text-secondary)]">
               {club.description || "This club has not added a description yet."}
             </p>
-            <div className="mt-5 flex items-center justify-between">
-              <span className="inline-flex items-center gap-1 text-xs text-[#F2E8D9]/65">
-                <Users className="h-3.5 w-3.5 text-[#C9A96E]" />
-                {club.memberCount} readers
-              </span>
+            <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap gap-2">
+                <StatusBadge tone={club.isPublic ? "teal" : "gold"}>
+                  {club.isPublic ? (
+                    <Globe className="h-3.5 w-3.5" />
+                  ) : (
+                    <Lock className="h-3.5 w-3.5" />
+                  )}
+                  {club.isPublic ? "Public" : "Private"}
+                </StatusBadge>
+                <span className="inline-flex items-center gap-1 text-xs text-[var(--app-text-secondary)]">
+                  <Users className="h-3.5 w-3.5 text-[var(--app-accent-gold)]" />
+                  {club.memberCount} readers
+                </span>
+              </div>
               <Link
                 href={`/clubs/${club.id}`}
-                className="inline-flex items-center gap-1 text-sm font-medium text-[#C9A96E] transition hover:text-[#d8b884]"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--app-accent-gold)] transition hover:text-[var(--app-accent-gold-hover)]"
               >
                 Open
                 <ArrowUpRight className="h-4 w-4" />

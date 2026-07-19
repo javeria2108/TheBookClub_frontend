@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { BookOpen, RefreshCw, Sparkles } from "lucide-react";
+import { RefreshCw, Sparkles } from "lucide-react";
 
 import { AppHeader } from "@/components/layout/AppHeader";
 import { JoinedClubsGrid } from "@/components/profile/JoinedClubsGrid";
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileSkeleton } from "@/components/profile/ProfileSkeleton";
+import { ErrorState, SectionHeader, StatusBadge } from "@/components/ui/app-primitives";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthState } from "@/hooks/useAuthState";
 import { getUserProfile, updateUserProfile } from "@/lib/profile";
@@ -83,7 +84,7 @@ export default function ProfilePage() {
     "R";
 
   return (
-    <main className="min-h-screen bg-[#1A0F07] text-[#F2E8D9]">
+    <main className="app-page">
       <AppHeader
         mode="app"
         isAuthenticated={isAuthenticated}
@@ -95,27 +96,24 @@ export default function ProfilePage() {
       {!isReady || isLoading ? (
         <ProfileSkeleton />
       ) : error ? (
-        <section className="mx-auto w-full max-w-4xl px-5 pb-12 pt-28 md:px-8">
-          <div className="rounded-2xl border border-[#8B4A3C]/60 bg-[#8B4A3C]/15 p-8 text-center">
-            <BookOpen className="mx-auto mb-4 h-10 w-10 text-[#C9A96E]" />
-            <h1 className="font-serif text-3xl text-[#F2E8D9]">
-              Unable to load profile
-            </h1>
-            <p className="mx-auto mt-3 max-w-md text-sm text-[#F2E8D9]/70">
-              {error}
-            </p>
+        <section className="app-container max-w-4xl">
+          <ErrorState
+            title="Unable to load profile"
+            description={error}
+            action={
             <button
               type="button"
               onClick={() => void loadProfile()}
-              className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#C9A96E] px-4 py-2 text-sm font-semibold text-[#1A0F07] transition hover:bg-[#d8b884]"
+              className="app-button-primary"
             >
               <RefreshCw className="h-4 w-4" />
               Try Again
             </button>
-          </div>
+            }
+          />
         </section>
       ) : profile ? (
-        <section className="relative mx-auto w-full max-w-7xl px-5 pb-12 pt-28 md:px-8">
+        <section className="app-container">
           {isEditing ? (
             <ProfileEditForm
               profile={profile}
@@ -132,33 +130,26 @@ export default function ProfilePage() {
               />
 
               <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_1.4fr]">
-                <section className="rounded-xl border border-[#C9A96E]/20 bg-[#2A1810]/85 p-5">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-                    Bio
-                  </p>
-                  <p className="mt-3 text-sm leading-6 text-[#F2E8D9]/75">
+                <section className="app-surface rounded-2xl p-5">
+                  <SectionHeader title="Bio" />
+                  <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
                     {profile.bio ||
                       "No bio yet. Add a few lines about the books and conversations you care about."}
                   </p>
                 </section>
 
-                <section className="rounded-xl border border-[#C9A96E]/20 bg-[#2A1810]/85 p-5">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-                    Favorite Genres
-                  </p>
+                <section className="app-surface rounded-2xl p-5">
+                  <SectionHeader title="Favorite Genres" />
                   {profile.favoriteGenres.length > 0 ? (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {profile.favoriteGenres.map((genre) => (
-                        <span
-                          key={genre}
-                          className="rounded-full border border-[#C9A96E]/25 bg-[#1A0F07] px-3 py-1.5 text-sm text-[#F2E8D9]/80"
-                        >
+                        <StatusBadge key={genre} tone="muted">
                           {genre}
-                        </span>
+                        </StatusBadge>
                       ))}
                     </div>
                   ) : (
-                    <p className="mt-3 text-sm text-[#F2E8D9]/70">
+                    <p className="mt-3 text-sm text-[var(--app-text-secondary)]">
                       No favorite genres selected yet.
                     </p>
                   )}
@@ -168,23 +159,21 @@ export default function ProfilePage() {
               <section className="mt-8">
                 <div className="mb-5 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-[#C9A96E]" />
-                    <h2 className="font-serif text-3xl text-[#F2E8D9]">
+                    <Sparkles className="h-5 w-5 text-[var(--app-accent-gold)]" />
+                    <h2 className="font-serif text-3xl text-[var(--app-text-primary)]">
                       Joined Clubs
                     </h2>
                   </div>
-                  <p className="hidden text-sm text-[#F2E8D9]/55 sm:block">
+                  <p className="hidden text-sm text-[var(--app-text-muted)] sm:block">
                     {profile.joinedClubs.length} joined
                   </p>
                 </div>
                 <JoinedClubsGrid clubs={profile.joinedClubs} />
               </section>
 
-              <section className="mt-8 rounded-xl border border-[#C9A96E]/20 bg-[#100904]/75 p-5">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-                  Reading Stats
-                </p>
-                <p className="mt-3 text-sm text-[#F2E8D9]/70">
+              <section className="app-surface mt-8 rounded-2xl p-5">
+                <SectionHeader title="Reading Stats" />
+                <p className="text-sm text-[var(--app-text-secondary)]">
                   Reading statistics will appear after reading cycles are added
                   to BookCircle.
                 </p>

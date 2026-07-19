@@ -8,7 +8,13 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = Boolean(authToken);
 
   const isProtectedRoute =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/profile");
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/my-clubs") ||
+    pathname.startsWith("/profile") ||
+    pathname.endsWith("/manage") ||
+    pathname.endsWith("/discussion") ||
+    pathname.endsWith("/members") ||
+    pathname.endsWith("/reading");
   const isAuthRoute =
     pathname.startsWith("/auth/login") || pathname.startsWith("/auth/signup");
 
@@ -26,5 +32,15 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile/:path*", "/auth/login", "/auth/signup"],
+  matcher: [
+    "/dashboard/:path*",
+    "/my-clubs/:path*",
+    "/profile/:path*",
+    "/clubs/:path*/discussion",
+    "/clubs/:path*/members",
+    "/clubs/:path*/reading",
+    "/clubs/:path*/manage",
+    "/auth/login",
+    "/auth/signup",
+  ],
 };

@@ -18,31 +18,50 @@ const cardReveal = {
   }),
 };
 
-export function DiscoverSection({
-  clubs,
-}: DiscoverSectionProps) {
+export function DiscoverSection({ clubs }: DiscoverSectionProps) {
   return (
-    <section id="discover" className="px-5 pb-24 md:px-8">
-      <div className="mx-auto w-full max-w-7xl">
-        <motion.h2
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="font-serif text-5xl md:text-6xl"
-        >
-          Explore Clubs
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.06 }}
-          className="mt-4 max-w-2xl text-[#F2E8D9]/75"
-        >
-          Public & private clubs — browse freely, join when ready.
-        </motion.p>
+    <section
+      id="discover"
+      className="relative overflow-hidden px-5 pb-28 pt-20 md:px-8"
+    >
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(19,176,168,0.14),transparent_28%),linear-gradient(180deg,#090807_0%,#120c08_42%,#080706_100%)]" />
+      <div className="absolute inset-x-0 top-0 h-px bg-[#C9A96E]/30" />
 
-        <div className="mt-10 flex gap-5 overflow-x-auto pb-2">
+      <div className="relative mx-auto w-full max-w-7xl">
+        <div className="flex flex-col justify-between gap-6 border-b border-[#C9A96E]/25 pb-8 lg:flex-row lg:items-end">
+          <div>
+            <motion.p
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-[11px] uppercase tracking-[0.28em] text-[#E8C46D]"
+            >
+              Choose your table
+            </motion.p>
+            <motion.h2
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.04 }}
+              className="mt-3 font-serif text-5xl font-black leading-none text-[#F7DFA5] md:text-7xl"
+            >
+              Explore Clubs
+            </motion.h2>
+          </div>
+
+          <motion.p
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.08 }}
+            className="max-w-xl text-sm leading-relaxed text-[#F2E8D9]/72 md:text-base"
+          >
+            Public and private circles are laid out like reader cards: scan the
+            cover, choose the mood, then step into the discussion.
+          </motion.p>
+        </div>
+
+        <div className="mt-12 flex gap-6 overflow-x-auto pb-5">
           {clubs.map((club, index) => (
             <motion.article
               key={club.id}
@@ -52,39 +71,43 @@ export function DiscoverSection({
               viewport={{ once: true }}
               custom={index}
               whileHover={{ y: -6 }}
-              className="min-w-72 max-w-80 flex-1 rounded-xl border border-[#C9A96E]/25 bg-[#2A1810] shadow-[0_18px_40px_rgba(0,0,0,0.35)]"
+              className="group min-w-72 max-w-80 flex-1 overflow-hidden rounded-md border border-[#E8C46D]/35 bg-[#100b08] shadow-[0_26px_56px_rgba(0,0,0,0.58)]"
             >
-              <div className="relative h-44 overflow-hidden rounded-t-xl">
+              <div className="relative h-52 overflow-hidden border-b border-[#E8C46D]/25">
                 <Image
                   src={club.coverImage}
                   alt={club.name}
                   fill
-                  className="object-cover"
+                  className="object-cover transition duration-500 group-hover:scale-105"
                 />
-                <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#1A0F07]/80 px-3 py-1 text-xs text-[#F2E8D9]">
+                <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,7,6,0.08),rgba(8,7,6,0.76))]" />
+                <span className="absolute right-3 top-3 inline-flex items-center gap-1 border border-[#E8C46D]/45 bg-[#090807]/80 px-3 py-1 text-xs text-[#F2E8D9] backdrop-blur">
                   {club.isPrivate ? (
                     <Lock className="h-3 w-3 text-[#C9A96E]" />
                   ) : (
                     <Globe className="h-3 w-3 text-[#C9A96E]" />
                   )}
-                  {club.isPrivate ? "Private 🔒" : "Public"}
+                  {club.isPrivate ? "Private" : "Public"}
                 </span>
+                <p className="absolute bottom-4 left-4 text-[10px] uppercase tracking-[0.2em] text-[#E8C46D]">
+                  {club.genre}
+                </p>
               </div>
+
               <div className="space-y-4 p-5">
-                <h3 className="font-serif text-2xl">{club.name}</h3>
+                <h3 className="font-serif text-3xl leading-none text-[#F7DFA5]">
+                  {club.name}
+                </h3>
                 <p className="line-clamp-2 text-sm text-[#F2E8D9]/70">
                   {club.description}
                 </p>
-                <div className="flex items-center gap-2 text-sm text-[#C9A96E]">
-                  <Users className="h-4 w-4" />
-                  <span>{club.memberCount} members</span>
-                </div>
-                <span className="inline-block rounded-full bg-[#8B4A3C]/30 px-3 py-1 text-xs text-[#F2E8D9]">
-                  {club.genre}
-                </span>
-                <div className="pt-1">
+                <div className="flex items-center justify-between border-t border-[#C9A96E]/20 pt-4">
+                  <div className="flex items-center gap-2 text-sm text-[#E8C46D]">
+                    <Users className="h-4 w-4" />
+                    <span>{club.memberCount} members</span>
+                  </div>
                   <p className="text-xs uppercase tracking-[0.16em] text-[#F2E8D9]/60">
-                    Club details are available inside the app.
+                    View inside
                   </p>
                 </div>
               </div>

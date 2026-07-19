@@ -34,7 +34,7 @@ export function GenreSelector({
 
   return (
     <fieldset className="space-y-3">
-      <legend className="text-sm font-medium text-[#F2E8D9]/85">
+      <legend className="text-sm font-medium text-[var(--app-text-secondary)]">
         Favorite Genres
       </legend>
       <div className="flex flex-wrap gap-2">
@@ -49,10 +49,10 @@ export function GenreSelector({
                 disabled || (!isSelected && value.length >= MAX_SELECTED_GENRES)
               }
               onClick={() => toggleGenre(genre)}
-              className={`rounded-full border px-3 py-2 text-sm transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A96E] ${
+              className={`min-h-10 rounded-lg border px-3 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--app-focus-ring)] ${
                 isSelected
-                  ? "border-[#C9A96E] bg-[#C9A96E] text-[#1A0F07]"
-                  : "border-[#C9A96E]/25 bg-[#1A0F07] text-[#F2E8D9]/75 hover:border-[#C9A96E]/60"
+                  ? "border-[rgba(216,181,109,0.56)] bg-[linear-gradient(180deg,rgba(35,29,16,0.94),rgba(20,18,13,0.94))] text-[#F7DFA5] shadow-[inset_3px_0_0_rgba(216,181,109,0.72)]"
+                  : "border-[var(--app-border-subtle)] bg-[rgba(244,234,216,0.045)] text-[var(--app-text-secondary)] hover:border-[var(--app-border-strong)]"
               } disabled:cursor-not-allowed disabled:opacity-50`}
             >
               {genre}
@@ -60,7 +60,7 @@ export function GenreSelector({
           );
         })}
       </div>
-      <p className="text-xs text-[#F2E8D9]/55">
+      <p className="text-xs text-[var(--app-text-muted)]">
         Choose up to {MAX_SELECTED_GENRES}. These help others understand what
         kind of reading circles you enjoy.
       </p>

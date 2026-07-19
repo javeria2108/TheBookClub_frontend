@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import type { JoinRequest } from "@/hooks/useClubModeration";
 
 interface JoinRequestsPanelProps {
@@ -25,7 +25,7 @@ export default function JoinRequestsPanel({
   useEffect(() => {
     // Load requests on mount
     void onRefresh();
-  }, [clubId]);
+  }, [clubId, onRefresh]);
 
   const pendingRequests = requests.filter((r) => r.status === "PENDING");
   const reviewedRequests = requests.filter((r) => r.status !== "PENDING");
