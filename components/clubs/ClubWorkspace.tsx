@@ -17,6 +17,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { ReadingCycleDialog } from "@/components/clubs/ReadingCycleDialog";
 import { ReadingCycleEditDialog } from "@/components/clubs/ReadingCycleEditDialog";
 import { ReadingCycleSection } from "@/components/clubs/ReadingCycleSection";
+import { NextBookPanel } from "@/components/clubs/NextBookPanel";
 import { StructuredDiscussionPanel } from "@/components/clubs/StructuredDiscussionPanel";
 import JoinRequestsPanel from "@/components/pages/clubs/JoinRequestsPanel";
 import MembersPanel from "@/components/pages/clubs/MembersPanel";
@@ -65,6 +66,7 @@ export type ClubWorkspaceView =
   | "overview"
   | "reading"
   | "discussion"
+  | "next-book"
   | "members"
   | "about"
   | "manage";
@@ -73,6 +75,7 @@ const CLUB_TABS: Array<{ label: string; view: ClubWorkspaceView; memberOnly?: bo
   { label: "Overview", view: "overview" },
   { label: "Reading", view: "reading", memberOnly: true },
   { label: "Discussion", view: "discussion", memberOnly: true },
+  { label: "Next Book", view: "next-book", memberOnly: true },
   { label: "Members", view: "members", memberOnly: true },
   { label: "About", view: "about" },
   { label: "Manage", view: "manage", ownerOnly: true },
@@ -747,6 +750,8 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                 canChat={isMember}
               />
             ) : null}
+
+            {view === "next-book" ? <NextBookPanel club={club} /> : null}
 
             {view === "members" ? (
               <MembersPanel
