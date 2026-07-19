@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
@@ -18,6 +17,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { ReadingCycleDialog } from "@/components/clubs/ReadingCycleDialog";
 import { ReadingCycleEditDialog } from "@/components/clubs/ReadingCycleEditDialog";
 import { ReadingCycleSection } from "@/components/clubs/ReadingCycleSection";
+import { StructuredDiscussionPanel } from "@/components/clubs/StructuredDiscussionPanel";
 import JoinRequestsPanel from "@/components/pages/clubs/JoinRequestsPanel";
 import MembersPanel from "@/components/pages/clubs/MembersPanel";
 import OwnerLeaveDialog from "@/components/pages/clubs/OwnerLeaveDialog";
@@ -39,26 +39,27 @@ import {
   cancelReadingCycle,
   completeReadingCycle,
   createReadingCycle,
+  createReadingTarget,
+  deleteReadingTarget,
   getCurrentReadingCycle,
   getReadingProgress,
   getReadingCycles,
+  getReadingTargets,
+  reorderReadingTargets,
   startReadingCycle,
   updateMyReadingProgress,
   updateReadingCycle,
+  updateReadingTarget,
 } from "@/lib/reading-cycles";
 import type {
   Club,
   CreateReadingCyclePayload,
+  CreateReadingTargetPayload,
   ReadingProgressResponse,
   ReadingCycle,
+  ReadingTarget,
   UpdateReadingCyclePayload,
 } from "@/lib/types";
-
-const ChatWindow = dynamic(() => import("@/components/clubs/ChatWindow"), {
-  loading: () => (
-    <div className="app-surface min-h-[420px] animate-pulse rounded-2xl" />
-  ),
-});
 
 export type ClubWorkspaceView =
   | "overview"
@@ -134,6 +135,10 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
   const [readingProgressError, setReadingProgressError] = useState("");
   const [isReadingProgressSaving, setIsReadingProgressSaving] =
     useState(false);
+  const [readingTargets, setReadingTargets] = useState<ReadingTarget[]>([]);
+  const [isReadingTargetsLoading, setIsReadingTargetsLoading] = useState(false);
+  const [readingTargetsError, setReadingTargetsError] = useState("");
+  const [readingTargetAction, setReadingTargetAction] = useState("");
 
   const shouldLoadReadingCycleData =
     view === "overview" || view === "reading";
@@ -321,6 +326,34 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
     void loadReadingProgressData();
   }, [loadReadingProgressData, shouldLoadReadingProgress]);
 
+  const loadReadingTargetsData = useCallback(async () => {
+    if (!currentCycle || !shouldLoadReadingProgress) return;
+
+    try {
+      setIsReadingTargetsLoading(true);
+      setReadingTargetsError("");
+      const response = await getReadingTargets(clubId, currentCycle.id);
+      setReadingTargets(response.targets);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Failed to load reading plan";
+      setReadingTargetsError(message);
+    } finally {
+      setIsReadingTargetsLoading(false);
+    }
+  }, [clubId, currentCycle, shouldLoadReadingProgress]);
+
+  useEffect(() => {
+    if (!shouldLoadReadingProgress) {
+      setReadingTargets([]);
+      setReadingTargetsError("");
+      setIsReadingTargetsLoading(false);
+      return;
+    }
+
+    void loadReadingTargetsData();
+  }, [loadReadingTargetsData, shouldLoadReadingProgress]);
+
   const onLeavePressed = () => {
     if (!club) return;
     if (club.memberRole === "OWNER") {
@@ -422,6 +455,90 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
       });
     } finally {
       setIsReadingProgressSaving(false);
+    }
+  };
+
+  const handleCreateReadingTarget = async (
+    payload: CreateReadingTargetPayload,
+  ) => {
+    if (!currentCycle) return;
+
+    try {
+      setReadingTargetAction("create");
+      await createReadingTarget(clubId, currentCycle.id, payload);
+      await loadReadingTargetsData();
+      toast({
+        title: "Reading target added",
+        description: "The reading plan has been updated.",
+      });
+    } finally {
+      setReadingTargetAction("");
+    }
+  };
+
+  const handleUpdateReadingTarget = async (
+    targetId: string,
+    payload: CreateReadingTargetPayload,
+  ) => {
+    if (!currentCycle) return;
+
+    try {
+      setReadingTargetAction(targetId);
+      await updateReadingTarget(clubId, currentCycle.id, targetId, payload);
+      await loadReadingTargetsData();
+      toast({
+        title: "Reading target updated",
+        description: "The reading plan has been refreshed.",
+      });
+    } finally {
+      setReadingTargetAction("");
+    }
+  };
+
+  const handleDeleteReadingTarget = async (target: ReadingTarget) => {
+    if (!currentCycle) return;
+
+    try {
+      setReadingTargetAction(target.id);
+      const response = await deleteReadingTarget(clubId, currentCycle.id, target.id);
+      setReadingTargets(response.targets);
+      toast({
+        title: "Reading target deleted",
+        description: "The reading plan order has been compacted.",
+      });
+    } finally {
+      setReadingTargetAction("");
+    }
+  };
+
+  const handleMoveReadingTarget = async (
+    targetId: string,
+    direction: "up" | "down",
+  ) => {
+    if (!currentCycle) return;
+
+    const currentIndex = readingTargets.findIndex(
+      (target) => target.id === targetId,
+    );
+    const nextIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= readingTargets.length) {
+      return;
+    }
+
+    const targetIds = readingTargets.map((target) => target.id);
+    const [movedTargetId] = targetIds.splice(currentIndex, 1);
+    if (!movedTargetId) return;
+    targetIds.splice(nextIndex, 0, movedTargetId);
+
+    try {
+      setReadingTargetAction(targetId);
+      const response = await reorderReadingTargets(clubId, currentCycle.id, {
+        targetIds,
+      });
+      setReadingTargets(response.targets);
+    } finally {
+      setReadingTargetAction("");
     }
   };
 
@@ -594,6 +711,7 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
             {view === "reading" ? (
               <ReadingCycleSection
                 currentCycle={currentCycle ?? null}
+                clubId={clubId}
                 completedCycles={completedCycles}
                 isOwner={isOwner}
                 isMember={isMember}
@@ -610,6 +728,15 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                 isProgressSaving={isReadingProgressSaving}
                 onRetryProgress={() => void loadReadingProgressData()}
                 onUpdateProgress={handleUpdateReadingProgress}
+                targets={readingTargets}
+                isTargetsLoading={isReadingTargetsLoading}
+                targetsError={readingTargetsError}
+                targetActionInProgress={readingTargetAction}
+                onRetryTargets={() => void loadReadingTargetsData()}
+                onCreateTarget={handleCreateReadingTarget}
+                onUpdateTarget={handleUpdateReadingTarget}
+                onDeleteTarget={handleDeleteReadingTarget}
+                onMoveTarget={handleMoveReadingTarget}
               />
             ) : null}
 
@@ -792,30 +919,15 @@ function ClubDiscussion({
   canChat: boolean;
 }) {
   return (
-    <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+    <div className="min-w-0">
       {canChat ? (
-        <ChatWindow clubId={club.id} roomId={`${club.id}-general`} />
+        <StructuredDiscussionPanel club={club} currentCycle={currentCycle} />
       ) : (
         <EmptyState
           title="Join to discuss"
-          description="Members can access the live club discussion."
+          description="Members can access structured topics and live chat."
         />
       )}
-      <aside className="app-surface h-fit rounded-2xl p-5">
-        <SectionHeader title="Room context" />
-        <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
-          This room is for ongoing club conversation. Keep spoilers aligned with
-          the club&apos;s current read.
-        </p>
-        {currentCycle ? (
-          <div className="mt-5 border-t border-[var(--app-border-subtle)] pt-5">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-[var(--app-accent-gold)]">
-              Current book
-            </p>
-            <p className="mt-2 font-serif text-xl">{currentCycle.book.title}</p>
-          </div>
-        ) : null}
-      </aside>
     </div>
   );
 }

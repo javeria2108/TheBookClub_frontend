@@ -131,6 +131,15 @@ export async function putJson<TResponse, TBody>(
   return readJsonResponse<TResponse>(response);
 }
 
+export async function deleteJson<TResponse>(path: string): Promise<TResponse> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  return readJsonResponse<TResponse>(response);
+}
+
 export async function postForm<TResponse>(
   path: string,
   body: FormData,

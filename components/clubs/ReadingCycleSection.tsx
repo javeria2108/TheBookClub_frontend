@@ -2,12 +2,15 @@
 
 import { BookOpen, CalendarDays, CheckCircle2, Clock, XCircle } from "lucide-react";
 
+import { ReadingPlanPanel } from "@/components/clubs/ReadingPlanPanel";
 import { ReadingProgressPanel } from "@/components/clubs/ReadingProgressPanel";
-import type { ReadingCycle } from "@/lib/types";
+import { RelatedDiscussionsPreview } from "@/components/clubs/RelatedDiscussionsPreview";
+import type { CreateReadingTargetPayload, ReadingCycle, ReadingTarget } from "@/lib/types";
 import type { ReadingProgressResponse } from "@/lib/types";
 
 type ReadingCycleSectionProps = {
   currentCycle: ReadingCycle | null;
+  clubId: string;
   completedCycles: ReadingCycle[];
   isOwner: boolean;
   isMember: boolean;
@@ -24,6 +27,18 @@ type ReadingCycleSectionProps = {
   isProgressSaving: boolean;
   onRetryProgress: () => void;
   onUpdateProgress: (progressPercentage: number) => Promise<void>;
+  targets: ReadingTarget[];
+  isTargetsLoading: boolean;
+  targetsError: string;
+  targetActionInProgress: string;
+  onRetryTargets: () => void;
+  onCreateTarget: (payload: CreateReadingTargetPayload) => Promise<void>;
+  onUpdateTarget: (
+    targetId: string,
+    payload: CreateReadingTargetPayload,
+  ) => Promise<void>;
+  onDeleteTarget: (target: ReadingTarget) => Promise<void>;
+  onMoveTarget: (targetId: string, direction: "up" | "down") => Promise<void>;
 };
 
 function formatDate(value: string): string {
@@ -61,6 +76,7 @@ function getStatusLabel(status: ReadingCycle["status"]): string {
 
 export function ReadingCycleSection({
   currentCycle,
+  clubId,
   completedCycles,
   isOwner,
   isMember,
@@ -77,6 +93,15 @@ export function ReadingCycleSection({
   isProgressSaving,
   onRetryProgress,
   onUpdateProgress,
+  targets,
+  isTargetsLoading,
+  targetsError,
+  targetActionInProgress,
+  onRetryTargets,
+  onCreateTarget,
+  onUpdateTarget,
+  onDeleteTarget,
+  onMoveTarget,
 }: ReadingCycleSectionProps) {
   const isCurrentPlanned = currentCycle?.status === "PLANNED";
   const isCurrentActive = currentCycle?.status === "ACTIVE";
@@ -242,15 +267,34 @@ export function ReadingCycleSection({
           </div>
 
           {isMember ? (
-            <ReadingProgressPanel
-              cycle={currentCycle}
-              progress={progress}
-              isLoading={isProgressLoading}
-              error={progressError}
-              isSaving={isProgressSaving}
-              onRetry={onRetryProgress}
-              onUpdate={onUpdateProgress}
-            />
+            <>
+              <ReadingProgressPanel
+                cycle={currentCycle}
+                progress={progress}
+                isLoading={isProgressLoading}
+                error={progressError}
+                isSaving={isProgressSaving}
+                onRetry={onRetryProgress}
+                onUpdate={onUpdateProgress}
+              />
+              <ReadingPlanPanel
+                cycle={currentCycle}
+                targets={targets}
+                isOwner={isOwner}
+                isLoading={isTargetsLoading}
+                error={targetsError}
+                actionInProgress={targetActionInProgress}
+                onRetry={onRetryTargets}
+                onCreate={onCreateTarget}
+                onUpdate={onUpdateTarget}
+                onDelete={onDeleteTarget}
+                onMove={onMoveTarget}
+              />
+              <RelatedDiscussionsPreview
+                clubId={clubId}
+                cycleId={currentCycle.id}
+              />
+            </>
           ) : null}
         </div>
       ) : (

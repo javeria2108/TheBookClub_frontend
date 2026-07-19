@@ -4,3 +4,4 @@ export * from "./club.types";
 export * from "./homepage.types";
 export * from "./profile.types";
 export * from "./reading-cycle.types";
+export * from "./discussion.types";
