@@ -24,9 +24,34 @@ function getBackendImagePattern() {
 
 const backendImagePattern = getBackendImagePattern();
 
+function getApiProxyDestination() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "/api";
+
+  if (!apiUrl.startsWith("/")) return null;
+
+  const backendUrl =
+    process.env.NEXT_PUBLIC_BACKEND_URL ?? process.env.NEXT_PUBLIC_SOCKET_URL;
+
+  if (!backendUrl) return null;
+
+  return `${backendUrl.replace(/\/$/, "")}/api/:path*`;
+}
+
+const apiProxyDestination = getApiProxyDestination();
+
 const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
+  },
+  async rewrites() {
+    return apiProxyDestination
+      ? [
+          {
+            source: "/api/:path*",
+            destination: apiProxyDestination,
+          },
+        ]
+      : [];
   },
   images: {
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
