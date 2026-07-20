@@ -285,8 +285,9 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
     () =>
       readingCycles.find((cycle) => cycle.status === "ACTIVE") ??
       readingCycles.find((cycle) => cycle.status === "PLANNED") ??
+      club?.currentReadingCycle ??
       publicCurrentCycle,
-    [publicCurrentCycle, readingCycles],
+    [club?.currentReadingCycle, publicCurrentCycle, readingCycles],
   );
 
   const plannedCycle = readingCycles.find((cycle) => cycle.status === "PLANNED");
