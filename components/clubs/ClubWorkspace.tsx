@@ -197,7 +197,7 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
 
     try {
       setIsReadingCycleLoading(true);
-      if (view === "reading" && isAuthenticated && club.isMember) {
+      if (isAuthenticated && club.isMember) {
         const data = await getReadingCycles(clubId);
         setReadingCycles(data.readingCycles);
         setPublicCurrentCycle(null);
@@ -212,7 +212,7 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
     } finally {
       setIsReadingCycleLoading(false);
     }
-  }, [club, clubId, isAuthenticated, shouldLoadReadingCycleData, view]);
+  }, [club, clubId, isAuthenticated, shouldLoadReadingCycleData]);
 
   useEffect(() => {
     if (!shouldLoadReadingCycleData) {

@@ -25,6 +25,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthState } from "@/hooks/useAuthState";
 import { getMyClubs } from "@/lib/clubs";
+import { getReadingCycles } from "@/lib/reading-cycles";
 import type { Club, ReadingCycle } from "@/lib/types";
 
 type ClubCycle = {
@@ -68,15 +69,53 @@ export default function DashboardPage() {
   const [error, setError] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
+  const loadClubCycle = useCallback(async (club: Club) => {
+    if (club.currentReadingCycle) return club.currentReadingCycle;
+
+    try {
+      const data = await getReadingCycles(club.id);
+      return (
+        data.readingCycles.find((cycle) => cycle.status === "ACTIVE") ??
+        data.readingCycles.find((cycle) => cycle.status === "PLANNED") ??
+        null
+      );
+    } catch {
+      return null;
+    }
+  }, []);
+
   const loadHome = useCallback(async () => {
     try {
       setIsLoading(true);
       setError("");
       const data = await getMyClubs();
-      setClubCycles(
-        data.clubs.map((club) => ({
-          club,
-          cycle: club.currentReadingCycle ?? null,
+      const initialClubCycles = data.clubs.map((club) => ({
+        club,
+        cycle: club.currentReadingCycle ?? null,
+      }));
+      setClubCycles(initialClubCycles);
+      setIsLoading(false);
+
+      const missingCycleClubs = data.clubs.filter(
+        (club) => !club.currentReadingCycle,
+      );
+
+      if (missingCycleClubs.length === 0) return;
+
+      const fallbackCycles = await Promise.all(
+        missingCycleClubs.map(async (club) => ({
+          clubId: club.id,
+          cycle: await loadClubCycle(club),
+        })),
+      );
+      const cycleByClubId = new Map(
+        fallbackCycles.map((item) => [item.clubId, item.cycle]),
+      );
+
+      setClubCycles((current) =>
+        current.map((item) => ({
+          ...item,
+          cycle: item.cycle ?? cycleByClubId.get(item.club.id) ?? null,
         })),
       );
     } catch (err) {
@@ -88,10 +127,9 @@ export default function DashboardPage() {
         title: "Failed to load home",
         description: message,
       });
-    } finally {
       setIsLoading(false);
     }
-  }, [toast]);
+  }, [loadClubCycle, toast]);
 
   useEffect(() => {
     if (!isReady) return;

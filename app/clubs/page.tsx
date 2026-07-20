@@ -23,7 +23,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthState } from "@/hooks/useAuthState";
 import { useJoinClubAction } from "@/hooks/useJoinClubAction";
-import { getClubs } from "@/lib/clubs";
+import { getClubs, getMyClubs } from "@/lib/clubs";
 import type { Club } from "@/lib/types";
 
 type VisibilityFilter = "ALL" | "PUBLIC" | "PRIVATE";
@@ -46,7 +46,39 @@ export default function ClubsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const mergeJoinedClubs = useCallback(async (discoveredClubs: Club[]) => {
+    if (!isReady || !isAuthenticated) return discoveredClubs;
+
+    try {
+      const myClubs = await getMyClubs();
+      const joinedClubById = new Map(
+        myClubs.clubs.map((club) => [club.id, club]),
+      );
+
+      return discoveredClubs.map((club) => {
+        const joinedClub = joinedClubById.get(club.id);
+
+        if (!joinedClub) return club;
+
+        return {
+          ...club,
+          isMember: true,
+          memberRole: joinedClub.memberRole ?? club.memberRole,
+          hasPendingJoinRequest: false,
+          pendingJoinRequestId: null,
+          currentReadingCycle:
+            joinedClub.currentReadingCycle ?? club.currentReadingCycle,
+        };
+      });
+    } catch (err) {
+      console.error("Failed to merge joined clubs into discovery:", err);
+      return discoveredClubs;
+    }
+  }, [isAuthenticated, isReady]);
+
   const loadClubs = useCallback(async () => {
+    if (!isReady) return;
+
     try {
       setIsLoading(true);
       setError("");
@@ -58,7 +90,7 @@ export default function ClubsPage() {
           visibility === "ALL" ? undefined : visibility === "PUBLIC",
       });
 
-      setClubs(data.clubs);
+      setClubs(await mergeJoinedClubs(data.clubs));
       setTotalPages(data.pagination.totalPages || 1);
     } catch (err) {
       const message =
@@ -72,11 +104,13 @@ export default function ClubsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, search, toast, visibility]);
+  }, [isReady, mergeJoinedClubs, page, search, toast, visibility]);
 
   useEffect(() => {
+    if (!isReady) return;
+
     void loadClubs();
-  }, [loadClubs]);
+  }, [isReady, loadClubs]);
 
   const { joiningClubId, joinClub, cancelJoinRequest } =
     useJoinClubAction<Club>({
