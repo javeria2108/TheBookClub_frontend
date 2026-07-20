@@ -18,7 +18,7 @@ export type LandingClub = {
   memberCount: number;
   genre: string;
   isPrivate: boolean;
-  coverImage: string;
+  coverImage: string | null;
 };
 
 export type Testimonial = {

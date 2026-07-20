@@ -83,7 +83,7 @@ export const JoinClubResponseSchema = z.object({
 export const ClubMemberSummarySchema = z.object({
   userId: z.string().uuid(),
   username: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().email().nullable(),
   role: z.enum(["MEMBER", "MODERATOR", "OWNER"]),
   joinedAt: z.string(),
 });

@@ -4,18 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useAuthState } from "@/hooks/useAuthState";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { getClubs } from "@/lib/clubs";
 import {
+  getLandingMetrics,
   mapApiClubsToLandingClubs,
-  mockClubs,
-  testimonials,
 } from "@/lib/homepage";
 import type { LandingClub as Club } from "@/lib/types";
 import {
   BookOpen,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   Lock,
   MessageSquare,
@@ -37,10 +35,10 @@ const cardReveal = {
 
 export default function HomePage() {
   const { isAuthenticated, isReady, logout, user } = useAuthState();
-  const [testimonialIndex, setTestimonialIndex] = useState(0);
   const [clubs, setClubs] = useState<Club[]>([]);
 
-  const featuredClub = clubs[0] ?? mockClubs[0];
+  const featuredClub = clubs[0] ?? null;
+  const metrics = useMemo(() => getLandingMetrics(clubs), [clubs]);
 
   useEffect(() => {
     const fetchLandingClubs = async () => {
@@ -60,16 +58,6 @@ export default function HomePage() {
     () => user?.name?.charAt(0).toUpperCase() ?? "R",
     [user?.name],
   );
-
-  const prevTestimonial = () => {
-    setTestimonialIndex(
-      (current) => (current - 1 + testimonials.length) % testimonials.length,
-    );
-  };
-
-  const nextTestimonial = () => {
-    setTestimonialIndex((current) => (current + 1) % testimonials.length);
-  };
 
   return (
     <main className="min-h-screen bg-[#090807] text-[#F2E8D9] font-sans">
@@ -164,7 +152,11 @@ export default function HomePage() {
               className="mt-8 inline-flex items-center gap-2 border border-[#C9A96E]/35 bg-[#080706]/70 px-4 py-2 text-sm text-[#F2E8D9]/90 shadow-[0_8px_30px_rgba(0,0,0,0.35)] backdrop-blur"
             >
               <Users className="h-4 w-4 text-[#C9A96E]" />
-              <span>240+ members | 18 cities | reading now</span>
+              <span>
+                {metrics.totalMembers} members | {metrics.clubCount}{" "}
+                {metrics.clubCount === 1 ? "club" : "clubs"} |{" "}
+                {metrics.genreCount} {metrics.genreCount === 1 ? "genre" : "genres"}
+              </span>
             </motion.div>
           </div>
 
@@ -423,12 +415,18 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="relative h-96 overflow-hidden rounded-md border border-[#E8C46D]/35 shadow-[0_28px_70px_rgba(0,0,0,0.55)] lg:col-span-3"
           >
-            <Image
-              src={featuredClub.coverImage}
-              alt={featuredClub.name}
-              fill
-              className="object-cover"
-            />
+            {featuredClub?.coverImage ? (
+              <Image
+                src={featuredClub.coverImage}
+                alt={featuredClub.name}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_50%_28%,rgba(232,196,109,0.22),transparent_34%),linear-gradient(135deg,#0E2B27,#100B08_58%,#201109)]">
+                <BookOpen className="h-20 w-20 text-[#E8C46D]/70" />
+              </div>
+            )}
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,7,6,0.08),rgba(8,7,6,0.58))]" />
           </motion.div>
 
@@ -439,10 +437,10 @@ export default function HomePage() {
             className="lg:col-span-2"
           >
             <p className="text-[11px] uppercase tracking-[0.24em] text-[#C9A96E]">
-              Featured Club
+              {featuredClub ? "Featured Club" : "Your First Club"}
             </p>
             <h2 className="mt-3 break-words font-serif text-4xl font-black leading-[0.95] text-[#F7DFA5] sm:text-5xl md:text-[64px]">
-              {featuredClub.name}
+              {featuredClub?.name ?? "Start a reading circle"}
             </h2>
             <div className="mt-6 flex flex-wrap gap-6 text-sm text-[#F2E8D9]/80 sm:gap-8">
               <div>
@@ -450,7 +448,7 @@ export default function HomePage() {
                   Members
                 </p>
                 <p className="mt-1 text-xl font-semibold">
-                  {featuredClub.memberCount}
+                  {featuredClub?.memberCount ?? 0}
                 </p>
               </div>
               <div>
@@ -458,12 +456,13 @@ export default function HomePage() {
                   Genre
                 </p>
                 <p className="mt-1 text-xl font-semibold">
-                  {featuredClub.genre}
+                  {featuredClub?.genre ?? "General"}
                 </p>
               </div>
             </div>
             <p className="mt-6 max-w-md text-base leading-relaxed text-[#F2E8D9]/80">
-              {featuredClub.description}
+              {featuredClub?.description ??
+                "Create a club and the landing page will start highlighting real circles from your database."}
             </p>
 
           </motion.div>
@@ -473,10 +472,10 @@ export default function HomePage() {
       <section className="border-y border-[#C9A96E]/25 bg-[#0E1C1A] px-5 py-14 md:px-8">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-y-8 lg:grid-cols-4">
           {[
-            { value: "240+", label: "Members" },
-            { value: "6", label: "Active Clubs" },
-            { value: "12", label: "Books Discussed" },
-            { value: "18", label: "Cities" },
+            { value: String(metrics.totalMembers), label: "Members" },
+            { value: String(metrics.clubCount), label: "Clubs" },
+            { value: String(metrics.genreCount), label: "Genres" },
+            { value: String(metrics.privateClubs), label: "Private Clubs" },
           ].map((item, index) => (
             <div
               key={item.label}
@@ -496,9 +495,9 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-[#090807] px-5 py-24 text-[#F2E8D9] md:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(201,169,110,0.14),transparent_32%)]" />
         <div className="relative mx-auto w-full max-w-5xl">
-          <AnimatePresence mode="wait">
+          <div>
             <motion.div
-              key={testimonialIndex}
+              key="database-snapshot"
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
@@ -506,44 +505,24 @@ export default function HomePage() {
               className="border-y border-[#C9A96E]/25 py-12 text-center"
             >
               <p className="break-words font-serif text-3xl italic leading-tight text-[#F7DFA5] sm:text-4xl md:text-6xl lg:text-7xl">
-                “{testimonials[testimonialIndex].quote}”
+                {metrics.clubCount > 0
+                  ? `${metrics.clubCount} real reading ${metrics.clubCount === 1 ? "circle is" : "circles are"} available now.`
+                  : "No reading circles have been created yet."}
               </p>
               <div className="mt-9 flex flex-col items-center gap-3">
-                <Image
-                  src={testimonials[testimonialIndex].avatarImage}
-                  alt={testimonials[testimonialIndex].author}
-                  width={56}
-                  height={56}
-                  className="h-14 w-14 rounded-full object-cover"
-                />
+                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#E8C46D]/35 bg-[#0E2B27]">
+                  <BookOpen className="h-6 w-6 text-[#E8C46D]" />
+                </div>
                 <p className="font-medium">
-                  {testimonials[testimonialIndex].author}
+                  Live BookCircle data
                 </p>
                 <p className="text-[11px] uppercase tracking-[0.2em] text-[#E8C46D]">
-                  {testimonials[testimonialIndex].role}
+                  {metrics.totalMembers} members / {metrics.genreCount} genres
                 </p>
               </div>
             </motion.div>
-          </AnimatePresence>
-
-          <div className="mt-10 flex items-center justify-center gap-4">
-            <button
-              type="button"
-              onClick={prevTestimonial}
-              className="rounded-full border border-[#E8C46D]/35 p-2 text-[#E8C46D] transition hover:bg-[#E8C46D]/10"
-              aria-label="Previous testimonial"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={nextTestimonial}
-              className="rounded-full border border-[#E8C46D]/35 p-2 text-[#E8C46D] transition hover:bg-[#E8C46D]/10"
-              aria-label="Next testimonial"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
           </div>
+
         </div>
       </section>
 
@@ -557,7 +536,8 @@ export default function HomePage() {
             Read More. Think Deeper.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-[#F2E8D9]/75">
-            Join thousands of readers in clubs built around great books.
+            Join a real club from discovery or create the next circle for your
+            readers.
           </p>
 
           {isAuthenticated ? (

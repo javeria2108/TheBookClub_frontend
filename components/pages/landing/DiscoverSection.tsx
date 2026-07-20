@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { Globe, Lock, Users } from "lucide-react";
 import type { LandingClub } from "@/lib/types";
 
@@ -61,6 +60,17 @@ export function DiscoverSection({ clubs }: DiscoverSectionProps) {
           </motion.p>
         </div>
 
+        {clubs.length === 0 ? (
+          <div className="mt-10 rounded-md border border-[#E8C46D]/25 bg-[#100b08] p-6 text-center sm:mt-12">
+            <h3 className="font-serif text-3xl text-[#F7DFA5]">
+              No clubs yet
+            </h3>
+            <p className="mx-auto mt-2 max-w-lg text-sm leading-6 text-[#F2E8D9]/70">
+              Create the first reading circle and it will appear here for new
+              readers to discover.
+            </p>
+          </div>
+        ) : (
         <div className="-mx-4 mt-10 flex snap-x gap-4 overflow-x-auto px-4 pb-5 sm:mx-0 sm:mt-12 sm:gap-6 sm:px-0">
           {clubs.map((club, index) => (
             <motion.article
@@ -74,12 +84,20 @@ export function DiscoverSection({ clubs }: DiscoverSectionProps) {
               className="group min-w-0 w-[min(18rem,calc(100vw-2rem))] shrink-0 snap-start overflow-hidden rounded-md border border-[#E8C46D]/35 bg-[#100b08] shadow-[0_26px_56px_rgba(0,0,0,0.58)] sm:w-80"
             >
               <div className="relative h-44 overflow-hidden border-b border-[#E8C46D]/25 sm:h-52">
-                <Image
-                  src={club.coverImage}
-                  alt={club.name}
-                  fill
-                  className="object-cover transition duration-500 group-hover:scale-105"
-                />
+                {club.coverImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={club.coverImage}
+                    alt={club.name}
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_50%_32%,rgba(232,196,109,0.24),transparent_34%),linear-gradient(135deg,#0E2B27,#100B08_58%,#201109)]">
+                    <span className="px-5 text-center font-serif text-3xl leading-tight text-[#F7DFA5]">
+                      {club.name}
+                    </span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,7,6,0.08),rgba(8,7,6,0.76))]" />
                 <span className="absolute right-3 top-3 inline-flex items-center gap-1 border border-[#E8C46D]/45 bg-[#090807]/80 px-3 py-1 text-xs text-[#F2E8D9] backdrop-blur">
                   {club.isPrivate ? (
@@ -114,6 +132,7 @@ export function DiscoverSection({ clubs }: DiscoverSectionProps) {
             </motion.article>
           ))}
         </div>
+        )}
       </div>
     </section>
   );

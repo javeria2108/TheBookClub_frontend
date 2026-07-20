@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { logoutUser } from "@/lib/auth";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 type HeaderMode = "landing" | "app";
 
@@ -130,7 +131,7 @@ export function AppHeader({
             {!isAuthReady ? (
               <div className="h-10 w-10 animate-pulse rounded-full border border-[var(--app-border-subtle)] bg-[var(--app-surface)]" />
             ) : isAuthenticated ? (
-              <div className="relative">
+              <>
                 {mode === "landing" ? (
                   <Link
                     href="/dashboard"
@@ -139,6 +140,8 @@ export function AppHeader({
                     Dashboard
                   </Link>
                 ) : null}
+                {mode === "app" ? <NotificationBell activation="desktop" /> : null}
+                <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsAvatarMenuOpen((value) => !value)}
@@ -180,6 +183,7 @@ export function AppHeader({
                   ) : null}
                 </AnimatePresence>
               </div>
+              </>
             ) : (
               <>
                 <Link
@@ -195,18 +199,23 @@ export function AppHeader({
             )}
           </div>
 
-          <button
-            aria-label={isMobileNavOpen ? "Close navigation" : "Open navigation"}
-            onClick={() => setIsMobileNavOpen((value) => !value)}
-            className="shrink-0 md:hidden"
-            type="button"
-          >
-            {isMobileNavOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
+          <div className="flex shrink-0 items-center gap-2 md:hidden">
+            {mode === "app" && isAuthenticated ? (
+              <NotificationBell activation="mobile" />
+            ) : null}
+            <button
+              aria-label={isMobileNavOpen ? "Close navigation" : "Open navigation"}
+              onClick={() => setIsMobileNavOpen((value) => !value)}
+              className="shrink-0"
+              type="button"
+            >
+              {isMobileNavOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
         </div>
 
         <AnimatePresence>

@@ -6,13 +6,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronLeft, Globe, Save, Settings2 } from "lucide-react";
+import { AlertTriangle, ChevronLeft, Globe, Save, Settings2, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 import { AppHeader } from "@/components/layout/AppHeader";
 import { ClubCoverUpload } from "@/components/clubs/ClubCoverUpload";
 import { ClubSettingsFormSchema, UpdateClubPayloadSchema } from "@/lib/contracts/club.contract";
-import { getClubById, updateClub } from "@/lib/clubs";
+import { deleteClub, getClubById, updateClub } from "@/lib/clubs";
 import { useAuthState } from "@/hooks/useAuthState";
 import { useToast } from "@/components/ui/use-toast";
 import type { Club } from "@/lib/types";
@@ -30,6 +30,8 @@ export default function ClubSettingsPage() {
   const [coverImage, setCoverImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState("");
   const [error, setError] = useState("");
 
   const {
@@ -128,6 +130,35 @@ export default function ClubSettingsPage() {
       });
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDeleteClub = async () => {
+    if (!club || deleteConfirmation !== club.name) {
+      toast({
+        variant: "destructive",
+        title: "Confirmation required",
+        description: "Type the club name exactly before deleting it.",
+      });
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      await deleteClub(clubId);
+      toast({
+        title: "Club deleted",
+        description: `${club.name} has been removed.`,
+      });
+      router.push("/my-clubs");
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Failed to delete club",
+        description: err instanceof Error ? err.message : "Failed to delete club",
+      });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -289,6 +320,55 @@ export default function ClubSettingsPage() {
                 </button>
               </div>
             </form>
+
+            <section className="border-t border-[rgba(196,95,95,0.35)] p-4 sm:p-6 md:p-8">
+              <div className="rounded-2xl border border-[rgba(196,95,95,0.5)] bg-[rgba(67,38,33,0.26)] p-4 sm:p-5">
+                <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-3">
+                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[rgba(196,95,95,0.45)] bg-[rgba(196,95,95,0.12)] text-[var(--app-danger)]">
+                        <AlertTriangle className="h-5 w-5" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-serif text-2xl text-[var(--app-text-primary)]">
+                          Delete club
+                        </p>
+                        <p className="mt-1 text-sm text-[var(--app-text-secondary)]">
+                          This permanently removes the club, memberships,
+                          reading cycles, discussions, votes, notifications,
+                          and chat history.
+                        </p>
+                      </div>
+                    </div>
+
+                    <label
+                      htmlFor="delete-confirmation"
+                      className="app-field-label mt-5 block"
+                    >
+                      Type {club.name} to confirm
+                    </label>
+                    <input
+                      id="delete-confirmation"
+                      value={deleteConfirmation}
+                      onChange={(event) => setDeleteConfirmation(event.target.value)}
+                      className="app-input mt-2 w-full px-3 py-3 text-sm"
+                      disabled={isDeleting}
+                      autoComplete="off"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => void handleDeleteClub()}
+                    disabled={isDeleting || deleteConfirmation !== club.name}
+                    className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-xl border border-[rgba(196,95,95,0.55)] bg-[rgba(196,95,95,0.16)] px-4 py-3 text-sm font-bold text-[#ffd6d6] transition hover:bg-[rgba(196,95,95,0.25)] disabled:cursor-not-allowed disabled:opacity-55 sm:w-auto"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    {isDeleting ? "Deleting..." : "Delete Club"}
+                  </button>
+                </div>
+              </div>
+            </section>
           </motion.div>
         ) : null}
       </section>

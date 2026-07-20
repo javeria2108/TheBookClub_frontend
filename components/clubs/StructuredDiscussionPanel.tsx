@@ -303,36 +303,36 @@ export function StructuredDiscussionPanel({
             </div>
 
             {newTopicOpen ? (
-              <form onSubmit={handleCreateTopic} className="mt-4 space-y-3 rounded-xl border border-[var(--app-border-subtle)] p-3">
-                <label className="block text-sm font-semibold">
-                  Title
+              <form onSubmit={handleCreateTopic} className="mt-4 space-y-4 rounded-xl border border-[var(--app-border-subtle)] p-3">
+                <label className="block min-w-0 text-sm font-semibold">
+                  <span className="mb-1.5 block">Title</span>
                   <input
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
-                    className="app-input mt-1"
+                    className="app-input"
                     maxLength={140}
                     required
                   />
                 </label>
-                <label className="block text-sm font-semibold">
-                  Prompt
+                <label className="block min-w-0 text-sm font-semibold">
+                  <span className="mb-1.5 block">Prompt</span>
                   <textarea
                     value={prompt}
                     onChange={(event) => setPrompt(event.target.value)}
-                    className="app-input mt-1 min-h-24"
+                    className="app-input min-h-24"
                     maxLength={1200}
                   />
                 </label>
                 {moderator ? (
                   <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                    <label className="block text-sm font-semibold">
-                      Topic type
+                    <label className="block min-w-0 text-sm font-semibold">
+                      <span className="mb-1.5 block">Topic type</span>
                       <select
                         value={topicType}
                         onChange={(event) =>
                           setTopicType(event.target.value as DiscussionTopic["topicType"])
                         }
-                        className="app-input mt-1"
+                        className="app-input"
                       >
                         <option value="GENERAL">General topic</option>
                         {currentCycle ? <option value="READING_CYCLE">Current reading</option> : null}
@@ -341,12 +341,12 @@ export function StructuredDiscussionPanel({
                       </select>
                     </label>
                     {topicType === "READING_TARGET" ? (
-                      <label className="block text-sm font-semibold">
-                        Reading target
+                      <label className="block min-w-0 text-sm font-semibold">
+                        <span className="mb-1.5 block">Reading target</span>
                         <select
                           value={readingTargetId}
                           onChange={(event) => setReadingTargetId(event.target.value)}
-                          className="app-input mt-1"
+                          className="app-input"
                           required
                         >
                           <option value="">Choose target</option>
@@ -437,7 +437,7 @@ export function StructuredDiscussionPanel({
                       {selectedTopic.title}
                     </h2>
                     <p className="mt-1 text-xs text-[var(--app-text-muted)]">
-                      Started by {selectedTopic.createdBy.displayName} · {formatDateTime(selectedTopic.createdAt)}
+                      Started by {selectedTopic.createdBy.displayName} / {formatDateTime(selectedTopic.createdAt)}
                     </p>
                   </div>
                   {selectedTopic.canModerate || selectedTopic.canDelete ? (
@@ -525,15 +525,15 @@ export function StructuredDiscussionPanel({
                   <form onSubmit={handleCreatePost} className="mt-5 space-y-3">
                     {replyParentId ? (
                       <button type="button" onClick={() => setReplyParentId(null)} className="text-sm font-semibold text-[var(--app-accent-gold)]">
-                        Replying to a comment · cancel
+                        Replying to a comment / cancel
                       </button>
                     ) : null}
-                    <label className="block text-sm font-semibold">
-                      Reply
+                    <label className="block min-w-0 text-sm font-semibold">
+                      <span className="mb-1.5 block">Reply</span>
                       <textarea
                         value={content}
                         onChange={(event) => setContent(event.target.value)}
-                        className="app-input mt-1 min-h-28"
+                        className="app-input min-h-28"
                         maxLength={4000}
                         required
                       />

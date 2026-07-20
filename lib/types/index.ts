@@ -7,3 +7,4 @@ export * from "./reading-cycle.types";
 export * from "./discussion.types";
 export * from "./book-vote.types";
 export * from "./reading-entry.types";
+export * from "./notification.types";

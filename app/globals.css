@@ -234,6 +234,8 @@ body {
   font-weight: 700;
   text-align: center;
   white-space: normal;
+  cursor: pointer;
+  touch-action: manipulation;
   transition:
     background-color 150ms ease,
     border-color 150ms ease,
@@ -277,12 +279,28 @@ body {
   background: rgba(216, 181, 109, 0.08);
 }
 
+.app-button-primary:disabled,
+.app-button-secondary:disabled {
+  cursor: not-allowed;
+}
+
+@media (hover: none) {
+  .app-button-primary:hover {
+    transform: none;
+  }
+}
+
 .app-input {
+  display: block;
+  width: 100%;
   min-height: 44px;
   border: 1px solid var(--app-border-subtle);
   border-radius: 10px;
   background: rgba(8, 11, 10, 0.72);
   color: var(--app-text-primary);
+  padding: 0.7rem 0.85rem;
+  line-height: 1.4;
+  resize: vertical;
 }
 
 .app-input::placeholder {
