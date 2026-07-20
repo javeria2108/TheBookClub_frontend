@@ -7,17 +7,23 @@ import { useAuthState } from "@/hooks/useAuthState";
 import { motion } from "framer-motion";
 import { getClubs } from "@/lib/clubs";
 import {
+  getHomepageStats,
   getLandingMetrics,
   mapApiClubsToLandingClubs,
 } from "@/lib/homepage";
-import type { LandingClub as Club } from "@/lib/types";
+import type { LandingClub as Club, LandingStats } from "@/lib/types";
 import {
+  Bell,
   BookOpen,
   ChevronDown,
   ChevronRight,
+  ListChecks,
   Lock,
   MessageSquare,
   Play,
+  Quote,
+  Sparkles,
+  Trophy,
   Users,
   Vote,
 } from "lucide-react";
@@ -36,18 +42,31 @@ const cardReveal = {
 export default function HomePage() {
   const { isAuthenticated, isReady, logout, user } = useAuthState();
   const [clubs, setClubs] = useState<Club[]>([]);
+  const [landingStats, setLandingStats] = useState<LandingStats | null>(null);
 
   const featuredClub = clubs[0] ?? null;
-  const metrics = useMemo(() => getLandingMetrics(clubs), [clubs]);
+  const metrics = useMemo(
+    () => getLandingMetrics(clubs, landingStats),
+    [clubs, landingStats],
+  );
 
   useEffect(() => {
     const fetchLandingClubs = async () => {
-      try {
-        const data = await getClubs({ limit: 5 });
+      const [clubResult, statsResult] = await Promise.allSettled([
+        getClubs({ limit: 5 }),
+        getHomepageStats(),
+      ]);
 
-        setClubs(mapApiClubsToLandingClubs(data.clubs));
-      } catch (error) {
-        console.error("Failed to load landing clubs", error);
+      if (clubResult.status === "fulfilled") {
+        setClubs(mapApiClubsToLandingClubs(clubResult.value.clubs));
+      } else {
+        console.error("Failed to load landing clubs", clubResult.reason);
+      }
+
+      if (statsResult.status === "fulfilled") {
+        setLandingStats(statsResult.value);
+      } else {
+        console.error("Failed to load landing stats", statsResult.reason);
       }
     };
 
@@ -120,8 +139,8 @@ export default function HomePage() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-[#F2E8D9]/80 md:text-lg lg:mx-0"
             >
-              Discover thoughtful circles, vote on the next great read, and
-              gather around conversations that glow long after the final page.
+              Create clubs, plan shared reads, track progress, vote on the next
+              book, and keep the best parts of the conversation in one place.
             </motion.p>
 
             <motion.div
@@ -154,9 +173,10 @@ export default function HomePage() {
             >
               <Users className="h-4 w-4 text-[#C9A96E]" />
               <span>
-                {metrics.totalMembers} members | {metrics.clubCount}{" "}
+                {metrics.readerCount} readers | {metrics.clubCount}{" "}
                 {metrics.clubCount === 1 ? "club" : "clubs"} |{" "}
-                {metrics.genreCount} {metrics.genreCount === 1 ? "genre" : "genres"}
+                {metrics.activeReadingCycles} active{" "}
+                {metrics.activeReadingCycles === 1 ? "read" : "reads"}
               </span>
             </motion.div>
           </div>
@@ -254,40 +274,40 @@ export default function HomePage() {
           <div className="relative mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {[
               {
-                title: "Focused Club Chat",
+                title: "Public & Private Clubs",
                 description:
-                  "Discuss chapters in a dedicated room that keeps every club conversation in one place.",
-                icon: MessageSquare,
-              },
-              {
-                title: "Async Club Chat",
-                description:
-                  "Keep momentum between sessions with threaded, thoughtful commentary.",
-                icon: MessageSquare,
-              },
-              {
-                title: "Book Voting",
-                description:
-                  "Vote on next reads with transparent tally and clear decision windows.",
-                icon: Vote,
-              },
-              {
-                title: "Private & Public Clubs",
-                description:
-                  "Host open communities or private circles with request-only entry.",
+                  "Open a public reading circle or approve requests for a quieter private club.",
                 icon: Lock,
               },
               {
-                title: "Reading Lists",
+                title: "Reading Cycles & Plans",
                 description:
-                  "Build living syllabi and archives that members can revisit anytime.",
-                icon: BookOpen,
+                  "Choose a book, set dates, add weekly targets, and keep every member oriented.",
+                icon: ListChecks,
               },
               {
-                title: "Member Discovery",
+                title: "Progress Tracking",
                 description:
-                  "Find readers by taste, pace, and discussion style across cities.",
+                  "Members can update percentage progress while the club sees a calm shared view.",
                 icon: Users,
+              },
+              {
+                title: "Discussions & Live Chat",
+                description:
+                  "Use structured topics for durable conversation and chat for the live room.",
+                icon: MessageSquare,
+              },
+              {
+                title: "Next Book Voting",
+                description:
+                  "Nominate books, vote while the round is open, and resolve the club pick.",
+                icon: Vote,
+              },
+              {
+                title: "Reflections & Notifications",
+                description:
+                  "Save quotes and reflections, then get in-app notices when club activity matters.",
+                icon: Bell,
               },
             ].map((feature, index) => {
               const Icon = feature.icon;
@@ -327,11 +347,11 @@ export default function HomePage() {
                 How to play
               </p>
               <h2 className="mt-3 break-words font-serif text-4xl font-black leading-none text-[#F7DFA5] sm:text-5xl md:text-7xl">
-                Gather. Vote. Read.
+                Create. Plan. Discuss.
               </h2>
               <p className="mt-5 text-sm leading-relaxed text-[#F2E8D9]/70">
-                Three moves take a quiet shelf and turn it into a living club
-                with rhythm, memory, and room for every reader.
+                Three simple moves turn a book choice into a shared reading
+                rhythm with progress, prompts, and room for every reader.
               </p>
             </div>
 
@@ -355,23 +375,23 @@ export default function HomePage() {
                 step: "01",
                 title: "Create or find a club",
                 description:
-                  "Start your own circle or join one that matches your reading pace and taste.",
+                  "Start a public club, keep it private, or join an existing circle from discovery.",
                 image:
                   "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=900&q=80",
               },
               {
                 step: "02",
-                title: "Join the conversation",
+                title: "Plan the shared read",
                 description:
-                  "Use club chat to discuss ideas, share reactions, and keep momentum between reads.",
+                  "Create reading cycles, add weekly targets, and let members track progress.",
                 image:
                   "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=900&q=80",
               },
               {
                 step: "03",
-                title: "Vote, read, and meet",
+                title: "Discuss and decide",
                 description:
-                  "Pick books together, schedule sessions, and build a stronger reading rhythm.",
+                  "Use chat, structured topics, reflections, quotes, and next-book voting to keep momentum.",
                 image:
                   "https://images.unsplash.com/photo-1526243741027-444d633d7365?w=900&q=80",
               },
@@ -473,10 +493,10 @@ export default function HomePage() {
       <section className="border-y border-[#C9A96E]/25 bg-[#0E1C1A] px-5 py-14 md:px-8">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-y-8 lg:grid-cols-4">
           {[
-            { value: String(metrics.totalMembers), label: "Members" },
+            { value: String(metrics.readerCount), label: "Readers" },
             { value: String(metrics.clubCount), label: "Clubs" },
-            { value: String(metrics.genreCount), label: "Genres" },
-            { value: String(metrics.privateClubs), label: "Private Clubs" },
+            { value: String(metrics.activeReadingCycles), label: "Active Reads" },
+            { value: String(metrics.discussionTopics), label: "Topics" },
           ].map((item, index) => (
             <div
               key={item.label}
@@ -495,35 +515,80 @@ export default function HomePage() {
 
       <section className="relative overflow-hidden bg-[#090807] px-5 py-24 text-[#F2E8D9] md:px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(201,169,110,0.14),transparent_32%)]" />
-        <div className="relative mx-auto w-full max-w-5xl">
-          <div>
-            <motion.div
-              key="database-snapshot"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.45 }}
-              className="border-y border-[#C9A96E]/25 py-12 text-center"
-            >
-              <p className="break-words font-serif text-3xl italic leading-tight text-[#F7DFA5] sm:text-4xl md:text-6xl lg:text-7xl">
-                {metrics.clubCount > 0
-                  ? `${metrics.clubCount} real reading ${metrics.clubCount === 1 ? "circle is" : "circles are"} available now.`
-                  : "No reading circles have been created yet."}
+        <div className="relative mx-auto w-full max-w-7xl">
+          <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.28em] text-[#E8C46D]">
+                Coming next
               </p>
-              <div className="mt-9 flex flex-col items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#E8C46D]/35 bg-[#0E2B27]">
-                  <BookOpen className="h-6 w-6 text-[#E8C46D]" />
-                </div>
-                <p className="font-medium">
-                  Live BookCircle data
-                </p>
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[#E8C46D]">
-                  {metrics.totalMembers} members / {metrics.genreCount} genres
-                </p>
-              </div>
-            </motion.div>
-          </div>
+              <h2 className="mt-3 break-words font-serif text-4xl font-black leading-none text-[#F7DFA5] sm:text-5xl md:text-7xl">
+                The roadmap stays reader-first.
+              </h2>
+              <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#F2E8D9]/70">
+                The current app focuses on clubs, reading plans, discussions,
+                voting, reflections, and notifications. Future phases add more
+                intelligence and motivation without turning the space into a
+                noisy social feed.
+              </p>
+            </div>
 
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[
+                {
+                  title: "AI discussion help",
+                  description:
+                    "Planned prompts, summaries, and reading aids for club owners and members.",
+                  icon: Sparkles,
+                },
+                {
+                  title: "Reading milestones",
+                  description:
+                    "Planned streaks, achievements, and progress moments that reward consistency.",
+                  icon: Trophy,
+                },
+                {
+                  title: "Smarter reminders",
+                  description:
+                    "Planned preferences for reading targets, votes, replies, and club activity.",
+                  icon: Bell,
+                },
+                {
+                  title: "Richer archives",
+                  description:
+                    "Planned ways to revisit finished reads, saved quotes, and discussion history.",
+                  icon: Quote,
+                },
+              ].map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <motion.article
+                    key={item.title}
+                    variants={cardReveal}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    custom={index}
+                    className="rounded-md border border-[#C9A96E]/25 bg-[#0B1513]/86 p-6"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center border border-[#E8C46D]/35 bg-[#090807] text-[#E8C46D]">
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <span className="border border-[#1AA59C]/45 bg-[#0E2B27] px-2 py-1 text-[10px] uppercase tracking-[0.14em] text-[#A8E9E3]">
+                        Planned
+                      </span>
+                    </div>
+                    <h3 className="mt-5 font-serif text-2xl text-[#F7DFA5]">
+                      {item.title}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-[#F2E8D9]/68">
+                      {item.description}
+                    </p>
+                  </motion.article>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -592,8 +657,8 @@ export default function HomePage() {
               </p>
               <ul className="mt-4 space-y-2 text-sm text-[#F2E8D9]/80">
                 <li>
-                  <a href="#" className="transition hover:text-[#C9A96E]">
-                    Features
+                  <a href="#how" className="transition hover:text-[#C9A96E]">
+                    How it Works
                   </a>
                 </li>
                 <li>
@@ -605,55 +670,53 @@ export default function HomePage() {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="transition hover:text-[#C9A96E]">
-                    Pricing
-                  </a>
+                  <Link
+                    href={isAuthenticated ? "/dashboard" : "/auth/signup"}
+                    className="transition hover:text-[#C9A96E]"
+                  >
+                    {isAuthenticated ? "Dashboard" : "Create Account"}
+                  </Link>
                 </li>
               </ul>
             </div>
 
             <div>
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-                Community
+                Current
               </p>
               <ul className="mt-4 space-y-2 text-sm text-[#F2E8D9]/80">
                 <li>
-                  <a href="#" className="transition hover:text-[#C9A96E]">
+                  <a href="#discover" className="transition hover:text-[#C9A96E]">
+                    Clubs
+                  </a>
+                </li>
+                <li>
+                  <span>
                     Discussions
-                  </a>
+                  </span>
                 </li>
                 <li>
-                  <a href="#" className="transition hover:text-[#C9A96E]">
-                    Newsletter
-                  </a>
+                  <span>Reading Plans</span>
                 </li>
                 <li>
-                  <a href="#" className="transition hover:text-[#C9A96E]">
-                    Events
-                  </a>
+                  <span>Next Book Voting</span>
                 </li>
               </ul>
             </div>
 
             <div>
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-                Company
+                Roadmap
               </p>
               <ul className="mt-4 space-y-2 text-sm text-[#F2E8D9]/80">
                 <li>
-                  <a href="#" className="transition hover:text-[#C9A96E]">
-                    About
-                  </a>
+                  <span>AI Discussion Help</span>
                 </li>
                 <li>
-                  <a href="#" className="transition hover:text-[#C9A96E]">
-                    Privacy
-                  </a>
+                  <span>Reading Milestones</span>
                 </li>
                 <li>
-                  <a href="#" className="transition hover:text-[#C9A96E]">
-                    Terms
-                  </a>
+                  <span>Notification Preferences</span>
                 </li>
               </ul>
             </div>

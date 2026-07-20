@@ -10,6 +10,14 @@ type JoinedClubsGridProps = {
   clubs: JoinedClubSummary[];
 };
 
+function getCurrentReadLabel(club: JoinedClubSummary) {
+  const cycle = club.currentReadingCycle;
+
+  if (!cycle) return "No current read yet";
+
+  return `${cycle.status === "ACTIVE" ? "Currently reading" : "Planning"} ${cycle.book.title}`;
+}
+
 export function JoinedClubsGrid({ clubs }: JoinedClubsGridProps) {
   if (clubs.length === 0) {
     return (
@@ -54,6 +62,9 @@ export function JoinedClubsGrid({ clubs }: JoinedClubsGridProps) {
             </div>
             <p className="mt-2 line-clamp-3 min-h-14 text-sm text-[var(--app-text-secondary)]">
               {club.description || "This club has not added a description yet."}
+            </p>
+            <p className="mt-3 line-clamp-2 break-words text-sm font-semibold text-[var(--app-accent-gold)]">
+              {getCurrentReadLabel(club)}
             </p>
             <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
               <div className="flex flex-wrap gap-2">

@@ -28,6 +28,14 @@ const FILTERS: Array<{ label: string; value: ClubFilter }> = [
   { label: "Private", value: "PRIVATE" },
 ];
 
+function getCurrentReadLabel(club: Club) {
+  const cycle = club.currentReadingCycle;
+
+  if (!cycle) return "No current read announced yet.";
+
+  return `${cycle.status === "ACTIVE" ? "Currently reading" : "Planning"} ${cycle.book.title}`;
+}
+
 export default function MyClubsPage() {
   const router = useRouter();
   const { isAuthenticated, isReady, logout, user } = useAuthState();
@@ -236,8 +244,8 @@ export default function MyClubsPage() {
                     <span>{club.genre || "General"}</span>
                   </div>
                   <div className="mt-5 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-                    <p className="text-xs uppercase tracking-[0.12em] text-[var(--app-text-muted)] sm:tracking-[0.16em]">
-                      Current read appears inside the club
+                    <p className="min-w-0 break-words text-xs uppercase tracking-[0.12em] text-[var(--app-text-muted)] sm:tracking-[0.16em]">
+                      {getCurrentReadLabel(club)}
                     </p>
                     <Link href={`/clubs/${club.id}`} className="app-button-primary w-full sm:w-auto">
                       <BookOpen className="h-4 w-4" />

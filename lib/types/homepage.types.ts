@@ -21,6 +21,15 @@ export type LandingClub = {
   coverImage: string | null;
 };
 
+export type LandingStats = {
+  readerCount: number;
+  clubCount: number;
+  activeReadingCycles: number;
+  discussionTopics: number;
+  readingEntries: number;
+  openVoteRounds: number;
+};
+
 export type Testimonial = {
   quote: string;
   author: string;

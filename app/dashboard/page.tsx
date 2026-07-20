@@ -25,15 +25,12 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useAuthState } from "@/hooks/useAuthState";
 import { getMyClubs } from "@/lib/clubs";
-import { getCurrentReadingCycle } from "@/lib/reading-cycles";
 import type { Club, ReadingCycle } from "@/lib/types";
 
 type ClubCycle = {
   club: Club;
   cycle: ReadingCycle | null;
 };
-
-const HOME_READING_CYCLE_LIMIT = 6;
 
 function getGreeting(name?: string | null) {
   const hour = new Date().getHours();
@@ -76,28 +73,10 @@ export default function DashboardPage() {
       setIsLoading(true);
       setError("");
       const data = await getMyClubs();
-      setClubCycles(data.clubs.map((club) => ({ club, cycle: null })));
-      setIsLoading(false);
-
-      const visibleClubCycles = await Promise.all(
-        data.clubs.slice(0, HOME_READING_CYCLE_LIMIT).map(async (club) => {
-          try {
-            return {
-              club,
-              cycle: await getCurrentReadingCycle(club.id),
-            };
-          } catch {
-            return { club, cycle: null };
-          }
-        }),
-      );
-      const cycleByClubId = new Map(
-        visibleClubCycles.map((item) => [item.club.id, item.cycle]),
-      );
       setClubCycles(
         data.clubs.map((club) => ({
           club,
-          cycle: cycleByClubId.get(club.id) ?? null,
+          cycle: club.currentReadingCycle ?? null,
         })),
       );
     } catch (err) {
@@ -109,6 +88,7 @@ export default function DashboardPage() {
         title: "Failed to load home",
         description: message,
       });
+    } finally {
       setIsLoading(false);
     }
   }, [toast]);

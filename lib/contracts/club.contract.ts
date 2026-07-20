@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ReadingCycleSchema } from "@/lib/contracts/reading-cycle.contract";
+
 export const ClubSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
@@ -10,6 +12,7 @@ export const ClubSchema = z.object({
   memberCount: z.number().int().nonnegative().optional(),
   isMember: z.boolean().optional(),
   memberRole: z.enum(["MEMBER", "MODERATOR", "OWNER"]).nullable().optional(),
+  currentReadingCycle: ReadingCycleSchema.nullable().optional(),
   hasPendingJoinRequest: z.boolean().optional(),
   pendingJoinRequestId: z.string().uuid().nullable().optional(),
   createdAt: z.string(),

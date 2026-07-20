@@ -1,4 +1,5 @@
-import type { GetClubsResponse, LandingClub } from "@/lib/types";
+import { getJson } from "@/lib/api";
+import type { GetClubsResponse, LandingClub, LandingStats } from "@/lib/types";
 
 export function mapApiClubsToLandingClubs(
   apiClubs: GetClubsResponse["clubs"],
@@ -14,15 +15,26 @@ export function mapApiClubsToLandingClubs(
   }));
 }
 
-export function getLandingMetrics(clubs: LandingClub[]) {
+export async function getHomepageStats(): Promise<LandingStats> {
+  return getJson<LandingStats>("/homepage/stats");
+}
+
+export function getLandingMetrics(
+  clubs: LandingClub[],
+  stats: LandingStats | null,
+) {
   const totalMembers = clubs.reduce((sum, club) => sum + club.memberCount, 0);
   const genreCount = new Set(clubs.map((club) => club.genre).filter(Boolean))
     .size;
   const privateClubs = clubs.filter((club) => club.isPrivate).length;
 
   return {
-    totalMembers,
-    clubCount: clubs.length,
+    readerCount: stats?.readerCount ?? totalMembers,
+    clubCount: stats?.clubCount ?? clubs.length,
+    activeReadingCycles: stats?.activeReadingCycles ?? 0,
+    discussionTopics: stats?.discussionTopics ?? 0,
+    readingEntries: stats?.readingEntries ?? 0,
+    openVoteRounds: stats?.openVoteRounds ?? 0,
     genreCount,
     privateClubs,
   };

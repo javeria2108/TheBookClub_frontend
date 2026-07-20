@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { ReadingCycleSchema } from "@/lib/contracts/reading-cycle.contract";
+
 export const PROFILE_GENRE_OPTIONS = [
   "Classics",
   "Contemporary Fiction",
@@ -26,6 +28,7 @@ export const JoinedClubSummarySchema = z.object({
   coverImage: z.string().url().nullable(),
   memberCount: z.number().int().nonnegative(),
   memberRole: z.enum(["MEMBER", "MODERATOR", "OWNER"]),
+  currentReadingCycle: ReadingCycleSchema.nullable().optional(),
   joinedAt: z.string().datetime(),
   createdAt: z.string().datetime(),
 });
