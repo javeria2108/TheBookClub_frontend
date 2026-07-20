@@ -5,11 +5,6 @@
  */
 @custom-variant dark (&:is(.dark *));
 
-/**
- * Bookshelf Theme - Dark Brown Aesthetic
- * Colors inspired by classic libraries and book spines
- */
-
 :root {
   /* Fantasy application theme tokens */
   --app-bg: #080b0a;
@@ -30,10 +25,10 @@
   --app-success: #63b387;
   --app-focus-ring: #f0cf86;
 
-  /* Primary bookshelf browns */
-  --wood-dark: #2d1b12; /* Dark walnut */
-  --wood-medium: #3d2817; /* Medium wood */
-  --wood-light: #5c3d2e; /* Light wood accent */
+  /* Legacy aliases kept for older components */
+  --wood-dark: var(--app-bg);
+  --wood-medium: var(--app-surface);
+  --wood-light: var(--app-surface-elevated);
 
   /* Book spine colors (contrasting accents) */
   --leather-burgundy: #6b2737; /* Deep burgundy leather */
@@ -42,48 +37,48 @@
   --leather-sage: #8b9d83; /* Sage green */
 
   /* Text colors */
-  --text-primary: #f5e6d3; /* Cream for main text */
-  --text-secondary: #c4b5a0; /* Muted cream */
-  --text-accent: #d4af37; /* Gold for highlights */
+  --text-primary: var(--app-text-primary);
+  --text-secondary: var(--app-text-secondary);
+  --text-accent: var(--app-accent-gold);
 
   /* Functional colors */
   --error: #dc2626;
   --success: #10b981;
 
-  /* Shadcn theme colors - Customized for bookshelf aesthetic */
-  --background: #2d1b12; /* Dark walnut background */
-  --foreground: #f5e6d3; /* Cream text */
-  --card: #3d2817; /* Medium wood for cards */
-  --card-foreground: #f5e6d3; /* Cream text on cards */
-  --popover: #3d2817; /* Medium wood for popovers */
-  --popover-foreground: #f5e6d3; /* Cream text */
-  --primary: #6b2737; /* Burgundy leather - main actions */
-  --primary-foreground: #f5e6d3; /* Cream text on burgundy */
-  --secondary: #5c3d2e; /* Light wood - secondary actions */
-  --secondary-foreground: #f5e6d3; /* Cream text */
-  --muted: #3d2817; /* Medium wood - muted elements */
-  --muted-foreground: #c4b5a0; /* Muted cream text */
-  --accent: #d4af37; /* Gold accent */
-  --accent-foreground: #2d1b12; /* Dark text on gold */
+  /* Shadcn theme colors mapped to the current BookCircle app theme */
+  --background: var(--app-bg);
+  --foreground: var(--app-text-primary);
+  --card: var(--app-surface);
+  --card-foreground: var(--app-text-primary);
+  --popover: var(--app-surface-elevated);
+  --popover-foreground: var(--app-text-primary);
+  --primary: var(--app-accent-teal);
+  --primary-foreground: #041312;
+  --secondary: var(--app-surface-elevated);
+  --secondary-foreground: var(--app-text-primary);
+  --muted: var(--app-surface);
+  --muted-foreground: var(--app-text-muted);
+  --accent: var(--app-accent-gold);
+  --accent-foreground: #171008;
   --destructive: #dc2626; /* Red for errors/delete */
   --destructive-foreground: #f5e6d3;
-  --border: #5c3d2e; /* Light wood borders */
-  --input: #3d2817; /* Medium wood input backgrounds */
-  --ring: #d4af37; /* Gold focus ring */
-  --chart-1: #6b2737;
-  --chart-2: #d4af37;
-  --chart-3: #8b9d83;
-  --chart-4: #5c3d2e;
-  --chart-5: #c4b5a0;
+  --border: rgba(232, 196, 109, 0.16);
+  --input: rgba(8, 11, 10, 0.72);
+  --ring: var(--app-focus-ring);
+  --chart-1: var(--app-accent-teal);
+  --chart-2: var(--app-accent-gold);
+  --chart-3: var(--app-success);
+  --chart-4: var(--app-surface-elevated);
+  --chart-5: var(--app-text-secondary);
   --radius: 0.5rem; /* Slightly rounded corners */
-  --sidebar: #2d1b12;
-  --sidebar-foreground: #f5e6d3;
-  --sidebar-primary: #6b2737;
-  --sidebar-primary-foreground: #f5e6d3;
-  --sidebar-accent: #5c3d2e;
-  --sidebar-accent-foreground: #f5e6d3;
-  --sidebar-border: #5c3d2e;
-  --sidebar-ring: #d4af37;
+  --sidebar: var(--app-bg);
+  --sidebar-foreground: var(--app-text-primary);
+  --sidebar-primary: var(--app-accent-teal);
+  --sidebar-primary-foreground: #041312;
+  --sidebar-accent: var(--app-surface-elevated);
+  --sidebar-accent-foreground: var(--app-text-primary);
+  --sidebar-border: rgba(232, 196, 109, 0.16);
+  --sidebar-ring: var(--app-focus-ring);
 }
 
 @theme inline {
@@ -172,6 +167,8 @@ body {
     sans-serif;
   min-height: 100vh;
   overflow-wrap: anywhere;
+  background: var(--app-bg);
+  color: var(--app-text-primary);
 }
 
 .app-page {
@@ -205,6 +202,14 @@ body {
     padding-inline: 16px;
     padding-bottom: calc(96px + env(safe-area-inset-bottom));
   }
+}
+
+.app-kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--app-accent-gold);
 }
 
 .app-surface {
@@ -400,22 +405,28 @@ body {
   }
 }
 
-/* Custom scrollbar (bookshelf aesthetic) */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--wood-medium);
+  background: var(--app-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--wood-light);
-  border-radius: 5px;
+  background: linear-gradient(180deg, rgba(26, 165, 156, 0.65), rgba(216, 181, 109, 0.62));
+  border: 2px solid var(--app-bg);
+  border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--leather-gold);
+  background: linear-gradient(180deg, rgba(26, 165, 156, 0.9), rgba(240, 207, 134, 0.88));
+}
+
+* {
+  scrollbar-color: rgba(26, 165, 156, 0.75) var(--app-bg);
+  scrollbar-width: thin;
 }
 
 /* Smooth animations */
@@ -480,39 +491,39 @@ body {
 /*---break---
  */
 
-/* Dark mode uses same bookshelf theme (our design is dark by default) */
+/* Dark mode uses the same BookCircle app theme */
 .dark {
-  --background: #2d1b12;
-  --foreground: #f5e6d3;
-  --card: #3d2817;
-  --card-foreground: #f5e6d3;
-  --popover: #3d2817;
-  --popover-foreground: #f5e6d3;
-  --primary: #6b2737;
-  --primary-foreground: #f5e6d3;
-  --secondary: #5c3d2e;
-  --secondary-foreground: #f5e6d3;
-  --muted: #3d2817;
-  --muted-foreground: #c4b5a0;
-  --accent: #d4af37;
-  --accent-foreground: #2d1b12;
+  --background: var(--app-bg);
+  --foreground: var(--app-text-primary);
+  --card: var(--app-surface);
+  --card-foreground: var(--app-text-primary);
+  --popover: var(--app-surface-elevated);
+  --popover-foreground: var(--app-text-primary);
+  --primary: var(--app-accent-teal);
+  --primary-foreground: #041312;
+  --secondary: var(--app-surface-elevated);
+  --secondary-foreground: var(--app-text-primary);
+  --muted: var(--app-surface);
+  --muted-foreground: var(--app-text-muted);
+  --accent: var(--app-accent-gold);
+  --accent-foreground: #171008;
   --destructive: #dc2626;
-  --border: #5c3d2e;
-  --input: #3d2817;
-  --ring: #d4af37;
-  --chart-1: #6b2737;
-  --chart-2: #d4af37;
-  --chart-3: #8b9d83;
-  --chart-4: #5c3d2e;
-  --chart-5: #c4b5a0;
-  --sidebar: #2d1b12;
-  --sidebar-foreground: #f5e6d3;
-  --sidebar-primary: #6b2737;
-  --sidebar-primary-foreground: #f5e6d3;
-  --sidebar-accent: #5c3d2e;
-  --sidebar-accent-foreground: #f5e6d3;
-  --sidebar-border: #5c3d2e;
-  --sidebar-ring: #d4af37;
+  --border: rgba(232, 196, 109, 0.16);
+  --input: rgba(8, 11, 10, 0.72);
+  --ring: var(--app-focus-ring);
+  --chart-1: var(--app-accent-teal);
+  --chart-2: var(--app-accent-gold);
+  --chart-3: var(--app-success);
+  --chart-4: var(--app-surface-elevated);
+  --chart-5: var(--app-text-secondary);
+  --sidebar: var(--app-bg);
+  --sidebar-foreground: var(--app-text-primary);
+  --sidebar-primary: var(--app-accent-teal);
+  --sidebar-primary-foreground: #041312;
+  --sidebar-accent: var(--app-surface-elevated);
+  --sidebar-accent-foreground: var(--app-text-primary);
+  --sidebar-border: rgba(232, 196, 109, 0.16);
+  --sidebar-ring: var(--app-focus-ring);
 }
 
 /*---break---
