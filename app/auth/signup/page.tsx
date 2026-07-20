@@ -33,7 +33,8 @@ function SignupPageContent() {
       setServerError("");
       setIsSubmitting(true);
       await signupUser(data.name, data.email, data.password);
-      router.push(returnTo);
+      router.replace(returnTo);
+      router.refresh();
     } catch (error) {
       setServerError(
         error instanceof Error

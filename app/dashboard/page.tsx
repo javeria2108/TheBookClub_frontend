@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   BookOpen,
   Compass,
@@ -62,6 +63,7 @@ function getDaysRemaining(targetEndDate: string) {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const { isAuthenticated, isReady, logout, user } = useAuthState();
   const { toast } = useToast();
   const [clubCycles, setClubCycles] = useState<ClubCycle[]>([]);
@@ -112,9 +114,15 @@ export default function DashboardPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (!isReady || !isAuthenticated) return;
+    if (!isReady) return;
+
+    if (!isAuthenticated) {
+      router.replace("/auth/login?returnTo=/dashboard");
+      return;
+    }
+
     void Promise.resolve().then(loadHome);
-  }, [isAuthenticated, isReady, loadHome]);
+  }, [isAuthenticated, isReady, loadHome, router]);
 
   const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
   const activeCycles = useMemo(

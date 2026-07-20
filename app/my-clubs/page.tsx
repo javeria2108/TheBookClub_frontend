@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BookOpen, Globe, Lock, Plus, Search, Users } from "lucide-react";
 
 import { CreateClubModal } from "@/components/clubs/CreateClubModal";
@@ -28,6 +29,7 @@ const FILTERS: Array<{ label: string; value: ClubFilter }> = [
 ];
 
 export default function MyClubsPage() {
+  const router = useRouter();
   const { isAuthenticated, isReady, logout, user } = useAuthState();
   const { toast } = useToast();
   const [clubs, setClubs] = useState<Club[]>([]);
@@ -58,9 +60,15 @@ export default function MyClubsPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (!isReady || !isAuthenticated) return;
+    if (!isReady) return;
+
+    if (!isAuthenticated) {
+      router.replace("/auth/login?returnTo=/my-clubs");
+      return;
+    }
+
     void loadClubs();
-  }, [isAuthenticated, isReady, loadClubs]);
+  }, [isAuthenticated, isReady, loadClubs, router]);
 
   const userInitial = user?.name?.charAt(0).toUpperCase() ?? "R";
 

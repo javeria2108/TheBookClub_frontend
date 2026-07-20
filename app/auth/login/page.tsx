@@ -32,7 +32,8 @@ function LoginPageContent() {
       setServerError("");
       setIsSubmitting(true);
       await loginUser(data.email, data.password);
-      router.push(returnTo);
+      router.replace(returnTo);
+      router.refresh();
     } catch (error) {
       setServerError(
         error instanceof Error
