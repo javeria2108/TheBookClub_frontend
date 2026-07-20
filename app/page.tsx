@@ -99,9 +99,10 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
-              className="break-words font-serif text-4xl font-black uppercase leading-[0.9] text-[#F7DFA5] drop-shadow-[0_6px_16px_rgba(0,0,0,0.75)] sm:text-7xl md:text-[86px] lg:text-[112px]"
+              className="font-serif text-5xl font-black uppercase leading-[0.82] text-[#F7DFA5] drop-shadow-[0_6px_16px_rgba(0,0,0,0.75)] sm:text-7xl md:text-[86px] lg:text-[112px]"
             >
-              BookCircle
+              <span className="block">Book</span>
+              <span className="block">Circle</span>
             </motion.h1>
 
             <motion.p
