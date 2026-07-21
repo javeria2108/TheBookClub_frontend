@@ -4,6 +4,7 @@ import {
   AuthUserSchema,
   LoginRequestPayloadSchema,
   SignupRequestPayloadSchema,
+  SocketTokenResponseSchema,
   UserRoleSchema,
 } from "@/lib/contracts/auth.contract";
 
@@ -12,3 +13,4 @@ export type AuthUser = z.infer<typeof AuthUserSchema>;
 export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 export type LoginRequestPayload = z.infer<typeof LoginRequestPayloadSchema>;
 export type SignupRequestPayload = z.infer<typeof SignupRequestPayloadSchema>;
+export type SocketTokenResponse = z.infer<typeof SocketTokenResponseSchema>;

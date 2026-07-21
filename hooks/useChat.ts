@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import type { ChatMessage } from "@/lib/types";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getSocketToken } from "@/lib/auth";
 import type { AuthUser } from "@/lib/types";
 
 const SOCKET_URL =
@@ -91,7 +91,14 @@ export function useChat(roomId: string, clubId: string) {
 
         setCurrentUser(user);
 
-        socket = io(SOCKET_URL, { withCredentials: true });
+        const token = await getSocketToken();
+
+        if (!isMounted) return;
+
+        socket = io(SOCKET_URL, {
+          auth: { token },
+          withCredentials: true,
+        });
         socketRef.current = socket;
 
         socket.on("connect", () => {

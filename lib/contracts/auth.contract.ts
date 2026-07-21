@@ -13,6 +13,10 @@ export const AuthResponseSchema = z.object({
   user: AuthUserSchema,
 });
 
+export const SocketTokenResponseSchema = z.object({
+  token: z.string().min(1),
+});
+
 export const LoginRequestPayloadSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
