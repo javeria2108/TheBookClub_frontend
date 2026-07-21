@@ -1,11 +1,11 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
-import dynamic from "next/dynamic";
 import {
   ChevronRight,
   Lock,
   MessageSquareText,
+  MoreHorizontal,
   Pin,
   Plus,
   RefreshCw,
@@ -24,27 +24,16 @@ import {
   updateDiscussionTopic,
   type DiscussionTopicFilter,
 } from "@/lib/discussions";
-import { getReadingTargets } from "@/lib/reading-cycles";
-import type { Club, DiscussionPost, DiscussionTopic, ReadingCycle, ReadingTarget } from "@/lib/types";
+import type { Club, DiscussionPost, DiscussionTopic } from "@/lib/types";
 
 type StructuredDiscussionPanelProps = {
   club: Club;
-  currentCycle: ReadingCycle | null;
 };
 
 const TOPIC_FILTERS: Array<{ label: string; value: DiscussionTopicFilter }> = [
-  { label: "All", value: "ALL" },
-  { label: "Current Reading", value: "CURRENT_READING" },
-  { label: "This Week", value: "THIS_WEEK" },
-  { label: "General", value: "GENERAL" },
+  { label: "All Topics", value: "ALL" },
   { label: "Pinned", value: "PINNED" },
 ];
-
-const ChatWindow = dynamic(() => import("@/components/clubs/ChatWindow"), {
-  loading: () => (
-    <div className="app-surface min-h-[420px] animate-pulse rounded-2xl" />
-  ),
-});
 
 function formatDateTime(value: string): string {
   return new Intl.DateTimeFormat("en", {
@@ -62,34 +51,25 @@ function getTopicContext(topic: DiscussionTopic): string {
   return "General topic";
 }
 
-function canModerate(role: Club["memberRole"]): boolean {
-  return role === "OWNER" || role === "MODERATOR";
-}
-
 export function StructuredDiscussionPanel({
   club,
-  currentCycle,
 }: StructuredDiscussionPanelProps) {
   const { toast } = useToast();
-  const [mode, setMode] = useState<"topics" | "chat">("topics");
   const [filter, setFilter] = useState<DiscussionTopicFilter>("ALL");
   const [topics, setTopics] = useState<DiscussionTopic[]>([]);
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null);
   const [posts, setPosts] = useState<DiscussionPost[]>([]);
-  const [targets, setTargets] = useState<ReadingTarget[]>([]);
   const [isLoadingTopics, setIsLoadingTopics] = useState(false);
   const [isLoadingPosts, setIsLoadingPosts] = useState(false);
   const [error, setError] = useState("");
   const [newTopicOpen, setNewTopicOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [topicType, setTopicType] = useState<DiscussionTopic["topicType"]>("GENERAL");
-  const [readingTargetId, setReadingTargetId] = useState("");
   const [content, setContent] = useState("");
   const [replyParentId, setReplyParentId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [openTopicMenuId, setOpenTopicMenuId] = useState<string | null>(null);
 
-  const moderator = canModerate(club.memberRole);
   const selectedTopic = useMemo(
     () => topics.find((topic) => topic.id === selectedTopicId) ?? null,
     [selectedTopicId, topics],
@@ -116,14 +96,6 @@ export function StructuredDiscussionPanel({
   useEffect(() => {
     void loadTopics();
   }, [loadTopics]);
-
-  useEffect(() => {
-    if (!moderator || !currentCycle) return;
-
-    getReadingTargets(club.id, currentCycle.id)
-      .then((response) => setTargets(response.targets))
-      .catch(() => setTargets([]));
-  }, [club.id, currentCycle, moderator]);
 
   const loadPosts = useCallback(async () => {
     if (!selectedTopicId) {
@@ -157,20 +129,15 @@ export function StructuredDiscussionPanel({
       const topic = await createDiscussionTopic(club.id, {
         title,
         prompt: prompt || null,
-        topicType,
-        readingCycleId:
-          topicType === "READING_CYCLE" || topicType === "PROMPT"
-            ? currentCycle?.id ?? null
-            : null,
-        readingTargetId: topicType === "READING_TARGET" ? readingTargetId : null,
+        topicType: "GENERAL",
+        readingCycleId: null,
+        readingTargetId: null,
       });
       setTopics((current) => [topic, ...current]);
       setSelectedTopicId(topic.id);
       setNewTopicOpen(false);
       setTitle("");
       setPrompt("");
-      setTopicType("GENERAL");
-      setReadingTargetId("");
     } catch (err) {
       toast({
         variant: "destructive",
@@ -233,44 +200,6 @@ export function StructuredDiscussionPanel({
 
   return (
     <section className="space-y-4">
-      <div
-        className="flex max-w-full gap-2 overflow-x-auto rounded-2xl border border-[var(--app-border-subtle)] bg-[var(--app-surface)] p-1"
-        role="tablist"
-        aria-label="Discussion sections"
-      >
-        {[
-          { label: "Topics", value: "topics" as const },
-          { label: "General Chat", value: "chat" as const },
-        ].map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            role="tab"
-            aria-selected={mode === item.value}
-            onClick={() => setMode(item.value)}
-            className={`min-h-11 shrink-0 rounded-xl px-4 text-sm font-semibold ${
-              mode === item.value
-                ? "bg-[var(--app-accent-teal-soft)] text-[var(--app-accent-gold-hover)]"
-                : "text-[var(--app-text-secondary)]"
-            }`}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      {mode === "chat" ? (
-        <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <ChatWindow clubId={club.id} roomId={`${club.id}-general`} />
-          <aside className="app-surface h-fit rounded-2xl p-5">
-            <SectionHeader title="Room context" />
-            <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
-              General chat stays realtime and informal. Use Topics for focused,
-              persistent reading conversations.
-            </p>
-          </aside>
-        </div>
-      ) : (
         <div className="grid min-w-0 gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
           <aside className="app-surface min-w-0 overflow-hidden rounded-2xl p-4">
             <div className="flex items-center justify-between gap-3">
@@ -285,7 +214,7 @@ export function StructuredDiscussionPanel({
               </button>
             </div>
 
-            <div className="mt-3 flex max-w-full gap-2 overflow-x-auto pb-1">
+            <div className="mt-4 flex max-w-full gap-2 overflow-x-auto pb-3 pr-2">
               {TOPIC_FILTERS.map((item) => (
                 <button
                   key={item.value}
@@ -323,43 +252,6 @@ export function StructuredDiscussionPanel({
                     maxLength={1200}
                   />
                 </label>
-                {moderator ? (
-                  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-                    <label className="block min-w-0 text-sm font-semibold">
-                      <span className="mb-1.5 block">Topic type</span>
-                      <select
-                        value={topicType}
-                        onChange={(event) =>
-                          setTopicType(event.target.value as DiscussionTopic["topicType"])
-                        }
-                        className="app-input"
-                      >
-                        <option value="GENERAL">General topic</option>
-                        {currentCycle ? <option value="READING_CYCLE">Current reading</option> : null}
-                        {currentCycle ? <option value="PROMPT">Prompt</option> : null}
-                        {targets.length > 0 ? <option value="READING_TARGET">This week</option> : null}
-                      </select>
-                    </label>
-                    {topicType === "READING_TARGET" ? (
-                      <label className="block min-w-0 text-sm font-semibold">
-                        <span className="mb-1.5 block">Reading target</span>
-                        <select
-                          value={readingTargetId}
-                          onChange={(event) => setReadingTargetId(event.target.value)}
-                          className="app-input"
-                          required
-                        >
-                          <option value="">Choose target</option>
-                          {targets.map((target) => (
-                            <option key={target.id} value={target.id}>
-                              {target.title}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    ) : null}
-                  </div>
-                ) : null}
                 <button type="submit" disabled={isSaving} className="app-button-primary w-full">
                   <MessageSquareText className="h-4 w-4" />
                   Start discussion
@@ -441,21 +333,59 @@ export function StructuredDiscussionPanel({
                     </p>
                   </div>
                   {selectedTopic.canModerate || selectedTopic.canDelete ? (
-                    <div className="flex flex-wrap gap-2">
-                      {selectedTopic.canModerate ? (
-                        <>
-                          <button type="button" onClick={() => void handleToggleTopic(selectedTopic, "isPinned")} className="app-button-secondary min-h-10 px-3">
-                            {selectedTopic.isPinned ? "Unpin" : "Pin"}
-                          </button>
-                          <button type="button" onClick={() => void handleToggleTopic(selectedTopic, "isLocked")} className="app-button-secondary min-h-10 px-3">
-                            {selectedTopic.isLocked ? "Unlock" : "Lock"}
-                          </button>
-                        </>
-                      ) : null}
-                      {selectedTopic.canDelete ? (
-                        <button type="button" onClick={() => void handleDeleteTopic(selectedTopic)} className="app-button-secondary min-h-10 px-3">
-                          Remove
-                        </button>
+                    <div className="relative self-start">
+                      <button
+                        type="button"
+                        aria-label="Topic actions"
+                        aria-expanded={openTopicMenuId === selectedTopic.id}
+                        onClick={() =>
+                          setOpenTopicMenuId((current) =>
+                            current === selectedTopic.id ? null : selectedTopic.id,
+                          )
+                        }
+                        className="app-button-secondary min-h-10 px-3"
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                      </button>
+                      {openTopicMenuId === selectedTopic.id ? (
+                        <div className="absolute right-0 top-12 z-20 w-44 overflow-hidden rounded-xl border border-[var(--app-border-subtle)] bg-[var(--app-surface-elevated)] p-1 shadow-[0_16px_42px_rgba(0,0,0,0.36)]">
+                          {selectedTopic.canModerate ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenTopicMenuId(null);
+                                  void handleToggleTopic(selectedTopic, "isPinned");
+                                }}
+                                className="block w-full rounded-lg px-3 py-2 text-left text-sm text-[var(--app-text-secondary)] hover:bg-[var(--app-accent-teal-soft)] hover:text-[var(--app-accent-gold-hover)]"
+                              >
+                                {selectedTopic.isPinned ? "Unpin topic" : "Pin topic"}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenTopicMenuId(null);
+                                  void handleToggleTopic(selectedTopic, "isLocked");
+                                }}
+                                className="block w-full rounded-lg px-3 py-2 text-left text-sm text-[var(--app-text-secondary)] hover:bg-[var(--app-accent-teal-soft)] hover:text-[var(--app-accent-gold-hover)]"
+                              >
+                                {selectedTopic.isLocked ? "Unlock topic" : "Lock topic"}
+                              </button>
+                            </>
+                          ) : null}
+                          {selectedTopic.canDelete ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenTopicMenuId(null);
+                                void handleDeleteTopic(selectedTopic);
+                              }}
+                              className="block w-full rounded-lg px-3 py-2 text-left text-sm text-[#fca5a5] hover:bg-[rgba(196,95,95,0.14)]"
+                            >
+                              Remove topic
+                            </button>
+                          ) : null}
+                        </div>
                       ) : null}
                     </div>
                   ) : null}
@@ -550,7 +480,6 @@ export function StructuredDiscussionPanel({
             )}
           </article>
         </div>
-      )}
     </section>
   );
 }

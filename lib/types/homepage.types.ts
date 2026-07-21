@@ -1,4 +1,6 @@
-export type AuthStateUser = { name: string };
+import type { AuthUser } from "./auth.types";
+
+export type AuthStateUser = AuthUser & { name: string };
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 

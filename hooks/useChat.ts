@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import type { ChatMessage } from "@/lib/types";
-import { getCurrentUser, getSocketToken } from "@/lib/auth";
+import { getSocketToken } from "@/lib/auth";
 import type { AuthUser } from "@/lib/types";
 
 const SOCKET_URL =
@@ -65,7 +65,7 @@ function mergeMessage(messages: ChatMessage[], incoming: ChatMessage) {
   return [...messages, { ...incoming, deliveryStatus: "sent" as const }];
 }
 
-export function useChat(roomId: string, clubId: string) {
+export function useChat(roomId: string, clubId: string, authenticatedUser: AuthUser | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSending, setIsSending] = useState(false);
   const [actionLoadingMessageId, setActionLoadingMessageId] = useState<
@@ -74,7 +74,7 @@ export function useChat(roomId: string, clubId: string) {
   const [chatError, setChatError] = useState<string | null>(null);
   const [participants, setParticipants] = useState<ChatParticipant[]>([]);
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(authenticatedUser);
   const currentUserId = currentUser?.id ?? null;
   const socketRef = useRef<Socket | null>(null);
   const isTypingRef = useRef(false);
@@ -85,11 +85,11 @@ export function useChat(roomId: string, clubId: string) {
 
     async function connectChat() {
       try {
-        const user = await getCurrentUser();
+        if (!authenticatedUser) return;
 
         if (!isMounted) return;
 
-        setCurrentUser(user);
+        setCurrentUser(authenticatedUser);
 
         const token = await getSocketToken();
 
@@ -145,7 +145,7 @@ export function useChat(roomId: string, clubId: string) {
         );
 
         socket.on("userTyping", (typingUser: TypingUser) => {
-          if (typingUser.userId === user.id) return;
+          if (typingUser.userId === authenticatedUser.id) return;
 
           setTypingUsers((current) => {
             if (
@@ -176,7 +176,7 @@ export function useChat(roomId: string, clubId: string) {
         });
       } catch {
         if (isMounted) {
-          setChatError("You must be logged in to use chat.");
+          setChatError("Unable to connect to chat. Please refresh and try again.");
         }
       }
     }
@@ -193,7 +193,7 @@ export function useChat(roomId: string, clubId: string) {
       setTypingUsers([]);
       isTypingRef.current = false;
     };
-  }, [clubId, roomId]);
+  }, [authenticatedUser, clubId, roomId]);
 
   const sendMessage = useCallback(
     async (content: string): Promise<boolean> => {

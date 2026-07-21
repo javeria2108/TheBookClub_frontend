@@ -40,6 +40,7 @@ export function useAuthState(): AuthState {
           isAuthenticated: true,
           isReady: true,
           user: {
+            ...user,
             name: user.username.trim() || "Reader",
           },
         });

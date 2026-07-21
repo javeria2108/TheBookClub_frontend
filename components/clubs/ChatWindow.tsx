@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useChat } from "@/hooks/useChat";
 import { getChatMessages } from "@/lib/clubs";
-import type { ChatMessage } from "@/lib/types";
+import type { AuthUser, ChatMessage } from "@/lib/types";
 import { useToast } from "@/components/ui/use-toast";
 import {
   MessageCircle,
@@ -31,9 +31,11 @@ function mergeOlderMessages(
 export default function ChatWindow({
   clubId,
   roomId,
+  currentUser,
 }: {
   clubId: string;
   roomId: string;
+  currentUser: AuthUser | null;
 }) {
   const {
     messages,
@@ -50,7 +52,7 @@ export default function ChatWindow({
     participants,
     typingUsers,
     clearChatError,
-  } = useChat(roomId, clubId);
+  } = useChat(roomId, clubId, currentUser);
 
   const [text, setText] = useState("");
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);

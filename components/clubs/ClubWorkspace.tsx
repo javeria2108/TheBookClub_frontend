@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -56,16 +57,24 @@ import type {
   Club,
   CreateReadingCyclePayload,
   CreateReadingTargetPayload,
+  AuthUser,
   ReadingProgressResponse,
   ReadingCycle,
   ReadingTarget,
   UpdateReadingCyclePayload,
 } from "@/lib/types";
 
+const ChatWindow = dynamic(() => import("@/components/clubs/ChatWindow"), {
+  loading: () => (
+    <div className="app-surface min-h-[420px] animate-pulse rounded-2xl" />
+  ),
+});
+
 export type ClubWorkspaceView =
   | "overview"
   | "reading"
   | "discussion"
+  | "chat"
   | "next-book"
   | "members"
   | "about"
@@ -75,6 +84,7 @@ const CLUB_TABS: Array<{ label: string; view: ClubWorkspaceView; memberOnly?: bo
   { label: "Overview", view: "overview" },
   { label: "Reading", view: "reading", memberOnly: true },
   { label: "Discussion", view: "discussion", memberOnly: true },
+  { label: "General Chat", view: "chat", memberOnly: true },
   { label: "Next Book", view: "next-book", memberOnly: true },
   { label: "Members", view: "members", memberOnly: true },
   { label: "About", view: "about" },
@@ -107,6 +117,24 @@ function getDaysRemaining(targetEndDate: string) {
 function tabHref(clubId: string, view: ClubWorkspaceView) {
   if (view === "overview") return `/clubs/${clubId}`;
   return `/clubs/${clubId}/${view}`;
+}
+
+function viewFromPath(pathname: string, clubId: string): ClubWorkspaceView {
+  const suffix = pathname.replace(`/clubs/${clubId}`, "").replace(/^\/+/, "");
+  if (!suffix) return "overview";
+  if (
+    suffix === "reading" ||
+    suffix === "discussion" ||
+    suffix === "chat" ||
+    suffix === "next-book" ||
+    suffix === "members" ||
+    suffix === "about" ||
+    suffix === "manage"
+  ) {
+    return suffix;
+  }
+
+  return "overview";
 }
 
 export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
@@ -142,13 +170,16 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
   const [isReadingTargetsLoading, setIsReadingTargetsLoading] = useState(false);
   const [readingTargetsError, setReadingTargetsError] = useState("");
   const [readingTargetAction, setReadingTargetAction] = useState("");
+  const [activeView, setActiveView] = useState<ClubWorkspaceView>(view);
 
   const shouldLoadReadingCycleData =
-    view === "overview" || view === "reading";
+    activeView === "overview" ||
+    activeView === "reading" ||
+    activeView === "discussion";
   const shouldLoadMembers =
-    view === "members" || view === "manage";
+    activeView === "members" || activeView === "manage";
   const shouldLoadJoinRequests =
-    view === "manage" &&
+    activeView === "manage" &&
     (club?.memberRole === "OWNER" || club?.memberRole === "MODERATOR") &&
     !club?.isPublic;
 
@@ -191,6 +222,19 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
   useEffect(() => {
     void loadClub();
   }, [loadClub]);
+
+  useEffect(() => {
+    setActiveView(view);
+  }, [view]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveView(viewFromPath(window.location.pathname, clubId));
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [clubId]);
 
   const loadReadingCycleData = useCallback(async () => {
     if (!club || !shouldLoadReadingCycleData) return;
@@ -245,10 +289,10 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
   }, [club?.isMember, loadMembers, shouldLoadMembers]);
 
   useEffect(() => {
-    if (!isLoading && club && view === "manage" && club.memberRole !== "OWNER") {
+    if (!isLoading && club && activeView === "manage" && club.memberRole !== "OWNER") {
       router.replace(`/clubs/${clubId}`);
     }
-  }, [club, clubId, isLoading, router, view]);
+  }, [activeView, club, clubId, isLoading, router]);
 
   const {
     joiningClubId,
@@ -300,7 +344,10 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
   const isMember = Boolean(club?.isMember);
 
   const shouldLoadReadingProgress =
-    view === "reading" && isAuthenticated && isMember && Boolean(currentCycle);
+    activeView === "reading" &&
+    isAuthenticated &&
+    isMember &&
+    Boolean(currentCycle);
 
   const loadReadingProgressData = useCallback(async () => {
     if (!currentCycle || !shouldLoadReadingProgress) return;
@@ -546,6 +593,15 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
     }
   };
 
+  const handleTabChange = (nextView: ClubWorkspaceView) => {
+    setActiveView(nextView);
+
+    const nextHref = tabHref(clubId, nextView);
+    if (typeof window !== "undefined" && window.location.pathname !== nextHref) {
+      window.history.pushState(null, "", nextHref);
+    }
+  };
+
   return (
     <main className="app-page">
       <AppHeader
@@ -685,12 +741,13 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                 (tab) =>
                   (!tab.memberOnly || isMember) && (!tab.ownerOnly || isOwner),
               ).map((tab) => {
-                const active = tab.view === view;
+                const active = tab.view === activeView;
                 return (
-                  <Link
+                  <button
                     key={tab.view}
-                    href={tabHref(clubId, tab.view)}
+                    type="button"
                     aria-current={active ? "page" : undefined}
+                    onClick={() => handleTabChange(tab.view)}
                     className={`min-h-11 shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium ${
                       active
                         ? "border-[var(--app-accent-gold)] bg-[var(--app-accent-teal-soft)] text-[var(--app-accent-gold-hover)]"
@@ -698,12 +755,12 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
                     }`}
                   >
                     {tab.label}
-                  </Link>
+                  </button>
                 );
               })}
             </nav>
 
-            {view === "overview" ? (
+            {activeView === "overview" ? (
               <ClubOverview
                 club={club}
                 currentCycle={currentCycle}
@@ -712,7 +769,7 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
               />
             ) : null}
 
-            {view === "reading" ? (
+            {activeView === "reading" ? (
               <ReadingCycleSection
                 currentCycle={currentCycle ?? null}
                 clubId={clubId}
@@ -744,17 +801,20 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
               />
             ) : null}
 
-            {view === "discussion" ? (
+            {activeView === "discussion" ? (
               <ClubDiscussion
                 club={club}
-                currentCycle={currentCycle}
                 canChat={isMember}
               />
             ) : null}
 
-            {view === "next-book" ? <NextBookPanel club={club} /> : null}
+            {activeView === "chat" ? (
+              <ClubChat club={club} currentUser={user ?? null} />
+            ) : null}
 
-            {view === "members" ? (
+            {activeView === "next-book" ? <NextBookPanel club={club} /> : null}
+
+            {activeView === "members" ? (
               <MembersPanel
                 members={memberManagement.members}
                 loading={memberManagement.loading}
@@ -767,9 +827,9 @@ export function ClubWorkspace({ view }: { view: ClubWorkspaceView }) {
               />
             ) : null}
 
-            {view === "about" ? <ClubAbout club={club} /> : null}
+            {activeView === "about" ? <ClubAbout club={club} /> : null}
 
-            {view === "manage" && isOwner ? (
+            {activeView === "manage" && isOwner ? (
               <ClubManage
                 club={club}
                 clubId={clubId}
@@ -917,23 +977,46 @@ function ClubOverview({
 
 function ClubDiscussion({
   club,
-  currentCycle,
   canChat,
 }: {
   club: Club;
-  currentCycle: ReadingCycle | null;
   canChat: boolean;
 }) {
   return (
     <div className="min-w-0">
       {canChat ? (
-        <StructuredDiscussionPanel club={club} currentCycle={currentCycle} />
+        <StructuredDiscussionPanel club={club} />
       ) : (
         <EmptyState
           title="Join to discuss"
-          description="Members can access structured topics and live chat."
+          description="Members can access structured discussion topics."
         />
       )}
+    </div>
+  );
+}
+
+function ClubChat({
+  club,
+  currentUser,
+}: {
+  club: Club;
+  currentUser: AuthUser | null;
+}) {
+  return (
+    <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+      <ChatWindow
+        clubId={club.id}
+        roomId={`${club.id}-general`}
+        currentUser={currentUser}
+      />
+      <aside className="app-surface h-fit rounded-2xl p-5">
+        <SectionHeader title="General Chat" />
+        <p className="text-sm leading-6 text-[var(--app-text-secondary)]">
+          Use this room for quick, realtime club conversation. Use Discussion
+          for focused topics that should be easy to revisit later.
+        </p>
+      </aside>
     </div>
   );
 }
