@@ -112,7 +112,7 @@ function LoginPageContent() {
                       id="email"
                       type="email"
                       placeholder="you@example.com"
-                      className="app-input pl-10"
+                      className="app-input app-input-with-leading-icon"
                       {...register("email")}
                     />
                   </div>
@@ -131,7 +131,7 @@ function LoginPageContent() {
                       id="password"
                       type="password"
                       placeholder="Your password"
-                      className="app-input pl-10"
+                      className="app-input app-input-with-leading-icon"
                       {...register("password")}
                     />
                   </div>

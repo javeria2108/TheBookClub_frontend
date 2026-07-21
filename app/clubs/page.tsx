@@ -177,7 +177,7 @@ export default function ClubsPage() {
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 placeholder="Search by club name, genre, or description"
-                className="app-input w-full py-3 pl-10 pr-3 text-sm"
+                className="app-input app-input-with-leading-icon w-full py-3 pr-3 text-sm"
               />
             </div>
             <button type="submit" className="app-button-primary w-full lg:w-auto">

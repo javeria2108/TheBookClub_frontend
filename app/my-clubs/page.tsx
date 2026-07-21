@@ -134,7 +134,7 @@ export default function MyClubsPage() {
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
                 placeholder="Search clubs"
-                className="app-input w-full py-3 pl-10 pr-3 text-sm"
+                className="app-input app-input-with-leading-icon w-full py-3 pr-3 text-sm"
               />
             </div>
             <div className="flex max-w-full flex-wrap gap-2">

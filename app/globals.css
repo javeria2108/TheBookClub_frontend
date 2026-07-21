@@ -312,6 +312,10 @@ body {
   color: color-mix(in srgb, var(--app-text-muted) 82%, transparent);
 }
 
+.app-input-with-leading-icon {
+  padding-left: 2.75rem;
+}
+
 .app-modal-backdrop {
   position: fixed;
   inset: 0;

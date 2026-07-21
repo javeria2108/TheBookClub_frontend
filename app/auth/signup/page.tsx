@@ -89,7 +89,7 @@ function SignupPageContent() {
                       id="name"
                       type="text"
                       placeholder="Jane Reader"
-                      className="app-input pl-10"
+                      className="app-input app-input-with-leading-icon"
                       {...register("name")}
                     />
                   </div>
@@ -108,7 +108,7 @@ function SignupPageContent() {
                       id="email"
                       type="email"
                       placeholder="you@example.com"
-                      className="app-input pl-10"
+                      className="app-input app-input-with-leading-icon"
                       {...register("email")}
                     />
                   </div>
@@ -128,7 +128,7 @@ function SignupPageContent() {
                         id="password"
                         type="password"
                         placeholder="Password"
-                        className="app-input pl-10"
+                        className="app-input app-input-with-leading-icon"
                         {...register("password")}
                       />
                     </div>
@@ -149,7 +149,7 @@ function SignupPageContent() {
                         id="confirmPassword"
                         type="password"
                         placeholder="Repeat"
-                        className="app-input pl-10"
+                        className="app-input app-input-with-leading-icon"
                         {...register("confirmPassword")}
                       />
                     </div>

@@ -141,7 +141,7 @@ export function BookSearchModal({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search by title, author, or ISBN..."
-              className="app-input w-full py-3 pl-10 pr-3 text-sm"
+              className="app-input app-input-with-leading-icon w-full py-3 pr-3 text-sm"
               autoFocus
             />
           </div>
