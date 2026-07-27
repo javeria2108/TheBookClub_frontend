@@ -706,17 +706,28 @@ export default function HomePage() {
 
             <div>
               <p className="text-[11px] uppercase tracking-[0.2em] text-[#C9A96E]">
-                Roadmap
+                Company
               </p>
               <ul className="mt-4 space-y-2 text-sm text-[#F2E8D9]/80">
                 <li>
-                  <span>AI Discussion Help</span>
+                  <Link href="/about" className="transition hover:text-[#C9A96E]">
+                    About
+                  </Link>
                 </li>
                 <li>
-                  <span>Reading Milestones</span>
+                  <Link href="/feedback" className="transition hover:text-[#C9A96E]">
+                    Feedback
+                  </Link>
                 </li>
                 <li>
-                  <span>Notification Preferences</span>
+                  <Link href="/privacy" className="transition hover:text-[#C9A96E]">
+                    Privacy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="transition hover:text-[#C9A96E]">
+                    Terms
+                  </Link>
                 </li>
               </ul>
             </div>

@@ -37,6 +37,15 @@ function getDisplayName(user: AuthUser | null): string {
   return user?.username.trim() || "You";
 }
 
+async function getOptionalSocketToken(): Promise<string | null> {
+  try {
+    return await getSocketToken();
+  } catch (error) {
+    console.warn("Socket token unavailable; falling back to cookie auth.", error);
+    return null;
+  }
+}
+
 function mergeMessage(messages: ChatMessage[], incoming: ChatMessage) {
   const clientMessageId = incoming.clientMessageId;
 
@@ -91,12 +100,12 @@ export function useChat(roomId: string, clubId: string, authenticatedUser: AuthU
 
         setCurrentUser(authenticatedUser);
 
-        const token = await getSocketToken();
+        const token = await getOptionalSocketToken();
 
         if (!isMounted) return;
 
         socket = io(SOCKET_URL, {
-          auth: { token },
+          auth: token ? { token } : undefined,
           withCredentials: true,
         });
         socketRef.current = socket;

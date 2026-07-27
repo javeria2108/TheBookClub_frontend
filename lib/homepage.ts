@@ -1,4 +1,5 @@
 import { getJson } from "@/lib/api";
+import { resolveBackendImageUrl } from "@/lib/image-url";
 import type { GetClubsResponse, LandingClub, LandingStats } from "@/lib/types";
 
 export function mapApiClubsToLandingClubs(
@@ -11,7 +12,7 @@ export function mapApiClubsToLandingClubs(
     isPrivate: !apiClub.isPublic,
     memberCount: apiClub.memberCount ?? 0,
     genre: apiClub.genre ?? "General",
-    coverImage: apiClub.coverImage ?? null,
+    coverImage: resolveBackendImageUrl(apiClub.coverImage),
   }));
 }
 
