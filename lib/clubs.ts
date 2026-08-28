@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/lib/api-base";
+import { resolveBackendImageUrl } from "@/lib/image-url";
 
 import {
   GetClubsParamsSchema,
@@ -23,7 +24,31 @@ import {
   ClubMemberSummary,
   OperationMessage,
   GetChatMessagesResponse,
+  Club,
 } from "@/lib/types";
+
+function normalizeClubImageUrls(club: Club): Club {
+  return {
+    ...club,
+    coverImage: resolveBackendImageUrl(club.coverImage),
+  };
+}
+
+function normalizeGetClubsResponse(response: GetClubsResponse): GetClubsResponse {
+  return {
+    ...response,
+    clubs: response.clubs.map(normalizeClubImageUrls),
+  };
+}
+
+function normalizeGetClubByIdResponse(
+  response: GetClubByIdResponse,
+): GetClubByIdResponse {
+  return {
+    ...response,
+    club: normalizeClubImageUrls(response.club),
+  };
+}
 
 export async function getClubs(params: GetClubsParams = {}) {
   const validatedParams = GetClubsParamsSchema.parse(params);
@@ -55,7 +80,9 @@ export async function getClubs(params: GetClubsParams = {}) {
     throw new Error(message);
   }
 
-  return GetClubsResponseSchema.parse(payload.data) as GetClubsResponse;
+  return normalizeGetClubsResponse(
+    GetClubsResponseSchema.parse(payload.data) as GetClubsResponse,
+  );
 }
 
 export async function createClub(
@@ -80,7 +107,12 @@ export async function createClub(
     throw new Error(message);
   }
 
-  return CreateClubResponseSchema.parse(body.data) as CreateClubResponse;
+  const parsed = CreateClubResponseSchema.parse(body.data) as CreateClubResponse;
+
+  return {
+    ...parsed,
+    club: normalizeClubImageUrls(parsed.club),
+  };
 }
 
 export async function updateClub(
@@ -110,7 +142,9 @@ export async function updateClub(
     throw new Error(message);
   }
 
-  return GetClubByIdResponseSchema.parse(body.data) as GetClubByIdResponse;
+  return normalizeGetClubByIdResponse(
+    GetClubByIdResponseSchema.parse(body.data) as GetClubByIdResponse,
+  );
 }
 
 export async function getClubById(id: string) {
@@ -133,7 +167,9 @@ export async function getClubById(id: string) {
     throw new Error(message);
   }
 
-  return GetClubByIdResponseSchema.parse(payload.data) as GetClubByIdResponse;
+  return normalizeGetClubByIdResponse(
+    GetClubByIdResponseSchema.parse(payload.data) as GetClubByIdResponse,
+  );
 }
 
 export async function getMyClubs() {
@@ -167,7 +203,9 @@ export async function getMyClubs() {
     },
   };
 
-  return GetClubsResponseSchema.parse(result) as GetClubsResponse;
+  return normalizeGetClubsResponse(
+    GetClubsResponseSchema.parse(result) as GetClubsResponse,
+  );
 }
 
 export async function joinClub(clubId: string): Promise<JoinClubResponse> {

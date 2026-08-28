@@ -42,12 +42,14 @@ export const CreateClubPayloadSchema = z.object({
   description: z.string().trim().max(500).optional(),
   isPublic: z.boolean().optional().default(true),
   genre: z.string().trim().max(80).optional(),
-  coverImage: z.string().url("Cover image is required"),
+  coverImage: z
+    .string()
+    .url("Cover image must be a valid URL")
+    .nullable()
+    .optional(),
 });
 
-export const CreateClubFormSchema = CreateClubPayloadSchema.omit({
-  coverImage: true,
-});
+export const CreateClubFormSchema = CreateClubPayloadSchema.omit({ coverImage: true });
 
 export const UpdateClubPayloadSchema = z
   .object({

@@ -46,18 +46,13 @@ export function CreateClubModal({ open, onOpenChange, onCreated }: Props) {
   };
 
   const onSubmit = async (data: CreateClubFormValues) => {
-    if (!coverImage) {
-      setCoverError("Cover image is required");
-      return;
-    }
-
     try {
       setIsSubmitting(true);
       setCoverError(null);
 
       const payload = CreateClubPayloadSchema.parse({
         ...data,
-        coverImage,
+        coverImage: coverImage ?? null,
       });
       await createClub(payload);
       await onCreated();
@@ -132,7 +127,7 @@ export function CreateClubModal({ open, onOpenChange, onCreated }: Props) {
                 }}
                 disabled={isSubmitting}
                 error={coverError ?? undefined}
-                helperText="JPEG, PNG, or WebP. Max 5 MB."
+                helperText="Optional. Upload a JPEG, PNG, or WebP up to 5 MB, or use the generated fallback."
                 previewClassName="create-club-cover-preview"
               />
             </div>
